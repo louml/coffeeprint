@@ -9,6 +9,7 @@ import { ConfigStore } from '../dist/core/storage/config.js';
 import { LabelService, ValidationError } from '../dist/core/service.js';
 import { bitmapToZpl } from '../dist/core/printer/zpl.js';
 import { parseAddress, PrinterError } from '../dist/core/printer/send.js';
+import { discoverPrinters } from '../dist/core/printer/discover.js';
 import { renderLabel } from '../dist/core/label/render.js';
 
 const tmp = () => fs.mkdtempSync(path.join(os.tmpdir(), 'tl-'));
@@ -109,4 +110,11 @@ test('textos muito longos não quebram nem saem da área', async () => {
   const svc = new LabelService(new CafeStore(dir), new ConfigStore(dir), dir);
   const png = await svc.preview(pedido('arara-da-mogiana', { cliente: 'X'.repeat(200) + ' ' + 'Y'.repeat(60) }));
   assert.ok(png.length > 1000);
+});
+
+test('procura impressoras com a porta 9100 aberta', async () => {
+  const p = await fakePrinter();
+  const found = await discoverPrinters({ hosts: ['127.0.0.1', '127.0.0.2'], port: p.port, timeoutMs: 300 });
+  p.close();
+  assert.ok(found.includes('127.0.0.1'));
 });

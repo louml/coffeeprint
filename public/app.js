@@ -152,6 +152,27 @@ $('form-config').addEventListener('submit', async (ev) => {
   try { await api('/api/config', 'PUT', lerConfig()); aviso($('aviso-config'), 'ok', '✔ Configurações salvas.'); refreshPreview(); }
   catch (e) { aviso($('aviso-config'), 'fail', '✖ ' + e.message); }
 });
+$('procurar').addEventListener('click', async () => {
+  $('procurar').disabled = true;
+  $('achados').innerHTML = '';
+  aviso($('aviso-config'), '', 'Procurando a impressora na rede… (leva até 20 segundos)');
+  try {
+    const { enderecos } = await api('/api/printer/discover');
+    if (!enderecos.length) {
+      aviso($('aviso-config'), 'fail', 'Não encontrei nenhuma impressora. Veja se ela está ligada e ligada na mesma rede (cabo ou Wi-Fi) deste computador.');
+    } else {
+      aviso($('aviso-config'), 'ok', enderecos.length === 1 ? 'Encontrei 1 impressora. Clique no endereço para usá-lo:' : `Encontrei ${enderecos.length} equipamentos. Clique no endereço da impressora:`);
+      $('achados').innerHTML = enderecos.map((ip) => `<button type="button" class="big achado" data-ip="${esc(ip)}">${esc(ip)}</button>`).join(' ');
+    }
+  } catch (e) { aviso($('aviso-config'), 'fail', '✖ ' + e.message); }
+  finally { $('procurar').disabled = false; }
+});
+$('achados').addEventListener('click', (ev) => {
+  const b = ev.target.closest('.achado'); if (!b) return;
+  $('cfg-endereco').value = b.dataset.ip;
+  aviso($('aviso-config'), 'ok', `Endereço ${b.dataset.ip} preenchido. Clique em "Imprimir etiqueta de teste" e depois em "Salvar configurações".`);
+});
+
 $('teste').addEventListener('click', async () => {
   $('teste').disabled = true;
   aviso($('aviso-config'), '', 'Enviando etiqueta de teste…');

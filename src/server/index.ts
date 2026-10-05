@@ -3,6 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { LabelService, ValidationError } from '../core/service.js';
 import { PrinterError } from '../core/printer/send.js';
+import { discoverPrinters } from '../core/printer/discover.js';
 import { CafeStore } from '../core/storage/cafes.js';
 import { ConfigStore } from '../core/storage/config.js';
 
@@ -40,6 +41,7 @@ export function createApp() {
     res.type('png').set('Cache-Control', 'no-store').send(png);
   });
   app.post('/api/label/print', async (req, res) => res.json({ ok: true, ...(await labels.print(req.body)) }));
+  app.get('/api/printer/discover', async (_req, res) => res.json({ enderecos: await discoverPrinters() }));
   app.post('/api/printer/test', async (req, res) =>
     res.json({ ok: true, ...(await labels.printTest(req.body?.enderecoImpressora)) }),
   );

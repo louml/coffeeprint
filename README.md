@@ -17,8 +17,10 @@ Aplicativo que gera e imprime o rótulo de cada pacote de café já preenchido (
 
 ## Primeira impressão de teste
 
-1. Ligue a impressora, com etiquetas de 80 × 100 mm, e confirme que ela está na rede. Para descobrir o IP, segure o botão FEED ao ligar para imprimir a página de configuração, ou veja no roteador.
-2. No app, abra **Configurações**, digite o endereço da impressora (ex.: `192.168.0.50`) e clique em **Imprimir etiqueta de teste**.
+1. Ligue a impressora, com etiquetas de 80 × 100 mm, e confirme que ela está ligada na mesma rede do computador (cabo de rede ou Wi-Fi).
+2. No app, abra **Configurações** e clique em **Procurar impressora na rede**. O app mostra os endereços encontrados; clique no da impressora (ex.: `192.168.15.20`) para preenchê-lo. Depois clique em **Imprimir etiqueta de teste**.
+   - Atenção: o endereço que aparece embaixo do roteador (ex.: `192.168.15.1`) é o do **roteador**, não o da impressora.
+   - Se a busca não achar nada, veja a lista de aparelhos conectados na página do roteador, ou consulte o manual da L42 PRO para imprimir a página de configuração de rede dela.
 3. Se aparecer "✔ 1 etiqueta enviada para a impressora" e a etiqueta sair, está pronto. Clique em **Salvar configurações**.
 4. Se a etiqueta sair desalinhada ou a impressora pular etiquetas, calibre o sensor de etiquetas (gap) pelo botão FEED / pelo manual da L42 PRO e teste de novo.
 

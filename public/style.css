@@ -45,3 +45,4 @@ button.big:disabled { opacity:.55; cursor:wait; }
 dialog { border:0; border-radius:16px; padding:24px; width:min(560px,94vw); box-shadow:0 10px 40px #0006; }
 dialog::backdrop { background:#0007; }
 .actions { display:flex; gap:12px; justify-content:flex-end; }
+#achados { display:flex; gap:10px; flex-wrap:wrap; } #achados:empty { display:none; }
