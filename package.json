@@ -1,0 +1,35 @@
+{
+  "name": "coffeeprint",
+  "version": "0.1.0",
+  "description": "Gerador e impressor de rótulos - Torra Local",
+  "main": "dist/server/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/server/index.js",
+    "test": "npm run build && node --test test/*.test.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/louml/coffeeprint.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/louml/coffeeprint/issues"
+  },
+  "homepage": "https://github.com/louml/coffeeprint#readme",
+  "dependencies": {
+    "@napi-rs/canvas": "^1.0.10",
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.6.4",
+    "typescript": "^7.0.2"
+  },
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  }
+}

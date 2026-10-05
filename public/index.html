@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Torra Local - Rótulos</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <h1>Torra Local <span>Rótulos</span></h1>
+  <nav>
+    <button class="tab active" data-tab="emitir">Emitir rótulo</button>
+    <button class="tab" data-tab="cafes">Cafés</button>
+    <button class="tab" data-tab="config">Configurações</button>
+  </nav>
+</header>
+
+<main>
+<!-- ============ EMITIR ============ -->
+<section id="emitir" class="panel active">
+  <div class="split">
+    <form id="form" novalidate>
+      <label>Cliente (Produzido para)
+        <input id="cliente" type="text" autocomplete="off" maxlength="120">
+      </label>
+      <label>Café
+        <select id="cafe"></select>
+      </label>
+      <div class="row">
+        <label>Peso
+          <select id="peso">
+            <option value="">Escolha…</option>
+            <option value="100g">100 g</option>
+            <option value="250g">250 g</option>
+            <option value="500g">500 g</option>
+            <option value="1kg">1 kg</option>
+          </select>
+        </label>
+        <label>Moagem
+          <select id="moagem">
+            <option value="">Escolha…</option>
+            <option value="Grão">Grão</option>
+            <option value="Moído">Moído</option>
+          </select>
+        </label>
+      </div>
+      <div class="row">
+        <label>Data de torra
+          <input id="data" type="date">
+        </label>
+        <label>Cópias
+          <input id="copias" type="number" min="1" max="500" step="1" value="1" inputmode="numeric">
+        </label>
+      </div>
+      <button id="imprimir" type="submit" class="big primary">Imprimir</button>
+      <div id="aviso" role="status" aria-live="polite"></div>
+    </form>
+
+    <div class="preview">
+      <div class="preview-frame">
+        <img id="previa" alt="Pré-visualização do rótulo" hidden>
+        <p id="previa-vazia">Escolha um café para ver o rótulo.</p>
+      </div>
+      <small>Pré-visualização: é exatamente a imagem que será impressa (80 × 100 mm).</small>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CAFÉS ============ -->
+<section id="cafes" class="panel">
+  <div class="bar">
+    <h2>Cafés cadastrados</h2>
+    <button id="novo-cafe" class="big primary">+ Novo café</button>
+  </div>
+  <div id="lista-cafes"></div>
+
+  <dialog id="dlg-cafe">
+    <form id="form-cafe" method="dialog" novalidate>
+      <h2 id="dlg-titulo">Novo café</h2>
+      <label>Nome do café (título)<input name="nome" type="text" maxlength="80"></label>
+      <label>Notas sensoriais<input name="notas" type="text" maxlength="160"></label>
+      <label>Produtor<input name="produtor" type="text" maxlength="80"></label>
+      <label>Variedade<input name="variedade" type="text" maxlength="80"></label>
+      <label>Região<input name="regiao" type="text" maxlength="80"></label>
+      <label>Espécie<input name="especie" type="text" list="especies" maxlength="40" value="100% Arábica"></label>
+      <datalist id="especies"><option value="100% Arábica"><option value="Blend Arábica e Conilon"></datalist>
+      <label>Nível de torra<input name="torra" type="text" list="torras" maxlength="40"></label>
+      <datalist id="torras"><option value="Torra Clara"><option value="Torra Média"><option value="Torra Escura"></datalist>
+      <label class="check"><input name="ativo" type="checkbox" checked> Ativo (aparece na lista de emissão)</label>
+      <div id="erro-cafe" class="erro"></div>
+      <div class="actions">
+        <button type="button" id="cancelar-cafe" class="big">Cancelar</button>
+        <button type="submit" class="big primary">Salvar</button>
+      </div>
+    </form>
+  </dialog>
+</section>
+
+<!-- ============ CONFIG ============ -->
+<section id="config" class="panel">
+  <h2>Configurações</h2>
+  <form id="form-config" class="narrow" novalidate>
+    <label>Endereço da impressora na rede
+      <input id="cfg-endereco" type="text" placeholder="Ex.: 192.168.0.50" autocomplete="off">
+      <small>Número IP da impressora Elgin L42 PRO (porta padrão 9100). Para usar outra porta: 192.168.0.50:9101.</small>
+    </label>
+    <button type="button" id="teste" class="big">Imprimir etiqueta de teste</button>
+    <label class="check"><input id="cfg-selo" type="checkbox"> Imprimir o selo gráfico de fundo (Cafés Especiais / Torra Local)</label>
+    <label class="check"><input id="cfg-offline" type="checkbox"> Modo sem impressora (salva o rótulo como imagem na pasta "saida")</label>
+    <button type="submit" class="big primary">Salvar configurações</button>
+    <div id="aviso-config" role="status" aria-live="polite"></div>
+  </form>
+</section>
+</main>
+<script src="app.js"></script>
+</body>
+</html>
