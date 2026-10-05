@@ -10,6 +10,7 @@ import { LabelService, ValidationError } from '../dist/core/service.js';
 import { bitmapToZpl } from '../dist/core/printer/zpl.js';
 import { parseAddress, PrinterError } from '../dist/core/printer/send.js';
 import { discoverPrinters } from '../dist/core/printer/discover.js';
+import { rotateBitmap } from '../dist/core/label/rotate.js';
 import { renderLabel } from '../dist/core/label/render.js';
 
 const tmp = () => fs.mkdtempSync(path.join(os.tmpdir(), 'tl-'));
@@ -117,4 +118,31 @@ test('procura impressoras com a porta 9100 aberta', async () => {
   const found = await discoverPrinters({ hosts: ['127.0.0.1', '127.0.0.2'], port: p.port, timeoutMs: 300 });
   p.close();
   assert.ok(found.includes('127.0.0.1'));
+});
+
+test('rotação gira a imagem no sentido horário', () => {
+  // 3x2: pixel preto só em (0,0), canto superior esquerdo
+  const b = { width: 3, height: 2, bytesPerRow: 1, data: new Uint8Array([0x80, 0x00]) };
+  const at = (r, x, y) => (r.data[y * r.bytesPerRow + (x >> 3)] & (0x80 >> (x & 7))) !== 0;
+  const r90 = rotateBitmap(b, 90);   // vira 2x3, canto superior direito
+  assert.deepEqual([r90.width, r90.height], [2, 3]); assert.ok(at(r90, 1, 0));
+  const r180 = rotateBitmap(b, 180); // canto inferior direito
+  assert.ok(at(r180, 2, 1));
+  const r270 = rotateBitmap(b, 270); // 2x3, canto inferior esquerdo
+  assert.deepEqual([r270.width, r270.height], [2, 3]); assert.ok(at(r270, 0, 2));
+  // 4 giros de 90° voltam à imagem original
+  const volta = rotateBitmap(rotateBitmap(rotateBitmap(rotateBitmap(b, 90), 90), 90), 90);
+  assert.deepEqual([...volta.data], [...b.data]);
+});
+
+test('rotação só vale para a impressora (ZPL), não para o arquivo', async () => {
+  const dir = tmp();
+  const p = await fakePrinter();
+  const cfg = new ConfigStore(dir); cfg.update({ enderecoImpressora: `127.0.0.1:${p.port}`, rotacao: 90 });
+  const svc = new LabelService(new CafeStore(dir), cfg, path.join(dir, 'saida'));
+  await svc.print(pedido('arara-da-mogiana', { copias: 1 }));
+  await new Promise((r) => setTimeout(r, 200));
+  p.close();
+  assert.match(p.received[0], /\^PW800/); assert.match(p.received[0], /\^LL640/);
+  assert.equal(new ConfigStore(dir).get().rotacao, 90);
 });

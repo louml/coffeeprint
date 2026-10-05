@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { renderLabel, bitmapToPng } from './label/render.js';
 import { MOAGENS, PESOS, type Bitmap1bpp, type DadosRotulo } from './label/types.js';
+import { rotateBitmap } from './label/rotate.js';
 import { bitmapToZpl } from './printer/zpl.js';
 import { parseAddress, sendRaw } from './printer/send.js';
 import type { CafeStore } from './storage/cafes.js';
@@ -112,7 +113,7 @@ export class LabelService {
       return { modo: 'arquivo', copias, arquivo, mensagem: `Modo sem impressora: o rótulo foi salvo como imagem em ${arquivo}.` };
     }
     const addr = parseAddress(enderecoOverride?.trim() || cfg.enderecoImpressora);
-    await sendRaw(addr, bitmapToZpl(bmp, copias));
+    await sendRaw(addr, bitmapToZpl(rotateBitmap(bmp, cfg.rotacao), copias));
     return { modo: 'impressora', copias, mensagem: `${plural} enviada${copias === 1 ? '' : 's'} para a impressora.` };
   }
 }

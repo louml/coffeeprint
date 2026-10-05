@@ -108,6 +108,15 @@
     <button type="button" id="procurar" class="big">Procurar impressora na rede</button>
     <div id="achados"></div>
     <button type="button" id="teste" class="big">Imprimir etiqueta de teste</button>
+    <label>Orientação da impressão
+      <select id="cfg-rotacao">
+        <option value="0">Normal</option>
+        <option value="180">Girar 180° (saindo de cabeça para baixo)</option>
+        <option value="90">Girar 90° para a direita (saindo deitada)</option>
+        <option value="270">Girar 90° para a esquerda (saindo deitada)</option>
+      </select>
+      <small>Se a etiqueta sair virada, escolha uma opção, salve e imprima a etiqueta de teste de novo até sair certa. Não muda a pré-visualização.</small>
+    </label>
     <label class="check"><input id="cfg-selo" type="checkbox"> Imprimir o selo gráfico de fundo (Cafés Especiais / Torra Local)</label>
     <label class="check"><input id="cfg-offline" type="checkbox"> Modo sem impressora (salva o rótulo como imagem na pasta "saida")</label>
     <button type="submit" class="big primary">Salvar configurações</button>

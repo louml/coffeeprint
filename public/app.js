@@ -143,10 +143,11 @@ $('form-cafe').addEventListener('submit', async (ev) => {
 async function loadConfig() {
   const c = await api('/api/config');
   $('cfg-endereco').value = c.enderecoImpressora;
+  $('cfg-rotacao').value = String(c.rotacao);
   $('cfg-selo').checked = c.selo;
   $('cfg-offline').checked = c.modoSemImpressora;
 }
-const lerConfig = () => ({ enderecoImpressora: $('cfg-endereco').value, selo: $('cfg-selo').checked, modoSemImpressora: $('cfg-offline').checked });
+const lerConfig = () => ({ enderecoImpressora: $('cfg-endereco').value, rotacao: Number($('cfg-rotacao').value), selo: $('cfg-selo').checked, modoSemImpressora: $('cfg-offline').checked });
 $('form-config').addEventListener('submit', async (ev) => {
   ev.preventDefault();
   try { await api('/api/config', 'PUT', lerConfig()); aviso($('aviso-config'), 'ok', '✔ Configurações salvas.'); refreshPreview(); }
