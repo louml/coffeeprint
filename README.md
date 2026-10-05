@@ -1,6 +1,6 @@
 # Torra Local – Emissão de rótulos
 
-Aplicativo que gera e imprime o rótulo de cada pacote de café já preenchido (café, peso, moagem, data de torra e cliente), direto na impressora **Elgin L42 PRO** (etiqueta de 80 mm de largura × 100 mm de altura).
+Aplicativo que gera e imprime o rótulo de cada pacote de café já preenchido (café, peso, moagem, data de torra e cliente), direto na impressora **Elgin L42 PRO** (etiqueta de 80 × 100 mm, rótulo em pé).
 
 ## Instalar (uma vez só, no computador da torrefação – Windows)
 
@@ -22,7 +22,7 @@ Aplicativo que gera e imprime o rótulo de cada pacote de café já preenchido (
    - Atenção: o endereço que aparece embaixo do roteador (ex.: `192.168.15.1`) é o do **roteador**, não o da impressora.
    - Se a busca não achar nada, veja a lista de aparelhos conectados na página do roteador, ou consulte o manual da L42 PRO para imprimir a página de configuração de rede dela.
 3. Se aparecer "✔ 1 etiqueta enviada para a impressora" e a etiqueta sair, está pronto. Clique em **Salvar configurações**.
-4. Se a etiqueta sair virada (de cabeça para baixo ou deitada), escolha outra opção em **Orientação da impressão**, salve e imprima o teste de novo até sair certa.
+4. O rótulo é desenhado em pé (80 mm de largura × 100 mm de altura). Se a etiqueta do seu rolo é **deitada (100 mm de largura × 80 mm de altura)**, vá em **Configurações → Orientação da impressão**, escolha "Etiqueta deitada: girar 90° para a direita", salve e imprima o teste. Se o texto sair de cabeça para baixo, use "girar 90° para a esquerda".
 5. Se a etiqueta sair desalinhada ou a impressora pular etiquetas, calibre o sensor de etiquetas (gap) pelo botão FEED / pelo manual da L42 PRO e teste de novo.
 
 Sem impressora (testes): em **Configurações**, marque **Modo sem impressora**. O botão Imprimir passa a salvar o rótulo como imagem PNG na pasta `saida`.
