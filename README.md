@@ -22,6 +22,12 @@ Aplicativo que roda no **navegador (Chrome ou Edge)**, sem nada para instalar al
 3. No Chrome ou Edge, abra o endereço do app (quem publicou o site informa o endereço). No Chrome: menu ⋮ → *Transmitir, salvar e compartilhar* → **Instalar página como aplicativo** (no Edge: ⋯ → *Aplicativos* → **Instalar este site como um aplicativo**). Marque a opção de criar atalho na Área de Trabalho.
 4. Depois disso o app abre pelo atalho, em janela própria, e **funciona também sem internet** (a internet só é necessária no primeiro acesso e para receber atualizações).
 
+## Testar antes de publicar (no próprio computador)
+
+1. Baixe a pasta do projeto da branch `claude/versao-web-driver` (no GitHub: botão **Code → Download ZIP**, com essa branch selecionada) e extraia. Clique com o botão direito no `.zip` → Propriedades → **Desbloquear** *antes* de extrair, para evitar avisos do Windows.
+2. Dê um duplo clique em **`testar-site.bat`** (precisa do Node.js LTS; na primeira vez baixa o que falta). O navegador abre em <http://localhost:8080>.
+3. Siga a seção seguinte. Feche a janela preta para encerrar.
+
 ## Primeira impressão de teste
 
 1. Abra o app → **Configurações**.
