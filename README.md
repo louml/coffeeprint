@@ -1,61 +1,74 @@
-# Torra Local – Emissão de rótulos
+# Torra Local – Emissão de rótulos (versão web)
 
-Aplicativo que gera e imprime o rótulo de cada pacote de café já preenchido (café, peso, moagem, data de torra e cliente), direto na impressora **Elgin L42 PRO** (etiqueta de 80 × 100 mm, rótulo em pé).
+Aplicativo que roda no **navegador (Chrome ou Edge)**, sem nada para instalar além de um atalho. Gera o rótulo já preenchido (café, peso, moagem, data de torra e cliente) e imprime pela impressora instalada no Windows (**Elgin L42 PRO**), como qualquer site.
 
-## Instalar (uma vez só, no computador da torrefação – Windows)
+> Esta versão imprime pelo **driver do Windows**. A versão que envia direto à impressora pela rede (ZPL, sem driver) continua no repositório e está descrita em [`README-LOCAL.md`](README-LOCAL.md).
 
-1. Instale o **Node.js** (versão **LTS**): baixe em <https://nodejs.org> e vá clicando em "Next".
-2. Copie a pasta deste aplicativo para o computador (por exemplo, para a Área de Trabalho).
-3. Dê um **duplo clique em `iniciar.bat`**. Na primeira vez ele baixa o que falta (precisa de internet, leva alguns minutos). Depois disso o app funciona **sem internet**.
+## O que muda em relação à versão com servidor local
 
-## Usar no dia a dia
+| | Versão web (este arquivo) | Versão local |
+|---|---|---|
+| Iniciar | Atalho no desktop, abre como app | `iniciar.bat` + janela preta |
+| Aviso de risco do Windows | Não há (é um site) | Aparece |
+| Impressão | Pelo driver do Windows | Direto pela rede (ZPL) |
+| Janela de impressão | Aparece, a menos que se use o atalho "silencioso" (abaixo) | Nunca aparece |
+| Erro "impressora desligada" | **O app não sabe**; quem avisa é a fila de impressão do Windows | Mensagem clara no app |
+| Cafés e configurações | Guardados no navegador deste computador (+ cópia de segurança em arquivo) | Arquivos na pasta `data` |
 
-1. Duplo clique em **`iniciar.bat`**. Abre uma janela preta (deixe aberta) e o navegador abre o app em <http://localhost:3000>.
-2. Na aba **Emitir rótulo**: escolha o café, o peso e a moagem, digite o cliente, confira a pré-visualização e clique em **Imprimir**.
-3. Depois de imprimir, o app mantém café, peso, moagem e data e limpa só o cliente, para o próximo pedido.
-4. Para fechar o app, feche a janela preta.
+## Instalar (uma vez só, no computador da torrefação)
+
+1. **Instale o driver da L42 PRO no Windows** (baixe no site da Elgin) e confirme que a impressora aparece em Configurações → Impressoras e scanners.
+2. **Configure o tamanho do papel no driver**: Preferências de impressão → papel personalizado do mesmo tamanho da etiqueta do rolo (**80 × 100 mm** em pé ou **100 × 80 mm** deitada), **sem margens**.
+3. No Chrome ou Edge, abra o endereço do app (quem publicou o site informa o endereço). No Chrome: menu ⋮ → *Transmitir, salvar e compartilhar* → **Instalar página como aplicativo** (no Edge: ⋯ → *Aplicativos* → **Instalar este site como um aplicativo**). Marque a opção de criar atalho na Área de Trabalho.
+4. Depois disso o app abre pelo atalho, em janela própria, e **funciona também sem internet** (a internet só é necessária no primeiro acesso e para receber atualizações).
 
 ## Primeira impressão de teste
 
-1. Ligue a impressora, com etiquetas de 80 × 100 mm, e confirme que ela está ligada na mesma rede do computador (cabo de rede ou Wi-Fi).
-2. No app, abra **Configurações** e clique em **Procurar impressora na rede**. O app mostra os endereços encontrados; clique no da impressora (ex.: `192.168.15.20`) para preenchê-lo. Depois clique em **Imprimir etiqueta de teste**.
-   - Atenção: o endereço que aparece embaixo do roteador (ex.: `192.168.15.1`) é o do **roteador**, não o da impressora.
-   - Se a busca não achar nada, veja a lista de aparelhos conectados na página do roteador, ou consulte o manual da L42 PRO para imprimir a página de configuração de rede dela.
-3. Se aparecer "✔ 1 etiqueta enviada para a impressora" e a etiqueta sair, está pronto. Clique em **Salvar configurações**.
-4. O rótulo é desenhado em pé (80 mm de largura × 100 mm de altura). Se a etiqueta do seu rolo é **deitada (100 mm de largura × 80 mm de altura)**, vá em **Configurações → Orientação da impressão**, escolha "Etiqueta deitada: girar 90° para a direita", salve e imprima o teste. Se o texto sair de cabeça para baixo, use "girar 90° para a esquerda".
-5. Se a etiqueta sair desalinhada ou a impressora pular etiquetas, calibre o sensor de etiquetas (gap) pelo botão FEED / pelo manual da L42 PRO e teste de novo.
+1. Abra o app → **Configurações**.
+2. Se a etiqueta do rolo for **deitada (100 × 80 mm)**, escolha em *Orientação da impressão* "Etiqueta deitada: girar 90° para a direita".
+3. Clique em **Imprimir etiqueta de teste**. Na janela de impressão do navegador:
+   - **Impressora:** a L42 PRO.
+   - **Margens:** Nenhuma. **Escala:** 100% (ou "Padrão"). **Cabeçalhos e rodapés:** desligados.
+   - **Tamanho do papel:** o mesmo da etiqueta (80 × 100 mm ou 100 × 80 mm).
+4. Se o texto sair de cabeça para baixo, use "girar 90° para a esquerda". Se sair cortado ou pequeno, ajuste o papel/escala no diálogo e no driver.
 
-Sem impressora (testes): em **Configurações**, marque **Modo sem impressora**. O botão Imprimir passa a salvar o rótulo como imagem PNG na pasta `saida`.
+## Imprimir sem a janela de impressão (opcional)
 
-## Cafés e selo
+O Chrome tem um modo que imprime direto na **impressora padrão do Windows**, sem janela. Para usá-lo:
 
-- Aba **Cafés**: adicionar, editar, remover ou **desativar** (o café inativo some da lista de emissão, mas não é apagado). Já vem cadastrado o *Arara da Mogiana*.
-- Em **Configurações** dá para ligar/desligar o selo "Cafés Especiais / Torra Local" ao fundo. Se na impressão ele atrapalhar a leitura, desligue.
+1. Deixe a L42 como **impressora padrão** (Configurações → Impressoras e scanners).
+2. Clique com o botão direito no atalho do app → **Propriedades** → no campo **Destino**, acrescente ao final, depois de um espaço: `--kiosk-printing`.
+3. Abra o app por esse atalho. Agora o botão **Imprimir** envia direto, usando o papel e as configurações padrão do driver. Por isso o passo 2 da instalação (papel e margens no driver) é obrigatório neste modo.
 
-Cafés e configurações ficam salvos na pasta `data` e permanecem após reiniciar. **Faça cópia dessa pasta de vez em quando.**
+> Eu não consegui testar o modo silencioso nem o driver numa L42 real. Se o tamanho, o giro ou a nitidez saírem diferentes do esperado, o ajuste costuma ser no driver (papel, margens, "sem escala").
 
-## Se algo der errado
+## Uso diário
 
-| Mensagem | O que fazer |
-|---|---|
-| "Não consegui encontrar a impressora" / "recusou a conexão" | Veja se está ligada e na mesma rede, e se o IP em Configurações está certo. |
-| "Node.js não está instalado" | Instale o Node.js LTS (passo 1). |
-| Navegador não abre | Abra manualmente <http://localhost:3000>. |
+1. Abra o app pelo atalho.
+2. **Emitir rótulo**: escolha café, peso e moagem, digite o cliente, confira a pré-visualização e clique em **Imprimir** (o número de cópias gera uma página por cópia).
+3. Depois de imprimir, café, peso, moagem e data são mantidos; só o cliente é limpo.
+4. Aviso importante: o navegador não informa se a impressora realmente imprimiu. "Enviadas para impressão" significa que o pedido foi entregue ao Windows. Se nada sair, veja a fila de impressão do Windows (impressora desligada, sem papel, offline).
+
+## Cafés, selo e cópia de segurança
+
+- Aba **Cafés**: adicionar, editar, remover ou **desativar** (some da lista de emissão, mas não é apagado). Já vem cadastrado o *Arara da Mogiana*.
+- Em **Configurações**: liga/desliga o selo "Cafés Especiais / Torra Local" ao fundo, orientação da impressão e **Modo sem impressora** (baixa o rótulo como imagem PNG).
+- **Cópia de segurança:** os cafés e configurações ficam guardados **neste navegador, neste computador**. Se os dados de navegação forem apagados, eles somem. Em Configurações há **Baixar cópia de segurança** e **Restaurar de uma cópia**. Faça uma cópia de vez em quando e antes de trocar de computador.
 
 ---
 
 ## Para desenvolvedores
 
 ```
-npm install      # dependências
-npm run build    # compila TypeScript para dist/
-npm start        # http://localhost:3000   (PORT, HOST, DATA_DIR, OUT_DIR configuráveis por variável de ambiente)
-npm test         # compila e roda os testes
+npm install        # dependências
+npm test           # compila (servidor e site) e roda os testes
+npm run site       # gera site/ e abre em http://localhost:8080
+npm run build:site # só gera site/ (pasta pronta para qualquer hospedagem estática)
 ```
 
-- `src/core/service.ts` – **núcleo**: `LabelService` valida o pedido, gera o rótulo e envia à impressora. Independe de HTTP e pode ser chamado por outros sistemas.
-- `src/core/label/` – desenho do rótulo (layout, fontes, selo) em imagem de 1 bit, 203 dpi (640 × 800 pontos). A **mesma imagem** é usada na pré-visualização e na impressão.
-- `src/core/printer/` – conversão para ZPL e envio TCP (porta 9100).
-- `src/core/storage/` – cadastro de cafés e configurações em JSON (`data/`).
-- `src/server/` – API HTTP; `public/` – interface web.
-- Fontes (Open Sans, Bebas Neue – licença OFL) e o selo ficam em `assets/`.
+- `src/core/label/draw.ts` – desenho do rótulo, **compartilhado** pelo servidor (Node) e pelo navegador. Cada ambiente injeta seu canvas e suas fontes.
+- `src/web/` – app do navegador: `app.ts` (telas), `env.ts` (canvas/fontes), `print.ts` (impressão pelo navegador), `storage.ts` (cadastro, configurações e backup, atrás da interface `Repository`), `request.ts` (validação).
+- `site-src/` – HTML, CSS, manifesto e service worker; `scripts/build-site.mjs` monta a pasta `site/`.
+- `.github/workflows/site.yml` – publica `site/` no GitHub Pages (precisa habilitar Pages com origem "GitHub Actions" e do plano do repositório).
+- A interface `Repository` permite trocar o armazenamento do navegador por um serviço na nuvem no futuro, sem mexer no resto.
+- Fora do escopo desta versão: login, histórico de impressões, ERP, importação em lote.

@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { renderLabel, bitmapToPng } from './label/render.js';
 import { MOAGENS, PESOS, type Bitmap1bpp, type DadosRotulo } from './label/types.js';
+import { formatDate } from './label/format.js';
 import { rotateBitmap } from './label/rotate.js';
 import { bitmapToZpl } from './printer/zpl.js';
 import { parseAddress, sendRaw } from './printer/send.js';
@@ -30,11 +31,6 @@ export interface ResultadoImpressao {
   copias: number;
   arquivo?: string;
   mensagem: string;
-}
-
-export function formatDate(iso: string): string {
-  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
-  return m ? `${m[3]}/${m[2]}/${m[1]}` : iso;
 }
 
 /**

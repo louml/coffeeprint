@@ -6,7 +6,9 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/server/index.js",
-    "test": "npm run build && node --test test/*.test.mjs"
+    "test": "npm run build && tsc -p tsconfig.web.json && node --test test/*.test.mjs",
+    "build:site": "node scripts/build-site.mjs",
+    "site": "npm run build:site && node scripts/serve-site.mjs"
   },
   "repository": {
     "type": "git",
