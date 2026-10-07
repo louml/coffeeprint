@@ -36,9 +36,17 @@ export async function buildSingle() {
   ictx.drawImage(await loadImage(path.join(root, 'assets/img/selo.jpg')), 3, 3, 58, 58);
   const favicon = `data:image/png;base64,${icon.toBuffer('image/png').toString('base64')}`;
 
+  const logoCanvas = createCanvas(160, 160);
+  const lctx = logoCanvas.getContext('2d');
+  lctx.fillStyle = '#fff';
+  lctx.fillRect(0, 0, 160, 160);
+  lctx.drawImage(await loadImage(path.join(root, 'assets/img/selo.jpg')), 0, 0, 160, 160);
+  const logo = `data:image/png;base64,${logoCanvas.toBuffer('image/png').toString('base64')}`;
+
   const css = fs.readFileSync(path.join(root, 'site-src/style.css'), 'utf8');
   let html = fs.readFileSync(path.join(root, 'site-src/index.html'), 'utf8');
   html = html
+    .replace('src="assets/img/logo.png"', () => `src="${logo}"`)
     .replace(/<link rel="manifest"[^>]*>\s*/, '')
     .replace(/<link rel="icon"[^>]*>/, `<link rel="icon" href="${favicon}">`)
     .replace(/<link rel="stylesheet"[^>]*>/, () => `<style>\n${css}\n</style>`)

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#3b2418">
+<meta name="theme-color" content="#161311">
 <title>Torra Local - Rótulos</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-192.png">
@@ -11,9 +11,12 @@
 </head>
 <body>
 <div id="app">
-<header>
-  <h1>Torra Local <span>Rótulos</span></h1>
-  <nav>
+<header class="topbar">
+  <div class="brand">
+    <img class="logo" src="assets/img/logo.png" alt="Torra Local - Cafés Especiais">
+    <div class="brand-text"><strong>Torra Local</strong><span>Emissão de rótulos</span></div>
+  </div>
+  <nav class="tabs" aria-label="Seções">
     <button class="tab active" data-tab="emitir">Emitir rótulo</button>
     <button class="tab" data-tab="cafes">Cafés</button>
     <button class="tab" data-tab="config">Configurações</button>
@@ -26,49 +29,57 @@
 <!-- ============ EMITIR ============ -->
 <section id="emitir" class="panel active">
   <div class="split">
-    <form id="form" novalidate>
-      <label>Cliente (Produzido para)
-        <input id="cliente" type="text" autocomplete="off" maxlength="120">
+    <form id="form" class="card" novalidate>
+      <label><span>Cliente <small>(Produzido para)</small></span>
+        <input id="cliente" type="text" autocomplete="off" maxlength="120" placeholder="Nome do cliente">
       </label>
       <label>Café
         <select id="cafe"></select>
       </label>
-      <div class="row">
-        <label>Peso
-          <select id="peso">
-            <option value="">Escolha…</option>
-            <option value="100g">100 g</option>
-            <option value="250g">250 g</option>
-            <option value="500g">500 g</option>
-            <option value="1kg">1 kg</option>
-          </select>
-        </label>
-        <label>Moagem
-          <select id="moagem">
-            <option value="">Escolha…</option>
-            <option value="Grão">Grão</option>
-            <option value="Moído">Moído</option>
-          </select>
-        </label>
+      <div class="field">
+        <span class="label-text" id="lbl-peso">Peso</span>
+        <select id="peso" class="choice-select" aria-labelledby="lbl-peso">
+          <option value="">Escolha…</option>
+          <option value="100g">100 g</option>
+          <option value="250g">250 g</option>
+          <option value="500g">500 g</option>
+          <option value="1kg">1 kg</option>
+        </select>
+      </div>
+      <div class="field">
+        <span class="label-text" id="lbl-moagem">Moagem</span>
+        <select id="moagem" class="choice-select" aria-labelledby="lbl-moagem">
+          <option value="">Escolha…</option>
+          <option value="Grão">Grão</option>
+          <option value="Moído">Moído</option>
+        </select>
       </div>
       <div class="row">
         <label>Data de torra
           <input id="data" type="date">
         </label>
-        <label>Cópias
-          <input id="copias" type="number" min="1" max="500" step="1" value="1" inputmode="numeric">
-        </label>
+        <div class="field">
+          <span class="label-text" id="lbl-copias">Cópias</span>
+          <div class="stepper">
+            <button type="button" id="menos" aria-label="Menos uma cópia">−</button>
+            <input id="copias" type="number" min="1" max="500" step="1" value="1" inputmode="numeric" aria-labelledby="lbl-copias">
+            <button type="button" id="mais" aria-label="Mais uma cópia">+</button>
+          </div>
+        </div>
       </div>
-      <button id="imprimir" type="submit" class="big primary">Imprimir</button>
+      <button id="imprimir" type="submit" class="print">
+        <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9V3h10v6"/><rect x="3" y="9" width="18" height="9" rx="2"/><path d="M7 14h10v7H7z"/></svg>
+        <span>Imprimir</span>
+      </button>
       <div id="aviso" role="status" aria-live="polite"></div>
     </form>
 
     <div class="preview">
-      <div class="preview-frame">
+      <div class="sheet">
         <canvas id="previa" width="640" height="800" aria-label="Pré-visualização do rótulo" hidden></canvas>
         <p id="previa-vazia">Escolha um café para ver o rótulo.</p>
       </div>
-      <small>Pré-visualização: é exatamente a imagem que será impressa (80 × 100 mm).</small>
+      <small>Rótulo de 80 × 100 mm. A pré-visualização é exatamente a imagem que será impressa.</small>
     </div>
   </div>
 </section>
@@ -76,7 +87,10 @@
 <!-- ============ CAFÉS ============ -->
 <section id="cafes" class="panel">
   <div class="bar">
-    <h2>Cafés cadastrados</h2>
+    <div>
+      <h2>Cafés cadastrados</h2>
+      <p class="sub">Os cafés ativos aparecem na tela de emissão.</p>
+    </div>
     <button id="novo-cafe" class="big primary">+ Novo café</button>
   </div>
   <div id="lista-cafes"></div>
@@ -92,9 +106,11 @@
       <datalist id="rotulos-produtor"><option value="Produtor"><option value="Produtora"><option value="Produtores"><option value="Produtoras"></datalist>
       <label>Variedade<input name="variedade" type="text" maxlength="80"></label>
       <label>Região<input name="regiao" type="text" maxlength="80"></label>
-      <label>Espécie<input name="especie" type="text" list="especies" maxlength="40" value="100% Arábica"></label>
+      <div class="row">
+        <label>Espécie<input name="especie" type="text" list="especies" maxlength="40" value="100% Arábica"></label>
+        <label>Nível de torra<input name="torra" type="text" list="torras" maxlength="40"></label>
+      </div>
       <datalist id="especies"><option value="100% Arábica"><option value="Blend Arábica e Conilon"></datalist>
-      <label>Nível de torra<input name="torra" type="text" list="torras" maxlength="40"></label>
       <datalist id="torras"><option value="Torra clara"><option value="Torra média"><option value="Torra escura"></datalist>
       <label class="check"><input name="ativo" type="checkbox" checked> Ativo (aparece na lista de emissão)</label>
       <div id="erro-cafe" class="erro"></div>
@@ -109,29 +125,32 @@
 <!-- ============ CONFIG ============ -->
 <section id="config" class="panel">
   <h2>Configurações</h2>
-  <form id="form-config" class="narrow" novalidate>
-    <label>Orientação da impressão
-      <select id="cfg-rotacao">
-        <option value="0">Normal (etiqueta de 80 mm de largura × 100 mm de altura)</option>
-        <option value="90">Etiqueta deitada (100 × 80 mm): girar 90° para a direita</option>
-        <option value="270">Etiqueta deitada (100 × 80 mm): girar 90° para a esquerda</option>
-        <option value="180">Girar 180° (saindo de cabeça para baixo)</option>
-      </select>
-      <small>Se a etiqueta do rolo é mais larga que alta (100 × 80 mm), escolha uma das opções "deitada". Se o texto sair de cabeça para baixo, use a outra. Não muda a pré-visualização.</small>
-    </label>
-    <button type="button" id="teste" class="big">Imprimir etiqueta de teste</button>
-    <label class="check"><input id="cfg-selo" type="checkbox"> Imprimir o selo gráfico de fundo (Cafés Especiais / Torra Local)</label>
-    <label class="check"><input id="cfg-offline" type="checkbox"> Modo sem impressora (baixa o rótulo como imagem em vez de imprimir)</label>
-    <button type="submit" class="big primary">Salvar configurações</button>
-    <div id="aviso-config" role="status" aria-live="polite"></div>
-  </form>
+  <div class="cards">
+    <form id="form-config" class="card" novalidate>
+      <h3>Impressão</h3>
+      <label>Orientação da impressão
+        <select id="cfg-rotacao">
+          <option value="0">Normal (etiqueta em pé, 80 × 100 mm)</option>
+          <option value="90">Deitada (100 × 80 mm): girar 90° à direita</option>
+          <option value="270">Deitada (100 × 80 mm): girar 90° à esquerda</option>
+          <option value="180">Girar 180° (de cabeça para baixo)</option>
+        </select>
+        <small>Se a etiqueta do rolo é mais larga que alta (100 × 80 mm), escolha uma das opções "deitada". Se o texto sair de cabeça para baixo, use a outra. Não muda a pré-visualização.</small>
+      </label>
+      <button type="button" id="teste" class="big">Imprimir etiqueta de teste</button>
+      <label class="check"><input id="cfg-selo" type="checkbox"> Imprimir o selo gráfico de fundo (Cafés Especiais / Torra Local)</label>
+      <label class="check"><input id="cfg-offline" type="checkbox"> Modo sem impressora (baixa o rótulo como imagem em vez de imprimir)</label>
+      <button type="submit" class="big primary">Salvar configurações</button>
+      <div id="aviso-config" role="status" aria-live="polite"></div>
+    </form>
 
-  <div class="secao narrow">
-    <h3>Cópia de segurança</h3>
-    <p>Os cafés e as configurações ficam guardados neste navegador, neste computador. Se os dados do navegador forem apagados, eles somem. Baixe uma cópia de vez em quando e guarde em local seguro.</p>
-    <button type="button" id="backup-baixar" class="big">Baixar cópia de segurança</button>
-    <label class="big arquivo" style="flex:none">Restaurar de uma cópia…<input id="backup-restaurar" type="file" accept="application/json,.json"></label>
-    <div id="aviso-backup" role="status" aria-live="polite"></div>
+    <div class="card">
+      <h3>Cópia de segurança</h3>
+      <p class="sub">Os cafés e as configurações ficam guardados neste navegador, neste computador. Se os dados do navegador forem apagados, eles somem. Baixe uma cópia de vez em quando e guarde em local seguro.</p>
+      <button type="button" id="backup-baixar" class="big">Baixar cópia de segurança</button>
+      <label class="big arquivo">Restaurar de uma cópia…<input id="backup-restaurar" type="file" accept="application/json,.json"></label>
+      <div id="aviso-backup" role="status" aria-live="polite"></div>
+    </div>
   </div>
 </section>
 </main>

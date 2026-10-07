@@ -15,6 +15,16 @@ fs.cpSync(path.join(root, 'assets/fonts'), path.join(site, 'assets/fonts'), { re
 fs.mkdirSync(path.join(site, 'assets/img'), { recursive: true });
 fs.copyFileSync(path.join(root, 'assets/img/selo.jpg'), path.join(site, 'assets/img/selo.jpg'));
 
+// logo pequena do cabeçalho
+{
+  const c = createCanvas(160, 160);
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, 160, 160);
+  ctx.drawImage(await loadImage(path.join(root, 'assets/img/selo.jpg')), 0, 0, 160, 160);
+  fs.writeFileSync(path.join(site, 'assets/img/logo.png'), c.toBuffer('image/png'));
+}
+
 // ícones do app a partir do selo
 const selo = await loadImage(path.join(root, 'assets/img/selo.jpg'));
 fs.mkdirSync(path.join(site, 'icons'), { recursive: true });

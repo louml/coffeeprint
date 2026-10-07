@@ -32,6 +32,49 @@ document.querySelectorAll<HTMLButtonElement>('.tab').forEach((b) =>
 );
 
 // ---------- emissão
+
+/** Peso e moagem viram botões de escolha (menos cliques); o <select> continua como fonte do valor. */
+function botoesDeEscolha(id: string): void {
+  const select = $(id) as HTMLSelectElement;
+  const opcoes = [...select.options].filter((o) => o.value);
+  const grupo = document.createElement('div');
+  grupo.className = 'chips';
+  grupo.style.setProperty('--n', String(opcoes.length));
+  grupo.setAttribute('role', 'group');
+  grupo.setAttribute('aria-labelledby', `lbl-${id}`);
+  const marcar = () => grupo.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.valor === select.value)));
+  for (const o of opcoes) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'chip';
+    b.dataset.valor = o.value;
+    b.textContent = o.textContent;
+    b.addEventListener('click', () => {
+      select.value = o.value;
+      marcar();
+      select.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    grupo.appendChild(b);
+  }
+  select.after(grupo);
+  select.addEventListener('change', marcar);
+  marcar();
+}
+botoesDeEscolha('peso');
+botoesDeEscolha('moagem');
+
+/** Botões − e + do número de cópias. */
+function contadorDeCopias(): void {
+  const campo = $('copias') as HTMLInputElement;
+  const ajustar = (delta: number) => {
+    const atual = Number.parseInt(campo.value, 10);
+    campo.value = String(Math.min(500, Math.max(1, (Number.isFinite(atual) ? atual : 1) + delta)));
+    campo.dispatchEvent(new Event('input', { bubbles: true }));
+  };
+  $('menos').addEventListener('click', () => ajustar(-1));
+  $('mais').addEventListener('click', () => ajustar(1));
+}
+contadorDeCopias();
 const FIELDS: Record<string, string> = { cliente: 'Cliente', cafe: 'Café', peso: 'Peso', moagem: 'Moagem', data: 'Data de torra', copias: 'Número de cópias' };
 const val = (id: string) => ($(id) as HTMLInputElement | HTMLSelectElement).value;
 
