@@ -1,6 +1,16 @@
 import { BOLD, DISPLAY, REG, renderLabelCore, type RenderEnv } from '../core/label/draw.js';
 import type { Bitmap1bpp, DadosRotulo, OpcoesRotulo } from '../core/label/types.js';
 
+/**
+ * No arquivo único (index.html aberto direto do disco), fontes e selo vêm embutidos como data URI,
+ * porque o navegador bloqueia arquivos externos em páginas abertas via file://.
+ */
+interface EmbeddedAssets {
+  fonts: Record<string, string>;
+  seal: string;
+}
+const embedded = (window as unknown as { __ASSETS__?: EmbeddedAssets }).__ASSETS__;
+
 const FONTS: Array<[string, string]> = [
   [REG, 'assets/fonts/open-sans-latin-400-normal.woff'],
   [BOLD, 'assets/fonts/open-sans-latin-700-normal.woff'],
@@ -12,7 +22,7 @@ let ready: Promise<void> | undefined;
 export function loadFonts(): Promise<void> {
   ready ??= Promise.all(
     FONTS.map(async ([family, url]) => {
-      const face = new FontFace(family, `url(${url})`);
+      const face = new FontFace(family, `url("${embedded?.fonts[family] ?? url}")`);
       document.fonts.add(await face.load());
     }),
   ).then(() => undefined);
@@ -32,7 +42,7 @@ const env: RenderEnv = {
       const img = new Image();
       img.onload = () => resolve(img);
       img.onerror = () => reject(new Error('Não foi possível carregar o selo.'));
-      img.src = 'assets/img/selo.jpg';
+      img.src = embedded?.seal ?? 'assets/img/selo.jpg';
     })),
 };
 

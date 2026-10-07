@@ -57,3 +57,10 @@ test('web: validação lista o que falta e monta os dados do rótulo', () => {
   assert.equal(d.cliente, 'Padaria');
   assert.equal(d.cafe.id, undefined);
 });
+
+test('index.html (arquivo único) está atualizado em relação ao código', async () => {
+  const { buildSingle } = await import('../scripts/single.mjs');
+  const fs = await import('node:fs');
+  const atual = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+  assert.equal(atual, await buildSingle(), 'index.html está desatualizado: rode "npm run build:single" e faça o commit.');
+});

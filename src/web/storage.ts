@@ -103,6 +103,13 @@ function tryStorage(): Storage | null {
   }
 }
 
+/** crypto.randomUUID só existe em contexto seguro; em alguns navegadores/arquivos locais precisa de plano B. */
+export function newId(): string {
+  return typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+    ? crypto.randomUUID()
+    : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
 const str = (v: unknown) => (typeof v === 'string' ? v.trim() : '');
 
 export function sanitizeCafe(raw: Partial<CafeInput>): CafeInput {
@@ -130,7 +137,7 @@ export class CafeBook {
     return this.list().find((c) => c.id === id);
   }
   create(input: Partial<CafeInput>): Cafe {
-    const cafe: Cafe = { id: crypto.randomUUID(), ...sanitizeCafe(input) };
+    const cafe: Cafe = { id: newId(), ...sanitizeCafe(input) };
     this.repo.saveCafes([...this.list(), cafe]);
     return cafe;
   }
@@ -171,7 +178,7 @@ export function importBackup(repo: Repository, raw: unknown): void {
     throw new Error('Este arquivo não é uma cópia de segurança do app.');
   }
   const cafes: Cafe[] = b.cafes.map((c, i) => ({
-    id: typeof c?.id === 'string' && c.id ? c.id : crypto.randomUUID() + i,
+    id: typeof c?.id === 'string' && c.id ? c.id : newId() + i,
     ...sanitizeCafe(c ?? {}),
   }));
   repo.saveCafes(cafes);
