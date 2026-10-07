@@ -29,7 +29,7 @@ export const CAFE_SEED: Cafe = {
   variedade: 'Arara',
   regiao: 'Média Mogiana',
   especie: '100% Arábica',
-  torra: 'Torra Média',
+  torra: 'Torra média',
   ativo: true,
 };
 export const DEFAULT_CONFIG: Config = { selo: true, modoSemImpressora: false, rotacao: 0 };

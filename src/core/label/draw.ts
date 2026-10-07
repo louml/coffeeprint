@@ -1,4 +1,4 @@
-import { HEIGHT, MARGIN, WIDTH } from './geometry.js';
+import { HEIGHT, WIDTH } from './geometry.js';
 import type { Bitmap1bpp, DadosRotulo, OpcoesRotulo } from './types.js';
 
 /**
@@ -7,9 +7,11 @@ import type { Bitmap1bpp, DadosRotulo, OpcoesRotulo } from './types.js';
  */
 type Ctx = CanvasRenderingContext2D;
 
-export const REG = 'TLOpenSans';
-export const BOLD = 'TLOpenSansBold';
-export const DISPLAY = 'TLBebas';
+/** Fonte do rótulo: Inter, em quatro pesos. Cada ambiente registra os arquivos com estes nomes. */
+export const REG = 'TLInter'; // 400
+export const MED = 'TLInterMed'; // 500
+export const SEMI = 'TLInterSemi'; // 600
+export const BOLD = 'TLInterBold'; // 700
 
 export interface RenderEnv {
   createCanvas(width: number, height: number): { getContext(type: '2d'): unknown };
@@ -101,140 +103,152 @@ function fitTokens(
 }
 
 // ---------------------------------------------------------------- layout
+// Medidas tiradas do modelo de referência (imagem 945x1181 reduzida para 640x800 pontos, 203 dpi).
 
-const CONTENT_W = WIDTH - 2 * MARGIN;
+const LEFT = 46;
+const RIGHT = 591;
+const CW = RIGHT - LEFT;
+const RULE4_Y = 659; // última linha: o rodapé fica fixo abaixo dela
+const RULE_H = 2;
+
+const SIZE = { title: 43.6, peso: 38.8, label: 22.6, value: 28, row: 22.4, date: 22.9, produzido: 28.1, client: 45.3, footer: 17.1 };
+
 const FOOTER_LINES = [
   'Produto artesanal. Conservar em local fresco e arejado.',
   'Validade de 6 meses a partir da data de torra.',
   'G. Gomes de Carvalho Ltda - CNPJ 36530500000182 - Porto Alegre, RS',
   'sac@torralocal.com.br - www.torralocal.com.br',
 ];
-const FOOTER_SIZE = 17;
-const FOOTER_LH = 22;
-const BRAND_SIZE = 74;
-const BOTTOM = HEIGHT - 28;
+const FOOTER_BASELINES = [702, 722, 742, 762];
+const FOOTER_MAX_W = WIDTH - 2 * 24;
 
-function dottedLine(ctx: Ctx, y: number): void {
-  for (let x = MARGIN; x < WIDTH - MARGIN; x += 8) ctx.fillRect(x, y, 4, 4);
-}
+type Op =
+  | { t: 'rule'; y: number }
+  | { t: 'text'; text: string; family: string; size: number; x: number; y: number; align: 'left' | 'right' | 'center' };
 
-function drawFooter(ctx: Ctx): number {
-  ctx.fillStyle = '#000';
-  ctx.textAlign = 'center';
-  const linesTop = BOTTOM - FOOTER_LINES.length * FOOTER_LH;
-  FOOTER_LINES.forEach((text, i) => {
-    const { size } = fitTokens(ctx, [{ text, family: REG }], CONTENT_W, FOOTER_SIZE, 12, 1);
-    ctx.font = font(REG, size);
-    ctx.fillText(text, WIDTH / 2, linesTop + (i + 1) * FOOTER_LH - 6);
+const text = (text: string, family: string, size: number, x: number, y: number, align: 'left' | 'right' | 'center' = 'left'): Op => ({ t: 'text', text, family, size, x, y, align });
+
+const lineText = (line: Token[]) => line.map((t) => t.text).join(' ');
+
+/** Posições dos itens da linha "espécie / torra / moagem": espaços iguais entre eles, de ponta a ponta. */
+function spreadRow(ctx: Ctx, items: string[], baseline: number): Op[] {
+  if (!items.length) return [];
+  let size = SIZE.row;
+  let widths: number[] = [];
+  for (; size >= 14; size -= 0.5) {
+    ctx.font = font(BOLD, size);
+    widths = items.map((t) => ctx.measureText(t).width);
+    if (items.length === 1 || (CW - widths.reduce((a, b) => a + b, 0)) / (items.length - 1) >= 14) break;
+  }
+  const gap = items.length > 1 ? (CW - widths.reduce((a, b) => a + b, 0)) / (items.length - 1) : 0;
+  let x = LEFT;
+  return items.map((t, i) => {
+    const op = text(t, BOLD, size, x, baseline);
+    x += widths[i] + gap;
+    return op;
   });
-  ctx.font = font(DISPLAY, BRAND_SIZE);
-  const brandBase = linesTop - 6;
-  ctx.fillText('TORRA LOCAL', WIDTH / 2, brandBase);
-  ctx.textAlign = 'left';
-  return brandBase - BRAND_SIZE * 0.72; // topo aproximado das letras
 }
 
-interface InfoLine {
-  tokens: Token[];
-  maxLines: number;
-}
-
-function infoLines(d: DadosRotulo): InfoLine[] {
+/** Calcula onde cada texto e linha vai ficar, com tudo reduzido na escala `s` (1 = tamanho do modelo). */
+function plan(ctx: Ctx, d: DadosRotulo, s: number) {
+  const ops: Op[] = [];
   const c = d.cafe;
-  const labeled = (label: string, value: string, maxLines = 1): InfoLine | null =>
-    value.trim()
-      ? { tokens: tokenize([{ text: label, family: BOLD }, { text: value, family: REG }]), maxLines }
-      : null;
-  const bold = (text: string): InfoLine | null =>
-    text.trim() ? { tokens: tokenize([{ text, family: BOLD }]), maxLines: 1 } : null;
-  return [
-    labeled('Notas Sensoriais:', c.notas, 2),
-    labeled('Produtor:', c.produtor),
-    labeled('Variedade:', c.variedade),
-    labeled('Região:', c.regiao),
-    bold(c.especie),
-    bold(c.torra),
-    bold(`Moagem: ${d.moagem}`),
-    bold(`DATA DE TORRA: ${d.dataTorra}`),
-  ].filter((l): l is InfoLine => l !== null);
+
+  // Título (esquerda) e peso (direita) na mesma linha
+  ctx.font = font(SEMI, SIZE.peso);
+  const pesoW = ctx.measureText(d.peso).width;
+  const title = fitTokens(ctx, tokenize([{ text: c.nome, family: MED }]), CW - pesoW - 24, SIZE.title, 22, 2, 30);
+  const base1 = 49 + 0.757 * title.size;
+  title.lines.forEach((line, i) => ops.push(text(lineText(line), MED, title.size, LEFT, base1 + i * Math.round(title.size * 1.15))));
+  ops.push(text(d.peso, SEMI, SIZE.peso, RIGHT, base1 - 3.3, 'right')); // o peso fica um pouco acima da linha de base do título, como no modelo
+  const rule1 = base1 + (title.lines.length - 1) * Math.round(title.size * 1.15) + 24;
+  ops.push({ t: 'rule', y: rule1 });
+
+  // Rótulo em negrito numa linha e valor na linha de baixo
+  const fields: Array<[string, string]> = [
+    ['Notas sensoriais:', c.notas],
+    ['Produtor:', c.produtor],
+    ['Variedade:', c.variedade],
+    ['Região:', c.regiao],
+  ];
+  let lb = rule1 + 40.5 * s;
+  let lastBase = rule1;
+  for (const [label, value] of fields) {
+    if (!value.trim()) continue;
+    ops.push(text(label, BOLD, SIZE.label * s, LEFT, lb));
+    const vs = SIZE.value * s;
+    const fit = fitTokens(ctx, tokenize([{ text: value, family: REG }]), CW, vs, vs * 0.8, 2, vs * 0.86);
+    const vlh = Math.round(fit.size * 1.25);
+    let vb = lb + 34.7 * s;
+    for (const line of fit.lines) {
+      ops.push(text(lineText(line), REG, fit.size, LEFT, vb));
+      lastBase = vb;
+      vb += vlh;
+    }
+    lb = lastBase + 38.7 * s;
+  }
+  const rule2 = lastBase + 21.6 * s;
+  ops.push({ t: 'rule', y: rule2 });
+
+  const rowBase = rule2 + 43.5 * s;
+  ops.push(...spreadRow(ctx, [c.especie, c.torra, `Moagem: ${d.moagem}`].filter((t) => t.trim()), rowBase));
+  const dateBase = rowBase + 38.8 * s;
+  ops.push(text(`Data de torra: ${d.dataTorra}`, BOLD, SIZE.date * s, LEFT, dateBase));
+  const upperEnd = dateBase + 29.5 * s; // onde a linha 3 ficaria logo depois da data
+
+  // Bloco "Produzido para": ancorado na última linha, para o rodapé não se mexer
+  const client = tokenize([{ text: d.cliente.trim(), family: SEMI }]);
+  const cfit = client.length ? fitTokens(ctx, client, CW, SIZE.client, 20, 2, 30) : { size: SIZE.client, lines: [] as Token[][] };
+  const clh = Math.round(cfit.size * 1.2);
+  const nLines = Math.max(1, cfit.lines.length);
+  const clientSpan = 0.757 * cfit.size + (nLines - 1) * clh;
+  const lowerH = 42.1 * s + 22.2 * s + clientSpan + 26.4 * s;
+  const rule3 = RULE4_Y - lowerH;
+  const prodBase = rule3 + 42.1 * s;
+  const lowerOps: Op[] = [{ t: 'rule', y: rule3 }, text('Produzido para:', REG, SIZE.produzido * s, LEFT, prodBase)];
+  cfit.lines.forEach((line, i) => lowerOps.push(text(lineText(line), SEMI, cfit.size, LEFT, prodBase + 22.2 * s + 0.757 * cfit.size + i * clh)));
+  return { ops: [...ops, ...lowerOps], overflow: upperEnd - rule3 };
 }
 
-/** Desenha todo o texto/linhas em preto sobre `ctx` (fundo branco já aplicado). */
 function drawContent(ctx: Ctx, d: DadosRotulo): void {
   ctx.fillStyle = '#000';
   ctx.textBaseline = 'alphabetic';
-  const brandTop = drawFooter(ctx);
-  const footerSepY = brandTop - 14;
 
-  // Título + peso na mesma linha
-  let y = 26;
-  ctx.font = font(BOLD, 46);
-  const pesoW = ctx.measureText(d.peso).width;
-  const titleMax = CONTENT_W - pesoW - 24;
-  const title = fitTokens(ctx, tokenize([{ text: d.cafe.nome, family: REG }]), titleMax, 54, 30, 2, 38);
-  const titleLH = Math.round(title.size * 1.2);
-  title.lines.forEach((line, i) => drawLine(ctx, line, title.size, MARGIN, y + title.size + i * titleLH));
-  ctx.font = font(BOLD, 46);
-  ctx.textAlign = 'right';
-  ctx.fillText(d.peso, WIDTH - MARGIN, y + title.size);
-  ctx.textAlign = 'left';
-  y += title.size + (title.lines.length - 1) * titleLH + 12;
-  ctx.fillRect(MARGIN, y, CONTENT_W, 3);
-  y += 3 + 12;
-
-  // Bloco de informações: reduz a fonte até sobrar espaço para "Produzido para"
-  const lines = infoLines(d);
-  const clientTokens = tokenize([{ text: d.cliente.trim(), family: REG }]);
-  const clientFit = clientTokens.length ? fitTokens(ctx, clientTokens, CONTENT_W, 42, 20, 2, 30) : null;
-  const clientH = clientFit ? clientFit.lines.length * Math.round(clientFit.size * 1.25) : 0;
-  const minClientBlock = Math.max(118, 40 + clientH + 20);
-  let layout: Array<{ size: number; lines: Token[][] }> = [];
-  let sizeCap = 27;
-  for (; sizeCap >= 16; sizeCap -= 1) {
-    layout = lines.map((l) => fitTokens(ctx, l.tokens, CONTENT_W, sizeCap, Math.max(sizeCap - 4, 16), l.maxLines, sizeCap - 2));
-    const h = layout.reduce((s, l) => s + l.lines.length * Math.round(l.size * 1.42), 0);
-    if (footerSepY - (y + h + 12) >= minClientBlock) break;
+  // reduz a escala só se o conteúdo não couber (textos muito longos); com textos normais s = 1
+  let s = 1;
+  let p = plan(ctx, d, s);
+  while (p.overflow > 3 && s > 0.6) {
+    s = Math.round((s - 0.02) * 100) / 100;
+    p = plan(ctx, d, s);
   }
-  for (const item of layout) {
-    const lh = Math.round(item.size * 1.42);
-    for (const line of item.lines) {
-      drawLine(ctx, line, item.size, MARGIN, y + Math.round(item.size * 1.1));
-      y += lh;
+  for (const op of p.ops) {
+    if (op.t === 'rule') {
+      ctx.fillRect(LEFT + 2, Math.round(op.y), CW - 2, RULE_H);
+    } else {
+      ctx.font = font(op.family, op.size);
+      ctx.textAlign = op.align;
+      ctx.fillText(op.text, op.x, op.y);
     }
   }
-  y += 10;
+  ctx.fillRect(LEFT + 2, RULE4_Y, CW - 2, RULE_H);
 
-  // Produzido para
-  dottedLine(ctx, y);
-  const areaTop = y + 8;
-  const areaBottom = footerSepY;
+  // Rodapé fixo
   ctx.textAlign = 'center';
-  ctx.font = font(BOLD, 30);
-  ctx.fillText('Produzido para:', WIDTH / 2, areaTop + 30);
-  const client = d.cliente.trim();
-  if (client) {
-    const room = areaBottom - (areaTop + 40) - 8;
-    const fit = clientFit!;
-    const lh = Math.round(fit.size * 1.25);
-    const blockH = fit.lines.length * lh;
-    let cy = areaTop + 40 + Math.max(0, (room - blockH) / 2) + fit.size;
-    for (const line of fit.lines) {
-      ctx.font = font(REG, fit.size);
-      ctx.fillText(line.map((t) => t.text).join(' '), WIDTH / 2, cy);
-      cy += lh;
-    }
-  }
+  FOOTER_LINES.forEach((line, i) => {
+    const { size } = fitTokens(ctx, [{ text: line, family: REG }], FOOTER_MAX_W, SIZE.footer, 11, 1);
+    ctx.font = font(REG, size);
+    ctx.fillText(line, WIDTH / 2, FOOTER_BASELINES[i]);
+  });
   ctx.textAlign = 'left';
-  dottedLine(ctx, footerSepY);
 }
 
 // ---------------------------------------------------------------- selo + 1 bit
 
 const BAYER4 = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
 const SEAL_DENSITY = 0.2; // fração de pontos pretos no fundo (cinza claro tracejado)
-const SEAL_DIAMETER = 400;
-const SEAL_CX = 520;
-const SEAL_CY = 215;
+const SEAL_DIAMETER = 370;
+const SEAL_CX = 437;
+const SEAL_CY = 316;
 const HALO = 3; // área em branco ao redor do texto para o selo não atrapalhar a leitura
 
 function dilate(mask: Uint8Array, r: number): Uint8Array {

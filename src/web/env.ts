@@ -1,4 +1,4 @@
-import { BOLD, DISPLAY, REG, renderLabelCore, type RenderEnv } from '../core/label/draw.js';
+import { BOLD, MED, REG, SEMI, renderLabelCore, type RenderEnv } from '../core/label/draw.js';
 import type { Bitmap1bpp, DadosRotulo, OpcoesRotulo } from '../core/label/types.js';
 
 /**
@@ -12,9 +12,10 @@ interface EmbeddedAssets {
 const embedded = (window as unknown as { __ASSETS__?: EmbeddedAssets }).__ASSETS__;
 
 const FONTS: Array<[string, string]> = [
-  [REG, 'assets/fonts/open-sans-latin-400-normal.woff'],
-  [BOLD, 'assets/fonts/open-sans-latin-700-normal.woff'],
-  [DISPLAY, 'assets/fonts/bebas-neue-latin-400-normal.woff'],
+  [REG, 'assets/fonts/inter-latin-400-normal.woff'],
+  [MED, 'assets/fonts/inter-latin-500-normal.woff'],
+  [SEMI, 'assets/fonts/inter-latin-600-normal.woff'],
+  [BOLD, 'assets/fonts/inter-latin-700-normal.woff'],
 ];
 
 let ready: Promise<void> | undefined;

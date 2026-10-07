@@ -86,7 +86,7 @@ export class LabelService {
     const cafe = this.cafes.list()[0];
     const base = cafe ? (({ id: _i, ativo: _a, ...r }) => r)(cafe) : {
       nome: 'Café de teste', notas: 'Chocolate e laranja', produtor: 'Produtor', variedade: 'Variedade',
-      regiao: 'Região', especie: '100% Arábica', torra: 'Torra Média',
+      regiao: 'Região', especie: '100% Arábica', torra: 'Torra média',
     };
     const dados: DadosRotulo = {
       cafe: base,

@@ -146,3 +146,12 @@ test('rotação só vale para a impressora (ZPL), não para o arquivo', async ()
   assert.match(p.received[0], /\^PW800/); assert.match(p.received[0], /\^LL640/);
   assert.equal(new ConfigStore(dir).get().rotacao, 90);
 });
+
+test('rótulo segue o modelo: linhas horizontais nas posições certas e rodapé abaixo da última', async () => {
+  const dados = { cafe: { nome: 'Arara da Mogiana', notas: 'Ameixa e caramelo', produtor: 'Luís Sordi', variedade: 'Arara', regiao: 'Média Mogiana', especie: '100% Arábica', torra: 'Torra média' }, cliente: 'Eliezer Ramos', peso: '500g', moagem: 'Grão', dataTorra: '05/10/2026' };
+  const bmp = await renderLabel(dados, { selo: false });
+  const inkInRow = (y) => { let n = 0; for (let x = 0; x < 640; x++) if (bmp.data[y * 80 + (x >> 3)] & (0x80 >> (x & 7))) n++; return n; };
+  for (const y of [106, 423, 534, 659]) assert.ok(inkInRow(y) >= 540, `linha em y=${y} deveria cruzar a etiqueta (${inkInRow(y)} pontos)`);
+  // entre as linhas há texto; fora delas (ex.: y=300 no meio do selo desligado) não há linha contínua
+  assert.ok(inkInRow(300) < 300);
+});

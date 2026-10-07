@@ -1,7 +1,7 @@
 import { createCanvas, GlobalFonts, loadImage, type Image } from '@napi-rs/canvas';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { BOLD, DISPLAY, REG, renderLabelCore, type RenderEnv } from './draw.js';
+import { BOLD, MED, REG, SEMI, renderLabelCore, type RenderEnv } from './draw.js';
 import type { Bitmap1bpp, DadosRotulo, OpcoesRotulo } from './types.js';
 
 const ASSETS = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../assets');
@@ -9,9 +9,9 @@ const ASSETS = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..
 let fontsReady = false;
 function ensureFonts(): void {
   if (fontsReady) return;
-  GlobalFonts.registerFromPath(path.join(ASSETS, 'fonts/open-sans-latin-400-normal.woff'), REG);
-  GlobalFonts.registerFromPath(path.join(ASSETS, 'fonts/open-sans-latin-700-normal.woff'), BOLD);
-  GlobalFonts.registerFromPath(path.join(ASSETS, 'fonts/bebas-neue-latin-400-normal.woff'), DISPLAY);
+  for (const [family, weight] of [[REG, 400], [MED, 500], [SEMI, 600], [BOLD, 700]] as const) {
+    GlobalFonts.registerFromPath(path.join(ASSETS, `fonts/inter-latin-${weight}-normal.woff`), family);
+  }
   fontsReady = true;
 }
 

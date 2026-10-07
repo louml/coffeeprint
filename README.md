@@ -62,7 +62,7 @@ O Chrome tem um modo que imprime direto na **impressora padrão do Windows**, se
 
 ## Cafés, selo e cópia de segurança
 
-- Aba **Cafés**: adicionar, editar, remover ou **desativar** (some da lista de emissão, mas não é apagado). Já vem cadastrado o *Arara da Mogiana*.
+- Aba **Cafés**: adicionar, editar, remover ou **desativar** (some da lista de emissão, mas não é apagado). Já vem cadastrado o *Arara da Mogiana*. O texto de cada campo sai no rótulo exatamente como foi digitado (por exemplo, "Torra média"); se um café cadastrado antes da atualização do modelo ainda mostra "Torra Média", edite-o em **Cafés → Editar**.
 - Em **Configurações**: liga/desliga o selo "Cafés Especiais / Torra Local" ao fundo, orientação da impressão e **Modo sem impressora** (baixa o rótulo como imagem PNG).
 - **Cópia de segurança:** os cafés e configurações ficam guardados **neste navegador, neste computador**. Se os dados de navegação forem apagados, eles somem. Em Configurações há **Baixar cópia de segurança** e **Restaurar de uma cópia**. Faça uma cópia de vez em quando e antes de trocar de computador.
 

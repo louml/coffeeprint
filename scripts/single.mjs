@@ -21,9 +21,10 @@ export async function buildSingle() {
 
   const assets = {
     fonts: {
-      TLOpenSans: b64('assets/fonts/open-sans-latin-400-normal.woff', 'font/woff'),
-      TLOpenSansBold: b64('assets/fonts/open-sans-latin-700-normal.woff', 'font/woff'),
-      TLBebas: b64('assets/fonts/bebas-neue-latin-400-normal.woff', 'font/woff'),
+      TLInter: b64('assets/fonts/inter-latin-400-normal.woff', 'font/woff'),
+      TLInterMed: b64('assets/fonts/inter-latin-500-normal.woff', 'font/woff'),
+      TLInterSemi: b64('assets/fonts/inter-latin-600-normal.woff', 'font/woff'),
+      TLInterBold: b64('assets/fonts/inter-latin-700-normal.woff', 'font/woff'),
     },
     seal: b64('assets/img/selo.jpg', 'image/jpeg'),
   };

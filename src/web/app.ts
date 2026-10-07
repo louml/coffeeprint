@@ -215,7 +215,7 @@ $('teste').addEventListener('click', async () => {
   aviso($('aviso-config'), '', 'Preparando a etiqueta de teste…');
   try {
     const cafe = book.list()[0];
-    const { id: _i, ativo: _a, ...base } = cafe ?? { id: '', ativo: true, nome: 'Café de teste', notas: 'Chocolate e laranja', produtor: 'Produtor', variedade: 'Variedade', regiao: 'Região', especie: '100% Arábica', torra: 'Torra Média' };
+    const { id: _i, ativo: _a, ...base } = cafe ?? { id: '', ativo: true, nome: 'Café de teste', notas: 'Chocolate e laranja', produtor: 'Produtor', variedade: 'Variedade', regiao: 'Região', especie: '100% Arábica', torra: 'Torra média' };
     const msg = await emitir({ cafe: base, cliente: 'ETIQUETA DE TESTE', peso: '250g', moagem: 'Grão', dataTorra: formatDate(today()) }, 1);
     aviso($('aviso-config'), 'ok', '✔ ' + msg);
   } catch (e) {
