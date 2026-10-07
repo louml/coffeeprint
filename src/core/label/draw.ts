@@ -167,7 +167,7 @@ function plan(ctx: Ctx, d: DadosRotulo, s: number) {
   // Rótulo em negrito numa linha e valor na linha de baixo
   const fields: Array<[string, string]> = [
     ['Notas sensoriais:', c.notas],
-    ['Produtor:', c.produtor],
+    [`${c.rotuloProdutor?.trim() || 'Produtor'}:`, c.produtor],
     ['Variedade:', c.variedade],
     ['Região:', c.regiao],
   ];

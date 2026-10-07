@@ -5,7 +5,7 @@ import type { Cafe } from './types.js';
  * quem já usava o app recebe só os que entraram depois (sem recriar um café que apagou).
  * Para acrescentar cafés no futuro: coloque no fim com `desde` = SEED_VERSION + 1 e aumente SEED_VERSION.
  */
-export const SEED_VERSION = 3;
+export const SEED_VERSION = 4;
 
 export type CafeInicial = Cafe & { desde: number };
 
@@ -26,6 +26,13 @@ export const CAFES_INICIAIS: CafeInicial[] = [
   // mesmo título do anterior, só muda o nível de torra
   { id: 'doce-cerrado-media-clara', desde: 3, nome: 'Doce Cerrado', notas: 'Melado e amêndoas', produtor: 'Marcelo Urtado', variedade: 'Topázio', regiao: 'Cerrado Mineiro', ...base, torra: 'Torra média clara' },
   { id: 'fermentado-cacau', desde: 3, nome: 'Fermentado Cacau', notas: 'Nibs de cacau e anis', produtor: 'Fazenda Lagoinha', variedade: 'Catuaí amarelo', regiao: 'Sul de Minas', ...base },
+  // versão 4
+  { id: 'moca-arara', desde: 4, nome: 'Moca Arara', notas: 'Bergamota e caramelo', produtor: 'Luís Sordi', variedade: 'Arara, Tipo Moca', regiao: 'Média Mogiana', ...base },
+  { id: 'mundo-novo', desde: 4, nome: 'Mundo Novo', notas: 'Caramelo e cereais', produtor: 'Irmãos Riccetto', variedade: 'Mundo Novo', regiao: 'Média Mogiana', ...base },
+  { id: 'paulista-amarelo', desde: 4, nome: 'Paulista Amarelo', notas: 'Calda de pudim e frutas vermelhas', produtor: 'Irmãos Riccetto', variedade: 'Catuaí amarelo', regiao: 'Média Mogiana', ...base },
+  { id: 'fermentado-framboesa', desde: 4, nome: 'Fermentado Framboesa', notas: 'Whisky e framboesa', produtor: 'Fazenda Lagoinha', variedade: 'Catuaí amarelo', regiao: 'Sul de Minas', ...base },
+  // no rótulo deste café o campo se chama "Produtora"
+  { id: 'geisha', desde: 4, nome: 'Geisha', notas: 'Flor de laranjeira e mel', produtor: 'Daniela Bertolin', rotuloProdutor: 'Produtora', variedade: 'Geisha', regiao: 'Média Mogiana', ...base },
 ];
 
 /** Cafés iniciais sem o campo interno `desde`. */

@@ -87,6 +87,9 @@
       <label>Nome do café (título)<input name="nome" type="text" maxlength="80"></label>
       <label>Notas sensoriais<input name="notas" type="text" maxlength="160"></label>
       <label>Produtor<input name="produtor" type="text" maxlength="80"></label>
+      <label>Título do campo produtor<input name="rotuloProdutor" type="text" list="rotulos-produtor" maxlength="20" placeholder="Produtor">
+        <small>Como o campo aparece no rótulo. Deixe vazio para "Produtor"; use "Produtora" quando for o caso.</small></label>
+      <datalist id="rotulos-produtor"><option value="Produtor"><option value="Produtora"><option value="Produtores"><option value="Produtoras"></datalist>
       <label>Variedade<input name="variedade" type="text" maxlength="80"></label>
       <label>Região<input name="regiao" type="text" maxlength="80"></label>
       <label>Espécie<input name="especie" type="text" list="especies" maxlength="40" value="100% Arábica"></label>

@@ -17,6 +17,7 @@ export function sanitizeCafe(raw: Partial<CafeInput>): CafeInput {
     nome,
     notas: str(raw.notas),
     produtor: str(raw.produtor),
+    rotuloProdutor: str(raw.rotuloProdutor),
     variedade: str(raw.variedade),
     regiao: str(raw.regiao),
     especie: str(raw.especie),

@@ -6,6 +6,7 @@ export interface Cafe {
   nome: string;
   notas: string;
   produtor: string;
+  rotuloProdutor?: string;
   variedade: string;
   regiao: string;
   especie: string;
@@ -124,6 +125,7 @@ export function sanitizeCafe(raw: Partial<CafeInput>): CafeInput {
     nome,
     notas: str(raw.notas),
     produtor: str(raw.produtor),
+    rotuloProdutor: str(raw.rotuloProdutor),
     variedade: str(raw.variedade),
     regiao: str(raw.regiao),
     especie: str(raw.especie),

@@ -162,12 +162,12 @@ $('lista-cafes').addEventListener('click', (ev) => {
     renderCafes();
   }
 });
-const CAMPOS = ['nome', 'notas', 'produtor', 'variedade', 'regiao', 'especie', 'torra'] as const;
+const CAMPOS = ['nome', 'notas', 'produtor', 'rotuloProdutor', 'variedade', 'regiao', 'especie', 'torra'] as const;
 function openCafe(c: Cafe | null): void {
   editId = c ? c.id : null;
   const f = $('form-cafe') as HTMLFormElement;
   $('dlg-titulo').textContent = c ? 'Editar café' : 'Novo café';
-  for (const k of CAMPOS) (f.elements.namedItem(k) as HTMLInputElement).value = c ? c[k] : k === 'especie' ? '100% Arábica' : '';
+  for (const k of CAMPOS) (f.elements.namedItem(k) as HTMLInputElement).value = c ? (c[k] ?? '') : k === 'especie' ? '100% Arábica' : '';
   (f.elements.namedItem('ativo') as HTMLInputElement).checked = c ? c.ativo : true;
   $('erro-cafe').textContent = '';
   ($('dlg-cafe') as HTMLDialogElement).showModal();

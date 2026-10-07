@@ -146,6 +146,9 @@ dialog::backdrop { background:#0007; }
       <label>Nome do café (título)<input name="nome" type="text" maxlength="80"></label>
       <label>Notas sensoriais<input name="notas" type="text" maxlength="160"></label>
       <label>Produtor<input name="produtor" type="text" maxlength="80"></label>
+      <label>Título do campo produtor<input name="rotuloProdutor" type="text" list="rotulos-produtor" maxlength="20" placeholder="Produtor">
+        <small>Como o campo aparece no rótulo. Deixe vazio para "Produtor"; use "Produtora" quando for o caso.</small></label>
+      <datalist id="rotulos-produtor"><option value="Produtor"><option value="Produtora"><option value="Produtores"><option value="Produtoras"></datalist>
       <label>Variedade<input name="variedade" type="text" maxlength="80"></label>
       <label>Região<input name="regiao" type="text" maxlength="80"></label>
       <label>Espécie<input name="especie" type="text" list="especies" maxlength="40" value="100% Arábica"></label>
@@ -306,7 +309,7 @@ dialog::backdrop { background:#0007; }
     ops.push({ t: "rule", y: rule1 });
     const fields = [
       ["Notas sensoriais:", c.notas],
-      ["Produtor:", c.produtor],
+      [`${c.rotuloProdutor?.trim() || "Produtor"}:`, c.produtor],
       ["Variedade:", c.variedade],
       ["Regi\xE3o:", c.regiao]
     ];
@@ -608,7 +611,7 @@ dialog::backdrop { background:#0007; }
   }
 
   // src/core/label/cafes-iniciais.ts
-  var SEED_VERSION = 3;
+  var SEED_VERSION = 4;
   var base = { especie: "100% Ar\xE1bica", torra: "Torra m\xE9dia", ativo: true };
   var blendNotas = "Calda de pudim, a\xE7\xFAcar mascavo, frutas amarelas e frutas vermelhas";
   var CAFES_INICIAIS = [
@@ -624,7 +627,14 @@ dialog::backdrop { background:#0007; }
     { id: "doce-cerrado", desde: 3, nome: "Doce Cerrado", notas: "Melado e am\xEAndoas", produtor: "Marcelo Urtado", variedade: "Top\xE1zio", regiao: "Cerrado Mineiro", ...base },
     // mesmo título do anterior, só muda o nível de torra
     { id: "doce-cerrado-media-clara", desde: 3, nome: "Doce Cerrado", notas: "Melado e am\xEAndoas", produtor: "Marcelo Urtado", variedade: "Top\xE1zio", regiao: "Cerrado Mineiro", ...base, torra: "Torra m\xE9dia clara" },
-    { id: "fermentado-cacau", desde: 3, nome: "Fermentado Cacau", notas: "Nibs de cacau e anis", produtor: "Fazenda Lagoinha", variedade: "Catua\xED amarelo", regiao: "Sul de Minas", ...base }
+    { id: "fermentado-cacau", desde: 3, nome: "Fermentado Cacau", notas: "Nibs de cacau e anis", produtor: "Fazenda Lagoinha", variedade: "Catua\xED amarelo", regiao: "Sul de Minas", ...base },
+    // versão 4
+    { id: "moca-arara", desde: 4, nome: "Moca Arara", notas: "Bergamota e caramelo", produtor: "Lu\xEDs Sordi", variedade: "Arara, Tipo Moca", regiao: "M\xE9dia Mogiana", ...base },
+    { id: "mundo-novo", desde: 4, nome: "Mundo Novo", notas: "Caramelo e cereais", produtor: "Irm\xE3os Riccetto", variedade: "Mundo Novo", regiao: "M\xE9dia Mogiana", ...base },
+    { id: "paulista-amarelo", desde: 4, nome: "Paulista Amarelo", notas: "Calda de pudim e frutas vermelhas", produtor: "Irm\xE3os Riccetto", variedade: "Catua\xED amarelo", regiao: "M\xE9dia Mogiana", ...base },
+    { id: "fermentado-framboesa", desde: 4, nome: "Fermentado Framboesa", notas: "Whisky e framboesa", produtor: "Fazenda Lagoinha", variedade: "Catua\xED amarelo", regiao: "Sul de Minas", ...base },
+    // no rótulo deste café o campo se chama "Produtora"
+    { id: "geisha", desde: 4, nome: "Geisha", notas: "Flor de laranjeira e mel", produtor: "Daniela Bertolin", rotuloProdutor: "Produtora", variedade: "Geisha", regiao: "M\xE9dia Mogiana", ...base }
   ];
   var semDesde = (c) => {
     const { desde: _desde, ...cafe } = c;
@@ -712,6 +722,7 @@ dialog::backdrop { background:#0007; }
       nome,
       notas: str(raw.notas),
       produtor: str(raw.produtor),
+      rotuloProdutor: str(raw.rotuloProdutor),
       variedade: str(raw.variedade),
       regiao: str(raw.regiao),
       especie: str(raw.especie),
@@ -907,12 +918,12 @@ dialog::backdrop { background:#0007; }
       renderCafes();
     }
   });
-  var CAMPOS = ["nome", "notas", "produtor", "variedade", "regiao", "especie", "torra"];
+  var CAMPOS = ["nome", "notas", "produtor", "rotuloProdutor", "variedade", "regiao", "especie", "torra"];
   function openCafe(c) {
     editId = c ? c.id : null;
     const f = $("form-cafe");
     $("dlg-titulo").textContent = c ? "Editar caf\xE9" : "Novo caf\xE9";
-    for (const k of CAMPOS) f.elements.namedItem(k).value = c ? c[k] : k === "especie" ? "100% Ar\xE1bica" : "";
+    for (const k of CAMPOS) f.elements.namedItem(k).value = c ? c[k] ?? "" : k === "especie" ? "100% Ar\xE1bica" : "";
     f.elements.namedItem("ativo").checked = c ? c.ativo : true;
     $("erro-cafe").textContent = "";
     $("dlg-cafe").showModal();

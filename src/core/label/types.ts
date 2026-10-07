@@ -4,6 +4,8 @@ export interface Cafe {
   nome: string;
   notas: string;
   produtor: string;
+  /** Como o campo aparece no rótulo: "Produtor" (padrão), "Produtora"... */
+  rotuloProdutor?: string;
   variedade: string;
   regiao: string;
   especie: string;
