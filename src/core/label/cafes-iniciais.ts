@@ -5,7 +5,7 @@ import type { Cafe } from './types.js';
  * quem já usava o app recebe só os que entraram depois (sem recriar um café que apagou).
  * Para acrescentar cafés no futuro: coloque no fim com `desde` = SEED_VERSION + 1 e aumente SEED_VERSION.
  */
-export const SEED_VERSION = 4;
+export const SEED_VERSION = 5;
 
 export type CafeInicial = Cafe & { desde: number };
 
@@ -33,6 +33,11 @@ export const CAFES_INICIAIS: CafeInicial[] = [
   { id: 'fermentado-framboesa', desde: 4, nome: 'Fermentado Framboesa', notas: 'Whisky e framboesa', produtor: 'Fazenda Lagoinha', variedade: 'Catuaí amarelo', regiao: 'Sul de Minas', ...base },
   // no rótulo deste café o campo se chama "Produtora"
   { id: 'geisha', desde: 4, nome: 'Geisha', notas: 'Flor de laranjeira e mel', produtor: 'Daniela Bertolin', rotuloProdutor: 'Produtora', variedade: 'Geisha', regiao: 'Média Mogiana', ...base },
+  // versão 5
+  { id: 'laurina', desde: 5, nome: 'Laurina', notas: 'Mel e frutas amarelas', produtor: 'Fazenda São Gabriel', variedade: 'Laurina', regiao: 'Sul de Minas', ...base },
+  { id: 'paulista-vermelho', desde: 5, nome: 'Paulista Vermelho', notas: 'Açúcar mascavo e frutas amarelas', produtor: 'Irmãos Riccetto', variedade: 'Catuaí vermelho', regiao: 'Média Mogiana', ...base },
+  { id: 'topazio-fermentado', desde: 5, nome: 'Topázio Fermentado', notas: 'Limão cravo e especiarias', produtor: 'Marcelo Urtado', variedade: 'Topázio', regiao: 'Cerrado Mineiro', ...base },
+  { id: 'topazio', desde: 5, nome: 'Topázio', notas: 'Baunilha, abacaxi, mel e laranja', produtor: 'Marcelo Urtado', variedade: 'Topázio', regiao: 'Cerrado Mineiro', ...base },
 ];
 
 /** Cafés iniciais sem o campo interno `desde`. */

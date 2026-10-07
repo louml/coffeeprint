@@ -611,7 +611,7 @@ dialog::backdrop { background:#0007; }
   }
 
   // src/core/label/cafes-iniciais.ts
-  var SEED_VERSION = 4;
+  var SEED_VERSION = 5;
   var base = { especie: "100% Ar\xE1bica", torra: "Torra m\xE9dia", ativo: true };
   var blendNotas = "Calda de pudim, a\xE7\xFAcar mascavo, frutas amarelas e frutas vermelhas";
   var CAFES_INICIAIS = [
@@ -634,7 +634,12 @@ dialog::backdrop { background:#0007; }
     { id: "paulista-amarelo", desde: 4, nome: "Paulista Amarelo", notas: "Calda de pudim e frutas vermelhas", produtor: "Irm\xE3os Riccetto", variedade: "Catua\xED amarelo", regiao: "M\xE9dia Mogiana", ...base },
     { id: "fermentado-framboesa", desde: 4, nome: "Fermentado Framboesa", notas: "Whisky e framboesa", produtor: "Fazenda Lagoinha", variedade: "Catua\xED amarelo", regiao: "Sul de Minas", ...base },
     // no rótulo deste café o campo se chama "Produtora"
-    { id: "geisha", desde: 4, nome: "Geisha", notas: "Flor de laranjeira e mel", produtor: "Daniela Bertolin", rotuloProdutor: "Produtora", variedade: "Geisha", regiao: "M\xE9dia Mogiana", ...base }
+    { id: "geisha", desde: 4, nome: "Geisha", notas: "Flor de laranjeira e mel", produtor: "Daniela Bertolin", rotuloProdutor: "Produtora", variedade: "Geisha", regiao: "M\xE9dia Mogiana", ...base },
+    // versão 5
+    { id: "laurina", desde: 5, nome: "Laurina", notas: "Mel e frutas amarelas", produtor: "Fazenda S\xE3o Gabriel", variedade: "Laurina", regiao: "Sul de Minas", ...base },
+    { id: "paulista-vermelho", desde: 5, nome: "Paulista Vermelho", notas: "A\xE7\xFAcar mascavo e frutas amarelas", produtor: "Irm\xE3os Riccetto", variedade: "Catua\xED vermelho", regiao: "M\xE9dia Mogiana", ...base },
+    { id: "topazio-fermentado", desde: 5, nome: "Top\xE1zio Fermentado", notas: "Lim\xE3o cravo e especiarias", produtor: "Marcelo Urtado", variedade: "Top\xE1zio", regiao: "Cerrado Mineiro", ...base },
+    { id: "topazio", desde: 5, nome: "Top\xE1zio", notas: "Baunilha, abacaxi, mel e laranja", produtor: "Marcelo Urtado", variedade: "Top\xE1zio", regiao: "Cerrado Mineiro", ...base }
   ];
   var semDesde = (c) => {
     const { desde: _desde, ...cafe } = c;

@@ -13,7 +13,7 @@ class FakeStorage {
 test('web: vem com o café da imagem e persiste entre "reaberturas" do navegador', () => {
   const store = new FakeStorage();
   const a = new CafeBook(new BrowserRepository(store));
-  assert.deepEqual(a.list().map((c) => c.nome), ['Arara da Mogiana', 'Blend Imperador', 'Blend Dois Catuaís', 'Bourbon Vermelho', 'Campeão', 'Catuaí da Mogiana', 'Catucaí', 'Doce Cerrado', 'Doce Cerrado', 'Fermentado Cacau', 'Moca Arara', 'Mundo Novo', 'Paulista Amarelo', 'Fermentado Framboesa', 'Geisha']);
+  assert.deepEqual(a.list().map((c) => c.nome), ['Arara da Mogiana', 'Blend Imperador', 'Blend Dois Catuaís', 'Bourbon Vermelho', 'Campeão', 'Catuaí da Mogiana', 'Catucaí', 'Doce Cerrado', 'Doce Cerrado', 'Fermentado Cacau', 'Moca Arara', 'Mundo Novo', 'Paulista Amarelo', 'Fermentado Framboesa', 'Geisha', 'Laurina', 'Paulista Vermelho', 'Topázio Fermentado', 'Topázio']);
   const novo = a.create({ nome: 'Catuaí', notas: 'Mel' });
   const b = new CafeBook(new BrowserRepository(store));
   assert.ok(b.get(novo.id));
@@ -28,7 +28,7 @@ test('web: sem armazenamento o app continua funcionando (só não lembra)', () =
   assert.equal(repo.persistent, false);
   const book = new CafeBook(repo);
   book.create({ nome: 'Teste' });
-  assert.equal(book.list().length, 16);
+  assert.equal(book.list().length, 20);
 });
 
 test('web: cópia de segurança vai e volta; arquivo inválido é recusado', () => {
@@ -40,7 +40,7 @@ test('web: cópia de segurança vai e volta; arquivo inválido é recusado', () 
   const destino = new BrowserRepository(new FakeStorage());
   importBackup(destino, backup);
   assert.equal(destino.listCafes().at(-1).nome, 'Bourbon');
-  assert.equal(destino.listCafes().length, 16);
+  assert.equal(destino.listCafes().length, 20);
   assert.equal(destino.getConfig().rotacao, 90);
   assert.throws(() => importBackup(destino, { qualquer: 'coisa' }), /cópia de segurança/);
   assert.throws(() => importBackup(destino, null), /cópia de segurança/);
@@ -75,13 +75,13 @@ test('web: quem já usava o app recebe os cafés novos sem perder nem recriar na
   ]));
   const repo = new BrowserRepository(store);
   const nomes = repo.listCafes().map((c) => c.nome);
-  assert.equal(nomes.length, 16);
+  assert.equal(nomes.length, 20);
   assert.deepEqual(nomes.slice(0, 3), ['Arara (editada)', 'Meu café', 'Blend Imperador']);
   assert.equal(repo.listCafes().find((c) => c.id === 'meu-cafe').ativo, false);
   // depois da migração, o que o usuário apagar fica apagado
   new CafeBook(repo).remove('campeao');
   assert.equal(new BrowserRepository(store).listCafes().some((c) => c.id === 'campeao'), false);
-  assert.equal(new BrowserRepository(store).listCafes().length, 15);
+  assert.equal(new BrowserRepository(store).listCafes().length, 19);
 });
 
 test('web: quem tinha apagado a Arara não a recebe de volta', () => {
@@ -94,15 +94,15 @@ test('web: quem tinha apagado a Arara não a recebe de volta', () => {
 
 test('web: de qualquer versão anterior da lista, o usuário recebe só os cafés que faltam, sem duplicar', async () => {
   const { CAFES_INICIAIS, SEED_VERSION } = await import('../site/js/core/label/cafes-iniciais.js');
-  assert.equal(CAFES_INICIAIS.length, 15);
+  assert.equal(CAFES_INICIAIS.length, 19);
   for (let v = 1; v < SEED_VERSION; v++) {
     const store = new FakeStorage();
     const tinha = CAFES_INICIAIS.filter((c) => c.desde <= v).map(({ desde, ...c }) => c);
     store.setItem('torralocal.cafes.v1', JSON.stringify(tinha));
     if (v > 1) store.setItem('torralocal.seed.v1', String(v));
     const ids = new BrowserRepository(store).listCafes().map((c) => c.id);
-    assert.equal(ids.length, 15, `da versão ${v}`);
-    assert.equal(new Set(ids).size, 15, `sem duplicados, da versão ${v}`);
+    assert.equal(ids.length, 19, `da versão ${v}`);
+    assert.equal(new Set(ids).size, 19, `sem duplicados, da versão ${v}`);
   }
 });
 
