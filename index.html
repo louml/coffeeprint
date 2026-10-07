@@ -598,9 +598,17 @@ dialog::backdrop { background:#0007; }
     const { id: _id, ativo: _ativo, ...cafe } = p.cafe;
     return { cafe, cliente: p.cliente.trim(), peso: p.peso, moagem: p.moagem, dataTorra: p.dataTorra ? formatDate(p.dataTorra) : "" };
   }
+  function ordenarCafes(lista) {
+    return [...lista].sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR") || a.torra.localeCompare(b.torra, "pt-BR"));
+  }
+  function textoNaLista(cafe, todos) {
+    const igual = (n) => n.trim().toLocaleLowerCase("pt-BR");
+    const repetido = todos.some((c) => c.id !== cafe.id && igual(c.nome) === igual(cafe.nome));
+    return repetido && cafe.torra ? `${cafe.nome} (${cafe.torra})` : cafe.nome;
+  }
 
   // src/core/label/cafes-iniciais.ts
-  var SEED_VERSION = 2;
+  var SEED_VERSION = 3;
   var base = { especie: "100% Ar\xE1bica", torra: "Torra m\xE9dia", ativo: true };
   var blendNotas = "Calda de pudim, a\xE7\xFAcar mascavo, frutas amarelas e frutas vermelhas";
   var CAFES_INICIAIS = [
@@ -609,7 +617,14 @@ dialog::backdrop { background:#0007; }
     { id: "blend-imperador", desde: 2, nome: "Blend Imperador", notas: blendNotas, produtor: "Mauro Riccetto e Marcos Riccetto", variedade: "Catua\xED Amarelo e Catua\xED da Mogiana", regiao: "M\xE9dia Mogiana", ...base },
     { id: "blend-dois-catuais", desde: 2, nome: "Blend Dois Catua\xEDs", notas: blendNotas, produtor: "Irm\xE3os Riccetto e Mauro Riccetto", variedade: "Catua\xED Vermelho e Catua\xED Amarelo", regiao: "M\xE9dia Mogiana", ...base },
     { id: "bourbon-vermelho", desde: 2, nome: "Bourbon Vermelho", notas: "Melado e frutas silvestres", produtor: "Sandra Momoeda", variedade: "Bourbon", regiao: "Serra da Mantiqueira", ...base },
-    { id: "campeao", desde: 2, nome: "Campe\xE3o", notas: "Melado e chocolate", produtor: "Marcelo Urtado", variedade: "Top\xE1zio", regiao: "Cerrado Mineiro", ...base }
+    { id: "campeao", desde: 2, nome: "Campe\xE3o", notas: "Melado e chocolate", produtor: "Marcelo Urtado", variedade: "Top\xE1zio", regiao: "Cerrado Mineiro", ...base },
+    // versão 3
+    { id: "catuai-da-mogiana", desde: 3, nome: "Catua\xED da Mogiana", notas: "Chocolate amargo e damasco", produtor: "Irm\xE3os Riccetto", variedade: "Catua\xED amarelo", regiao: "M\xE9dia Mogiana", ...base },
+    { id: "catucai", desde: 3, nome: "Catuca\xED", notas: "Caramelo e maracuj\xE1", produtor: "Sandra Momoeda", variedade: "Catuca\xED amarelo", regiao: "Serra da Mantiqueira", ...base },
+    { id: "doce-cerrado", desde: 3, nome: "Doce Cerrado", notas: "Melado e am\xEAndoas", produtor: "Marcelo Urtado", variedade: "Top\xE1zio", regiao: "Cerrado Mineiro", ...base },
+    // mesmo título do anterior, só muda o nível de torra
+    { id: "doce-cerrado-media-clara", desde: 3, nome: "Doce Cerrado", notas: "Melado e am\xEAndoas", produtor: "Marcelo Urtado", variedade: "Top\xE1zio", regiao: "Cerrado Mineiro", ...base, torra: "Torra m\xE9dia clara" },
+    { id: "fermentado-cacau", desde: 3, nome: "Fermentado Cacau", notas: "Nibs de cacau e anis", produtor: "Fazenda Lagoinha", variedade: "Catua\xED amarelo", regiao: "Sul de Minas", ...base }
   ];
   var semDesde = (c) => {
     const { desde: _desde, ...cafe } = c;
@@ -781,8 +796,8 @@ dialog::backdrop { background:#0007; }
   }
   function loadCafes() {
     const atual = val("cafe");
-    const ativos = book.list().filter((c) => c.ativo);
-    $("cafe").innerHTML = '<option value="">Escolha\u2026</option>' + ativos.map((c) => `<option value="${esc(c.id)}">${esc(c.nome)}</option>`).join("");
+    const ativos = ordenarCafes(book.list().filter((c) => c.ativo));
+    $("cafe").innerHTML = '<option value="">Escolha\u2026</option>' + ativos.map((c) => `<option value="${esc(c.id)}">${esc(textoNaLista(c, ativos))}</option>`).join("");
     if (ativos.some((c) => c.id === atual)) $("cafe").value = atual;
     else if (ativos.length === 1) $("cafe").value = ativos[0].id;
     refreshPreview();
@@ -865,11 +880,11 @@ dialog::backdrop { background:#0007; }
   });
   var editId = null;
   function renderCafes() {
-    const lista = book.list();
+    const lista = ordenarCafes(book.list());
     $("lista-cafes").innerHTML = lista.map(
       (c) => `
       <div class="cafe-item ${c.ativo ? "" : "inativo"}">
-        <div class="info"><strong>${esc(c.nome)}</strong>${c.ativo ? "" : '<span class="tag">Inativo</span>'}
+        <div class="info"><strong>${esc(textoNaLista(c, lista))}</strong>${c.ativo ? "" : '<span class="tag">Inativo</span>'}
           <small>${esc([c.notas, c.produtor, c.regiao].filter(Boolean).join(" \xB7 "))}</small></div>
         <button data-act="edit" data-id="${esc(c.id)}">Editar</button>
         <button data-act="toggle" data-id="${esc(c.id)}">${c.ativo ? "Desativar" : "Ativar"}</button>

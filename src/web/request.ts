@@ -32,3 +32,18 @@ export function dadosDoPedido(p: Pedido): DadosRotulo | null {
   const { id: _id, ativo: _ativo, ...cafe } = p.cafe;
   return { cafe, cliente: p.cliente.trim(), peso: p.peso, moagem: p.moagem, dataTorra: p.dataTorra ? formatDate(p.dataTorra) : '' };
 }
+
+/** Cafés em ordem alfabética (e, no mesmo nome, por torra). */
+export function ordenarCafes<T extends Pick<Cafe, 'nome' | 'torra'>>(lista: T[]): T[] {
+  return [...lista].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR') || a.torra.localeCompare(b.torra, 'pt-BR'));
+}
+
+/**
+ * Texto de cada café na lista da tela. Cafés com o mesmo nome (por exemplo, o mesmo café em duas torras)
+ * recebem a torra entre parênteses para poderem ser distinguidos. O que é impresso no rótulo não muda.
+ */
+export function textoNaLista(cafe: Pick<Cafe, 'id' | 'nome' | 'torra'>, todos: Array<Pick<Cafe, 'id' | 'nome'>>): string {
+  const igual = (n: string) => n.trim().toLocaleLowerCase('pt-BR');
+  const repetido = todos.some((c) => c.id !== cafe.id && igual(c.nome) === igual(cafe.nome));
+  return repetido && cafe.torra ? `${cafe.nome} (${cafe.torra})` : cafe.nome;
+}

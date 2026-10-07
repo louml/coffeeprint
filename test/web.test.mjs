@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { BrowserRepository, CafeBook, exportBackup, importBackup } from '../site/js/web/storage.js';
-import { camposFaltando, dadosDoPedido } from '../site/js/web/request.js';
+import { camposFaltando, dadosDoPedido, ordenarCafes, textoNaLista } from '../site/js/web/request.js';
 
 class FakeStorage {
   m = new Map();
@@ -13,7 +13,7 @@ class FakeStorage {
 test('web: vem com o café da imagem e persiste entre "reaberturas" do navegador', () => {
   const store = new FakeStorage();
   const a = new CafeBook(new BrowserRepository(store));
-  assert.deepEqual(a.list().map((c) => c.nome), ['Arara da Mogiana', 'Blend Imperador', 'Blend Dois Catuaís', 'Bourbon Vermelho', 'Campeão']);
+  assert.deepEqual(a.list().map((c) => c.nome), ['Arara da Mogiana', 'Blend Imperador', 'Blend Dois Catuaís', 'Bourbon Vermelho', 'Campeão', 'Catuaí da Mogiana', 'Catucaí', 'Doce Cerrado', 'Doce Cerrado', 'Fermentado Cacau']);
   const novo = a.create({ nome: 'Catuaí', notas: 'Mel' });
   const b = new CafeBook(new BrowserRepository(store));
   assert.ok(b.get(novo.id));
@@ -28,7 +28,7 @@ test('web: sem armazenamento o app continua funcionando (só não lembra)', () =
   assert.equal(repo.persistent, false);
   const book = new CafeBook(repo);
   book.create({ nome: 'Teste' });
-  assert.equal(book.list().length, 6);
+  assert.equal(book.list().length, 11);
 });
 
 test('web: cópia de segurança vai e volta; arquivo inválido é recusado', () => {
@@ -40,7 +40,7 @@ test('web: cópia de segurança vai e volta; arquivo inválido é recusado', () 
   const destino = new BrowserRepository(new FakeStorage());
   importBackup(destino, backup);
   assert.equal(destino.listCafes().at(-1).nome, 'Bourbon');
-  assert.equal(destino.listCafes().length, 6);
+  assert.equal(destino.listCafes().length, 11);
   assert.equal(destino.getConfig().rotacao, 90);
   assert.throws(() => importBackup(destino, { qualquer: 'coisa' }), /cópia de segurança/);
   assert.throws(() => importBackup(destino, null), /cópia de segurança/);
@@ -75,12 +75,13 @@ test('web: quem já usava o app recebe os cafés novos sem perder nem recriar na
   ]));
   const repo = new BrowserRepository(store);
   const nomes = repo.listCafes().map((c) => c.nome);
-  assert.deepEqual(nomes, ['Arara (editada)', 'Meu café', 'Blend Imperador', 'Blend Dois Catuaís', 'Bourbon Vermelho', 'Campeão']);
+  assert.equal(nomes.length, 11);
+  assert.deepEqual(nomes.slice(0, 3), ['Arara (editada)', 'Meu café', 'Blend Imperador']);
   assert.equal(repo.listCafes().find((c) => c.id === 'meu-cafe').ativo, false);
   // depois da migração, o que o usuário apagar fica apagado
   new CafeBook(repo).remove('campeao');
   assert.equal(new BrowserRepository(store).listCafes().some((c) => c.id === 'campeao'), false);
-  assert.equal(new BrowserRepository(store).listCafes().length, 5);
+  assert.equal(new BrowserRepository(store).listCafes().length, 10);
 });
 
 test('web: quem tinha apagado a Arara não a recebe de volta', () => {
@@ -89,4 +90,24 @@ test('web: quem tinha apagado a Arara não a recebe de volta', () => {
   const ids = new BrowserRepository(store).listCafes().map((c) => c.id);
   assert.equal(ids.includes('arara-da-mogiana'), false);
   assert.equal(ids.includes('blend-imperador'), true);
+});
+
+test('web: quem está na versão 2 da lista recebe só os cafés da versão 3', () => {
+  const store = new FakeStorage();
+  const antes = new BrowserRepository(new FakeStorage()); // gera a lista completa e depois "volta no tempo"
+  const v2 = antes.listCafes().filter((c) => !['catuai-da-mogiana', 'catucai', 'doce-cerrado', 'doce-cerrado-media-clara', 'fermentado-cacau'].includes(c.id));
+  assert.equal(v2.length, 5);
+  store.setItem('torralocal.cafes.v1', JSON.stringify(v2));
+  store.setItem('torralocal.seed.v1', '2');
+  const ids = new BrowserRepository(store).listCafes().map((c) => c.id);
+  assert.equal(ids.length, 10);
+  assert.equal(new Set(ids).size, 10);
+});
+
+test('web: cafés de mesmo nome se distinguem pela torra na lista e a lista é ordenada', () => {
+  const lista = new BrowserRepository(new FakeStorage()).listCafes();
+  const medias = lista.filter((c) => c.nome === 'Doce Cerrado');
+  assert.deepEqual(medias.map((c) => textoNaLista(c, lista)).sort(), ['Doce Cerrado (Torra média clara)', 'Doce Cerrado (Torra média)']);
+  assert.equal(textoNaLista(lista.find((c) => c.id === 'campeao'), lista), 'Campeão');
+  assert.deepEqual(ordenarCafes(lista).slice(0, 3).map((c) => c.nome), ['Arara da Mogiana', 'Blend Dois Catuaís', 'Blend Imperador']);
 });

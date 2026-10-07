@@ -5,7 +5,7 @@ import type { Cafe } from './types.js';
  * quem já usava o app recebe só os que entraram depois (sem recriar um café que apagou).
  * Para acrescentar cafés no futuro: coloque no fim com `desde` = SEED_VERSION + 1 e aumente SEED_VERSION.
  */
-export const SEED_VERSION = 2;
+export const SEED_VERSION = 3;
 
 export type CafeInicial = Cafe & { desde: number };
 
@@ -19,6 +19,13 @@ export const CAFES_INICIAIS: CafeInicial[] = [
   { id: 'blend-dois-catuais', desde: 2, nome: 'Blend Dois Catuaís', notas: blendNotas, produtor: 'Irmãos Riccetto e Mauro Riccetto', variedade: 'Catuaí Vermelho e Catuaí Amarelo', regiao: 'Média Mogiana', ...base },
   { id: 'bourbon-vermelho', desde: 2, nome: 'Bourbon Vermelho', notas: 'Melado e frutas silvestres', produtor: 'Sandra Momoeda', variedade: 'Bourbon', regiao: 'Serra da Mantiqueira', ...base },
   { id: 'campeao', desde: 2, nome: 'Campeão', notas: 'Melado e chocolate', produtor: 'Marcelo Urtado', variedade: 'Topázio', regiao: 'Cerrado Mineiro', ...base },
+  // versão 3
+  { id: 'catuai-da-mogiana', desde: 3, nome: 'Catuaí da Mogiana', notas: 'Chocolate amargo e damasco', produtor: 'Irmãos Riccetto', variedade: 'Catuaí amarelo', regiao: 'Média Mogiana', ...base },
+  { id: 'catucai', desde: 3, nome: 'Catucaí', notas: 'Caramelo e maracujá', produtor: 'Sandra Momoeda', variedade: 'Catucaí amarelo', regiao: 'Serra da Mantiqueira', ...base },
+  { id: 'doce-cerrado', desde: 3, nome: 'Doce Cerrado', notas: 'Melado e amêndoas', produtor: 'Marcelo Urtado', variedade: 'Topázio', regiao: 'Cerrado Mineiro', ...base },
+  // mesmo título do anterior, só muda o nível de torra
+  { id: 'doce-cerrado-media-clara', desde: 3, nome: 'Doce Cerrado', notas: 'Melado e amêndoas', produtor: 'Marcelo Urtado', variedade: 'Topázio', regiao: 'Cerrado Mineiro', ...base, torra: 'Torra média clara' },
+  { id: 'fermentado-cacau', desde: 3, nome: 'Fermentado Cacau', notas: 'Nibs de cacau e anis', produtor: 'Fazenda Lagoinha', variedade: 'Catuaí amarelo', regiao: 'Sul de Minas', ...base },
 ];
 
 /** Cafés iniciais sem o campo interno `desde`. */

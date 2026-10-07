@@ -3,7 +3,7 @@ import type { Rotacao } from '../core/label/rotate.js';
 import type { Bitmap1bpp, DadosRotulo } from '../core/label/types.js';
 import { drawBitmap, loadFonts, renderLabel } from './env.js';
 import { baixarPng, imprimir } from './print.js';
-import { camposFaltando, dadosDoPedido, type Pedido } from './request.js';
+import { camposFaltando, dadosDoPedido, ordenarCafes, textoNaLista, type Pedido } from './request.js';
 import { BrowserRepository, CafeBook, exportBackup, importBackup, type Cafe } from './storage.js';
 
 const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
@@ -41,8 +41,8 @@ function pedido(): Pedido {
 
 function loadCafes(): void {
   const atual = val('cafe');
-  const ativos = book.list().filter((c) => c.ativo);
-  $('cafe').innerHTML = '<option value="">Escolha…</option>' + ativos.map((c) => `<option value="${esc(c.id)}">${esc(c.nome)}</option>`).join('');
+  const ativos = ordenarCafes(book.list().filter((c) => c.ativo));
+  $('cafe').innerHTML = '<option value="">Escolha…</option>' + ativos.map((c) => `<option value="${esc(c.id)}">${esc(textoNaLista(c, ativos))}</option>`).join('');
   if (ativos.some((c) => c.id === atual)) ($('cafe') as HTMLSelectElement).value = atual;
   else if (ativos.length === 1) ($('cafe') as HTMLSelectElement).value = ativos[0].id;
   refreshPreview();
@@ -132,13 +132,13 @@ $('form').addEventListener('submit', async (ev) => {
 // ---------- cadastro de cafés
 let editId: string | null = null;
 function renderCafes(): void {
-  const lista = book.list();
+  const lista = ordenarCafes(book.list());
   $('lista-cafes').innerHTML =
     lista
       .map(
         (c) => `
       <div class="cafe-item ${c.ativo ? '' : 'inativo'}">
-        <div class="info"><strong>${esc(c.nome)}</strong>${c.ativo ? '' : '<span class="tag">Inativo</span>'}
+        <div class="info"><strong>${esc(textoNaLista(c, lista))}</strong>${c.ativo ? '' : '<span class="tag">Inativo</span>'}
           <small>${esc([c.notas, c.produtor, c.regiao].filter(Boolean).join(' · '))}</small></div>
         <button data-act="edit" data-id="${esc(c.id)}">Editar</button>
         <button data-act="toggle" data-id="${esc(c.id)}">${c.ativo ? 'Desativar' : 'Ativar'}</button>
