@@ -1,3 +1,4 @@
+import { CAFES_INICIAIS, SEED_VERSION, semDesde } from '../core/label/cafes-iniciais.js';
 import type { Rotacao } from '../core/label/rotate.js';
 
 export interface Cafe {
@@ -21,21 +22,12 @@ export interface Config {
   rotacao: Rotacao;
 }
 
-export const CAFE_SEED: Cafe = {
-  id: 'arara-da-mogiana',
-  nome: 'Arara da Mogiana',
-  notas: 'Ameixa e caramelo',
-  produtor: 'Luís Sordi',
-  variedade: 'Arara',
-  regiao: 'Média Mogiana',
-  especie: '100% Arábica',
-  torra: 'Torra média',
-  ativo: true,
-};
+export const CAFE_SEED: Cafe = semDesde(CAFES_INICIAIS[0]);
 export const DEFAULT_CONFIG: Config = { selo: true, modoSemImpressora: false, rotacao: 0 };
 
 const KEY_CAFES = 'torralocal.cafes.v1';
 const KEY_CONFIG = 'torralocal.config.v1';
+const KEY_SEED = 'torralocal.seed.v1';
 
 /**
  * Onde os dados ficam guardados. Hoje: no próprio navegador deste computador.
@@ -77,12 +69,25 @@ export class BrowserRepository implements Repository {
 
   listCafes(): Cafe[] {
     const saved = this.read<Cafe[] | null>(KEY_CAFES, null);
-    if (saved) return saved;
-    this.saveCafes([CAFE_SEED]);
-    return [CAFE_SEED];
+    if (!saved) {
+      const todos = CAFES_INICIAIS.map(semDesde);
+      this.saveCafes(todos);
+      return todos;
+    }
+    // Quem já tinha cafés salvos recebe só os que entraram na lista depois (versão ausente = 1).
+    const versao = this.read<number>(KEY_SEED, 1);
+    if (versao < SEED_VERSION) {
+      const ids = new Set(saved.map((c) => c.id));
+      const novos = CAFES_INICIAIS.filter((c) => c.desde > versao && !ids.has(c.id)).map(semDesde);
+      const lista = [...saved, ...novos];
+      this.saveCafes(lista);
+      return lista;
+    }
+    return saved;
   }
   saveCafes(cafes: Cafe[]): void {
     this.write(KEY_CAFES, cafes);
+    this.write(KEY_SEED, SEED_VERSION); // a lista salva passa a ser a que vale (inclusive ao restaurar um backup)
   }
   getConfig(): Config {
     return { ...DEFAULT_CONFIG, ...this.read<Partial<Config>>(KEY_CONFIG, {}) };

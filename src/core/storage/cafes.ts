@@ -1,21 +1,12 @@
 import { randomUUID } from 'node:crypto';
 import path from 'node:path';
+import { CAFES_INICIAIS, semDesde } from '../label/cafes-iniciais.js';
 import type { Cafe } from '../label/types.js';
 import { readJson, writeJson } from './json-file.js';
 
 export type CafeInput = Omit<Cafe, 'id'>;
 
-export const CAFE_SEED: Cafe = {
-  id: 'arara-da-mogiana',
-  nome: 'Arara da Mogiana',
-  notas: 'Ameixa e caramelo',
-  produtor: 'Luís Sordi',
-  variedade: 'Arara',
-  regiao: 'Média Mogiana',
-  especie: '100% Arábica',
-  torra: 'Torra média',
-  ativo: true,
-};
+export const CAFE_SEED: Cafe = semDesde(CAFES_INICIAIS[0]);
 
 const str = (v: unknown) => (typeof v === 'string' ? v.trim() : '');
 
@@ -41,7 +32,7 @@ export class CafeStore {
   }
 
   private load(): Cafe[] {
-    return readJson<Cafe[]>(this.file, () => [CAFE_SEED]);
+    return readJson<Cafe[]>(this.file, () => CAFES_INICIAIS.map(semDesde));
   }
 
   list(): Cafe[] {

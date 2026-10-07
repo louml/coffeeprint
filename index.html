@@ -599,21 +599,29 @@ dialog::backdrop { background:#0007; }
     return { cafe, cliente: p.cliente.trim(), peso: p.peso, moagem: p.moagem, dataTorra: p.dataTorra ? formatDate(p.dataTorra) : "" };
   }
 
-  // src/web/storage.ts
-  var CAFE_SEED = {
-    id: "arara-da-mogiana",
-    nome: "Arara da Mogiana",
-    notas: "Ameixa e caramelo",
-    produtor: "Lu\xEDs Sordi",
-    variedade: "Arara",
-    regiao: "M\xE9dia Mogiana",
-    especie: "100% Ar\xE1bica",
-    torra: "Torra m\xE9dia",
-    ativo: true
+  // src/core/label/cafes-iniciais.ts
+  var SEED_VERSION = 2;
+  var base = { especie: "100% Ar\xE1bica", torra: "Torra m\xE9dia", ativo: true };
+  var blendNotas = "Calda de pudim, a\xE7\xFAcar mascavo, frutas amarelas e frutas vermelhas";
+  var CAFES_INICIAIS = [
+    { id: "arara-da-mogiana", desde: 1, nome: "Arara da Mogiana", notas: "Ameixa e caramelo", produtor: "Lu\xEDs Sordi", variedade: "Arara", regiao: "M\xE9dia Mogiana", ...base },
+    // Nos blends, as variedades e os produtores estão na mesma ordem (o 1º produtor é da 1ª variedade).
+    { id: "blend-imperador", desde: 2, nome: "Blend Imperador", notas: blendNotas, produtor: "Mauro Riccetto e Marcos Riccetto", variedade: "Catua\xED Amarelo e Catua\xED da Mogiana", regiao: "M\xE9dia Mogiana", ...base },
+    { id: "blend-dois-catuais", desde: 2, nome: "Blend Dois Catua\xEDs", notas: blendNotas, produtor: "Irm\xE3os Riccetto e Mauro Riccetto", variedade: "Catua\xED Vermelho e Catua\xED Amarelo", regiao: "M\xE9dia Mogiana", ...base },
+    { id: "bourbon-vermelho", desde: 2, nome: "Bourbon Vermelho", notas: "Melado e frutas silvestres", produtor: "Sandra Momoeda", variedade: "Bourbon", regiao: "Serra da Mantiqueira", ...base },
+    { id: "campeao", desde: 2, nome: "Campe\xE3o", notas: "Melado e chocolate", produtor: "Marcelo Urtado", variedade: "Top\xE1zio", regiao: "Cerrado Mineiro", ...base }
+  ];
+  var semDesde = (c) => {
+    const { desde: _desde, ...cafe } = c;
+    return cafe;
   };
+
+  // src/web/storage.ts
+  var CAFE_SEED = semDesde(CAFES_INICIAIS[0]);
   var DEFAULT_CONFIG = { selo: true, modoSemImpressora: false, rotacao: 0 };
   var KEY_CAFES = "torralocal.cafes.v1";
   var KEY_CONFIG = "torralocal.config.v1";
+  var KEY_SEED = "torralocal.seed.v1";
   var BrowserRepository = class {
     constructor(store = tryStorage()) {
       this.store = store;
@@ -642,12 +650,24 @@ dialog::backdrop { background:#0007; }
     }
     listCafes() {
       const saved = this.read(KEY_CAFES, null);
-      if (saved) return saved;
-      this.saveCafes([CAFE_SEED]);
-      return [CAFE_SEED];
+      if (!saved) {
+        const todos = CAFES_INICIAIS.map(semDesde);
+        this.saveCafes(todos);
+        return todos;
+      }
+      const versao = this.read(KEY_SEED, 1);
+      if (versao < SEED_VERSION) {
+        const ids = new Set(saved.map((c) => c.id));
+        const novos = CAFES_INICIAIS.filter((c) => c.desde > versao && !ids.has(c.id)).map(semDesde);
+        const lista = [...saved, ...novos];
+        this.saveCafes(lista);
+        return lista;
+      }
+      return saved;
     }
     saveCafes(cafes) {
       this.write(KEY_CAFES, cafes);
+      this.write(KEY_SEED, SEED_VERSION);
     }
     getConfig() {
       return { ...DEFAULT_CONFIG, ...this.read(KEY_CONFIG, {}) };
@@ -923,8 +943,8 @@ dialog::backdrop { background:#0007; }
     aviso($("aviso-config"), "", "Preparando a etiqueta de teste\u2026");
     try {
       const cafe = book.list()[0];
-      const { id: _i, ativo: _a, ...base } = cafe ?? { id: "", ativo: true, nome: "Caf\xE9 de teste", notas: "Chocolate e laranja", produtor: "Produtor", variedade: "Variedade", regiao: "Regi\xE3o", especie: "100% Ar\xE1bica", torra: "Torra m\xE9dia" };
-      const msg = await emitir({ cafe: base, cliente: "ETIQUETA DE TESTE", peso: "250g", moagem: "Gr\xE3o", dataTorra: formatDate(today()) }, 1);
+      const { id: _i, ativo: _a, ...base2 } = cafe ?? { id: "", ativo: true, nome: "Caf\xE9 de teste", notas: "Chocolate e laranja", produtor: "Produtor", variedade: "Variedade", regiao: "Regi\xE3o", especie: "100% Ar\xE1bica", torra: "Torra m\xE9dia" };
+      const msg = await emitir({ cafe: base2, cliente: "ETIQUETA DE TESTE", peso: "250g", moagem: "Gr\xE3o", dataTorra: formatDate(today()) }, 1);
       aviso($("aviso-config"), "ok", "\u2714 " + msg);
     } catch (e) {
       aviso($("aviso-config"), "fail", "\u2716 " + (e instanceof Error ? e.message : "Erro inesperado."));
