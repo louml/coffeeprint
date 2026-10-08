@@ -23,7 +23,10 @@ const aviso = (el: HTMLElement, tipo: '' | 'ok' | 'fail', texto: string) => {
 // ---------- abas
 document.querySelectorAll<HTMLButtonElement>('.tab').forEach((b) =>
   b.addEventListener('click', () => {
-    document.querySelectorAll('.tab').forEach((t) => t.classList.toggle('active', t === b));
+    document.querySelectorAll('.tab').forEach((t) => {
+      t.classList.toggle('active', t === b);
+      t.setAttribute('aria-selected', String(t === b));
+    });
     document.querySelectorAll('.panel').forEach((p) => p.classList.toggle('active', p.id === b.dataset.tab));
     if (b.dataset.tab === 'emitir') loadCafes();
     if (b.dataset.tab === 'cafes') renderCafes();
