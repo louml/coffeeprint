@@ -1,29 +1,26 @@
-import { BOLD, MED, REG, SEMI, renderLabelCore, type RenderEnv } from '../core/label/draw.js';
-import type { Bitmap1bpp, DadosRotulo, OpcoesRotulo } from '../core/label/types.js';
+import { BOLD, MED, REG, SEMI, renderLabelCore, type RenderEnv } from './label/draw.js';
+import type { Bitmap1bpp, DadosRotulo, OpcoesRotulo } from './label/types.js';
 
 /**
- * No arquivo único (index.html aberto direto do disco), fontes e selo vêm embutidos como data URI,
- * porque o navegador bloqueia arquivos externos em páginas abertas via file://.
+ * O app é um arquivo único aberto direto do disco (file://), onde o navegador bloqueia arquivos externos.
+ * Por isso o build (scripts/build.mjs) embute fontes e selo como data URI em window.__ASSETS__.
  */
 interface EmbeddedAssets {
   fonts: Record<string, string>;
   seal: string;
 }
-const embedded = (window as unknown as { __ASSETS__?: EmbeddedAssets }).__ASSETS__;
+const found = (window as unknown as { __ASSETS__?: EmbeddedAssets }).__ASSETS__;
+if (!found) throw new Error('Fontes e selo não foram embutidos. Gere o index.html com "npm run build".');
+const embedded: EmbeddedAssets = found;
 
-const FONTS: Array<[string, string]> = [
-  [REG, 'assets/fonts/inter-latin-400-normal.woff'],
-  [MED, 'assets/fonts/inter-latin-500-normal.woff'],
-  [SEMI, 'assets/fonts/inter-latin-600-normal.woff'],
-  [BOLD, 'assets/fonts/inter-latin-700-normal.woff'],
-];
+const FONT_FAMILIES = [REG, MED, SEMI, BOLD];
 
 let ready: Promise<void> | undefined;
 /** Carrega as fontes do rótulo (empacotadas no site, funcionam sem internet depois do primeiro acesso). */
 export function loadFonts(): Promise<void> {
   ready ??= Promise.all(
-    FONTS.map(async ([family, url]) => {
-      const face = new FontFace(family, `url("${embedded?.fonts[family] ?? url}")`);
+    FONT_FAMILIES.map(async (family) => {
+      const face = new FontFace(family, `url("${embedded.fonts[family]}")`);
       document.fonts.add(await face.load());
     }),
   ).then(() => undefined);
@@ -43,7 +40,7 @@ const env: RenderEnv = {
       const img = new Image();
       img.onload = () => resolve(img);
       img.onerror = () => reject(new Error('Não foi possível carregar o selo.'));
-      img.src = embedded?.seal ?? 'assets/img/selo.jpg';
+      img.src = embedded.seal;
     })),
 };
 

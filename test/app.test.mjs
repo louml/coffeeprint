@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { BrowserRepository, CafeBook, exportBackup, importBackup } from '../site/js/web/storage.js';
-import { camposFaltando, dadosDoPedido, ordenarCafes, textoNaLista } from '../site/js/web/request.js';
+import { BrowserRepository, CafeBook, exportBackup, importBackup } from '../build/storage.js';
+import { camposFaltando, dadosDoPedido, ordenarCafes, textoNaLista } from '../build/request.js';
 
 class FakeStorage {
   m = new Map();
@@ -60,10 +60,10 @@ test('web: validação lista o que falta e monta os dados do rótulo', () => {
 });
 
 test('index.html (arquivo único) está atualizado em relação ao código', async () => {
-  const { buildSingle } = await import('../scripts/single.mjs');
+  const { buildApp } = await import('../scripts/build.mjs');
   const fs = await import('node:fs');
   const atual = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
-  assert.equal(atual, await buildSingle(), 'index.html está desatualizado: rode "npm run build:single" e faça o commit.');
+  assert.equal(atual, await buildApp(), 'index.html está desatualizado: rode "npm run build" e faça o commit.');
 });
 
 test('web: quem já usava o app recebe os cafés novos sem perder nem recriar nada', () => {
@@ -93,7 +93,7 @@ test('web: quem tinha apagado a Arara não a recebe de volta', () => {
 });
 
 test('web: de qualquer versão anterior da lista, o usuário recebe só os cafés que faltam, sem duplicar', async () => {
-  const { CAFES_INICIAIS, SEED_VERSION } = await import('../site/js/core/label/cafes-iniciais.js');
+  const { CAFES_INICIAIS, SEED_VERSION } = await import('../build/label/cafes-iniciais.js');
   assert.equal(CAFES_INICIAIS.length, 19);
   for (let v = 1; v < SEED_VERSION; v++) {
     const store = new FakeStorage();

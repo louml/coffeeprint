@@ -1,6 +1,6 @@
-import { formatDate } from '../core/label/format.js';
-import type { Rotacao } from '../core/label/rotate.js';
-import type { Bitmap1bpp, DadosRotulo } from '../core/label/types.js';
+import { formatDate } from './label/format.js';
+import type { Rotacao } from './label/rotate.js';
+import type { Bitmap1bpp, DadosRotulo } from './label/types.js';
 import { drawBitmap, loadFonts, renderLabel } from './env.js';
 import { baixarPng, imprimir } from './print.js';
 import { camposFaltando, dadosDoPedido, ordenarCafes, textoNaLista, type Pedido } from './request.js';
@@ -305,6 +305,3 @@ if (!repo.persistent) {
   navigator.storage.persist().catch(() => undefined); // pede ao navegador para não apagar os dados sozinho
 }
 loadFonts().then(loadCafes);
-if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
-  navigator.serviceWorker.register('sw.js').catch(() => undefined);
-}

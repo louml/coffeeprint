@@ -1,18 +1,8 @@
-import { CAFES_INICIAIS, SEED_VERSION, semDesde } from '../core/label/cafes-iniciais.js';
-import type { Rotacao } from '../core/label/rotate.js';
+import { CAFES_INICIAIS, SEED_VERSION, semDesde } from './label/cafes-iniciais.js';
+import type { Cafe } from './label/types.js';
+import type { Rotacao } from './label/rotate.js';
 
-export interface Cafe {
-  id: string;
-  nome: string;
-  notas: string;
-  produtor: string;
-  rotuloProdutor?: string;
-  variedade: string;
-  regiao: string;
-  especie: string;
-  torra: string;
-  ativo: boolean;
-}
+export type { Cafe };
 export type CafeInput = Omit<Cafe, 'id'>;
 
 export interface Config {
@@ -23,7 +13,6 @@ export interface Config {
   rotacao: Rotacao;
 }
 
-export const CAFE_SEED: Cafe = semDesde(CAFES_INICIAIS[0]);
 export const DEFAULT_CONFIG: Config = { selo: true, modoSemImpressora: false, rotacao: 0 };
 
 const KEY_CAFES = 'torralocal.cafes.v1';

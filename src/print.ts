@@ -1,5 +1,5 @@
-import { rotateBitmap, type Rotacao } from '../core/label/rotate.js';
-import type { Bitmap1bpp } from '../core/label/types.js';
+import { rotateBitmap, type Rotacao } from './label/rotate.js';
+import type { Bitmap1bpp } from './label/types.js';
 import { drawBitmap } from './env.js';
 
 const mm = (dots: number) => `${(dots / 8).toFixed(2).replace(/\.00$/, '')}mm`;

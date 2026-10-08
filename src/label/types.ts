@@ -13,12 +13,6 @@ export interface Cafe {
   ativo: boolean;
 }
 
-export const PESOS = ['100g', '250g', '500g', '1kg'] as const;
-export type Peso = (typeof PESOS)[number];
-
-export const MOAGENS = ['Grão', 'Moído'] as const;
-export type Moagem = (typeof MOAGENS)[number];
-
 /** Tudo o que é necessário para desenhar um rótulo. */
 export interface DadosRotulo {
   cafe: Omit<Cafe, 'id' | 'ativo'>;

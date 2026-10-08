@@ -5,15 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#161311">
 <title>Torra Local - Rótulos</title>
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" href="icons/icon-192.png">
-<link rel="stylesheet" href="style.css">
+<link rel="icon" href="{{FAVICON}}">
+<style>
+/*{{CSS}}*/
+</style>
 </head>
 <body>
 <div id="app">
 <header class="topbar">
   <div class="brand">
-    <img class="logo" src="assets/img/logo.png" alt="Torra Local - Cafés Especiais">
+    <img class="logo" src="{{LOGO}}" alt="Torra Local - Cafés Especiais">
     <div class="brand-text"><strong>Torra Local</strong><span>Emissão de rótulos</span></div>
   </div>
   <nav class="tabs" aria-label="Seções">
@@ -155,6 +156,9 @@
 </section>
 </main>
 </div>
-<script type="module" src="js/web/app.js"></script>
+<script>window.__ASSETS__ = {{ASSETS}};</script>
+<script>
+/*{{SCRIPT}}*/
+</script>
 </body>
 </html>

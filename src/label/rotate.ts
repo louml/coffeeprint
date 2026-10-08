@@ -1,7 +1,6 @@
 import type { Bitmap1bpp } from './types.js';
 
 export type Rotacao = 0 | 90 | 180 | 270;
-export const ROTACOES: readonly Rotacao[] = [0, 90, 180, 270];
 
 const get = (b: Bitmap1bpp, x: number, y: number) => (b.data[y * b.bytesPerRow + (x >> 3)] & (0x80 >> (x & 7))) !== 0;
 

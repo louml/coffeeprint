@@ -1,5 +1,2 @@
 node_modules/
-dist/
-data/
-saida/
-site/
+build/

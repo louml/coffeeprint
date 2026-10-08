@@ -1,5 +1,5 @@
-import { formatDate } from '../core/label/format.js';
-import type { DadosRotulo } from '../core/label/types.js';
+import { formatDate } from './label/format.js';
+import type { DadosRotulo } from './label/types.js';
 import type { Cafe } from './storage.js';
 
 export interface Pedido {
