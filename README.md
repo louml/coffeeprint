@@ -11,6 +11,12 @@ O app inteiro é **um único arquivo: [`index.html`](index.html)**. Roda direto 
 3. **Atalho no desktop:** botão direito no arquivo → *Enviar para* → *Área de trabalho (criar atalho)*. Para abrir como janela de aplicativo, crie um atalho para o Chrome com o destino:
    `"C:\Program Files\Google\Chrome\Application\chrome.exe" --app=file:///C:/TorraLocal/Rotulos.html`
 
+### Ícone do atalho
+
+1. Baixe também o arquivo [`assets/torra-local.ico`](assets/torra-local.ico) (no GitHub: *Download raw file*) e salve **na mesma pasta do app**, por exemplo `C:\TorraLocal\torra-local.ico`. O atalho guarda o caminho do ícone, então não mude o arquivo de lugar depois.
+2. Clique com o botão direito no atalho da Área de Trabalho → **Propriedades**.
+3. Na aba **Atalho**, clique em **Alterar Ícone…** → **Procurar…** → escolha `torra-local.ico` → **OK** → **OK**.
+
 **Atualizar o app:** baixe o novo `index.html` e substitua o arquivo antigo. Cafés e configurações não se perdem (ficam no navegador, não no arquivo).
 
 ## Instalar a impressora (uma vez só)
@@ -48,6 +54,7 @@ O Chrome imprime direto na **impressora padrão do Windows** com a opção `--ki
 ```
 npm install   # dependências (só para gerar o arquivo e rodar os testes)
 npm run build # gera o index.html a partir de src/ e assets/
+npm run icone # (raramente) gera de novo assets/torra-local.ico a partir do selo
 npm test      # confere os tipos, roda os testes e verifica se o index.html está atualizado
 ```
 
@@ -65,7 +72,8 @@ src/request.ts          validação e textos da lista
 src/label/draw.ts       desenho do rótulo em imagem de 1 bit (640 × 800 pontos, 203 dpi)
 src/label/cafes-iniciais.ts  cafés que já vêm cadastrados (com versão da lista)
 scripts/build.mjs       empacota tudo em um arquivo (esbuild; fontes e selo como data URI)
-assets/                 fontes Inter (licença OFL) e o selo da marca
+scripts/icone.mjs       gera o ícone do atalho a partir do selo
+assets/                 fontes Inter (licença OFL), o selo da marca e o ícone do atalho (.ico)
 docs/modelo-do-rotulo.png    modelo de referência do rótulo
 test/                   testes (node:test)
 ```

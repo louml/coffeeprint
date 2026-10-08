@@ -6,7 +6,8 @@
   "description": "Emissão de rótulos da Torra Local (arquivo único index.html)",
   "scripts": {
     "build": "node scripts/build.mjs",
-    "test": "tsc && node --test test/*.test.mjs"
+    "test": "tsc && node --test test/*.test.mjs",
+    "icone": "node scripts/icone.mjs"
   },
   "devDependencies": {
     "@napi-rs/canvas": "^1.0.10",
