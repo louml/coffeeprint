@@ -8,14 +8,14 @@ O app inteiro é **um único arquivo: [`index.html`](index.html)**. Roda direto 
 
 1. **Baixe o `index.html`** (no GitHub: abra o arquivo e clique em *Download raw file*) e salve em uma pasta fixa, por exemplo `C:\TorraLocal\Rotulos.html`. O nome pode ser outro.
 2. **Dê dois cliques** nele (abre no Chrome ou Edge; se abrir em outro navegador, botão direito → *Abrir com*).
-3. **Atalho no desktop:** botão direito no arquivo → *Enviar para* → *Área de trabalho (criar atalho)*. Para abrir como janela de aplicativo, crie um atalho para o Chrome com o destino:
+3. **Atalho no desktop:** botão direito no arquivo → *Enviar para* → *Área de trabalho (criar atalho)* (no Windows 11, o menu aparece depois de *Mostrar mais opções*). Para abrir como janela de aplicativo, crie um atalho para o Chrome com o destino:
    `"C:\Program Files\Google\Chrome\Application\chrome.exe" --app=file:///C:/TorraLocal/Rotulos.html`
 
 ### Ícone do atalho
 
 1. Baixe também o arquivo [`assets/torra-local.ico`](assets/torra-local.ico) (no GitHub: *Download raw file*) e salve **na mesma pasta do app**, por exemplo `C:\TorraLocal\torra-local.ico`. O atalho guarda o caminho do ícone, então não mude o arquivo de lugar depois.
-2. Clique com o botão direito no atalho da Área de Trabalho → **Propriedades**.
-3. Na aba **Atalho**, clique em **Alterar Ícone…** → **Procurar…** → escolha `torra-local.ico` → **OK** → **OK**.
+2. Clique com o botão direito no **atalho** da Área de Trabalho (o ícone com uma setinha no canto) → **Propriedades**. Se o ícone não tem a setinha, é o arquivo, não um atalho: crie o atalho antes (passo 3 de "Como usar"; no Windows 11, o *Enviar para* fica em **Mostrar mais opções**).
+3. Na aba **Atalho** (ou **Documento da Web**, se o atalho foi criado pelo navegador), clique em **Alterar Ícone…** → **Procurar…** → escolha `torra-local.ico` → **OK** → **OK**.
 
 **Atualizar o app:** baixe o novo `index.html` e substitua o arquivo antigo. Cafés e configurações não se perdem (ficam no navegador, não no arquivo).
 
