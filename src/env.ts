@@ -1,4 +1,4 @@
-import { BOLD, MED, REG, SEMI, renderLabelCore, type RenderEnv } from './label/draw.js';
+import { BOLD, REG, SEMI, renderLabelCore, type RenderEnv } from './label/draw.js';
 import type { Bitmap1bpp, DadosRotulo, OpcoesRotulo } from './label/types.js';
 
 /**
@@ -13,7 +13,7 @@ const found = (window as unknown as { __ASSETS__?: EmbeddedAssets }).__ASSETS__;
 if (!found) throw new Error('Fontes e selo não foram embutidos. Gere o index.html com "npm run build".');
 const embedded: EmbeddedAssets = found;
 
-const FONT_FAMILIES = [REG, MED, SEMI, BOLD];
+const FONT_FAMILIES = [REG, SEMI, BOLD];
 
 let ready: Promise<void> | undefined;
 /** Carrega as fontes do rótulo (empacotadas no site, funcionam sem internet depois do primeiro acesso). */

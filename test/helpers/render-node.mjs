@@ -1,10 +1,10 @@
 // Roda o mesmo desenho do app (src/label/draw.ts) no Node, só para os testes.
 import { GlobalFonts, createCanvas, loadImage } from '@napi-rs/canvas';
 import path from 'node:path';
-import { BOLD, MED, REG, SEMI, renderLabelCore } from '../../build/label/draw.js';
+import { BOLD, REG, SEMI, renderLabelCore } from '../../build/label/draw.js';
 
 const assets = path.resolve(import.meta.dirname, '../../assets');
-for (const [family, peso] of [[REG, 400], [MED, 500], [SEMI, 600], [BOLD, 700]]) {
+for (const [family, peso] of [[REG, 400], [SEMI, 600], [BOLD, 700]]) {
   GlobalFonts.registerFromPath(path.join(assets, `fonts/inter-latin-${peso}-normal.woff`), family);
 }
 const env = {

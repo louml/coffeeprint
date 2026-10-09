@@ -34,7 +34,6 @@ export async function buildApp() {
   const assets = {
     fonts: {
       TLInter: dataUri('assets/fonts/inter-latin-400-normal.woff', 'font/woff'),
-      TLInterMed: dataUri('assets/fonts/inter-latin-500-normal.woff', 'font/woff'),
       TLInterSemi: dataUri('assets/fonts/inter-latin-600-normal.woff', 'font/woff'),
       TLInterBold: dataUri('assets/fonts/inter-latin-700-normal.woff', 'font/woff'),
     },
