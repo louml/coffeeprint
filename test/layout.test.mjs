@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { moagemNoRotulo } from '../build/label/draw.js';
 import { rotateBitmap } from '../build/label/rotate.js';
 import { arara, pontosNaLinha, renderLabel } from './helpers/render-node.mjs';
 
@@ -98,4 +99,18 @@ test('nome do café e nome do cliente têm o mesmo tamanho e o mesmo peso', asyn
   const tinta = (y0, y1) => { let n = 0; for (let y = y0; y <= y1; y++) n += pontosNaLinha(bmp, y); return n; };
   const titulo = tinta(40, 95), cliente = tinta(590, 640);
   assert.ok(Math.abs(titulo - cliente) / cliente < 0.03, `título ${titulo} x cliente ${cliente}`);
+});
+
+test('moagem: a etiqueta mostra só "Em grãos" ou "Moído", sem a legenda "Moagem:"', async () => {
+  assert.equal(moagemNoRotulo('Grão'), 'Em grãos');
+  assert.equal(moagemNoRotulo('Moído'), 'Moído');
+  assert.equal(moagemNoRotulo(''), '');
+  const grao = await renderLabel({ ...arara, moagem: 'Grão' }, { selo: false });
+  const moido = await renderLabel({ ...arara, moagem: 'Moído' }, { selo: false });
+  const sem = await renderLabel({ ...arara, moagem: '' }, { selo: false });
+  assert.notDeepEqual(grao.data, moido.data);
+  assert.notDeepEqual(moido.data, sem.data);
+  // o item da direita da linha 100% Arábica / Torra / moagem termina junto da margem direita
+  const ultimaTinta = (b) => { let max = 0; for (let y = 440; y < 480; y++) for (let x = 400; x < 640; x++) if (b.data[y * 80 + (x >> 3)] & (0x80 >> (x & 7))) max = Math.max(max, x); return max; };
+  for (const b of [grao, moido]) assert.ok(ultimaTinta(b) >= 586 && ultimaTinta(b) <= 592, `termina na margem direita (${ultimaTinta(b)})`);
 });

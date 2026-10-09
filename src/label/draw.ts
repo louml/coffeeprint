@@ -129,6 +129,11 @@ type Op =
 
 const text = (text: string, family: string, size: number, x: number, y: number, align: 'left' | 'right' | 'center' = 'left'): Op => ({ t: 'text', text, family, size, x, y, align });
 
+/** Como a moagem aparece na etiqueta (a lista de escolha do usuário continua com "Grão" e "Moído"). */
+export function moagemNoRotulo(moagem: string): string {
+  return moagem === 'Grão' ? 'Em grãos' : moagem;
+}
+
 const lineText = (line: Token[]) => line.map((t) => t.text).join(' ');
 
 /** Posições dos itens da linha "espécie / torra / moagem": espaços iguais entre eles, de ponta a ponta. */
@@ -192,7 +197,7 @@ function plan(ctx: Ctx, d: DadosRotulo, s: number) {
   ops.push({ t: 'rule', y: rule2 });
 
   const rowBase = rule2 + 43.5 * s;
-  ops.push(...spreadRow(ctx, [c.especie, c.torra, `Moagem: ${d.moagem}`].filter((t) => t.trim()), rowBase));
+  ops.push(...spreadRow(ctx, [c.especie, c.torra, moagemNoRotulo(d.moagem)].filter((t) => t.trim()), rowBase));
   const dateBase = rowBase + 38.8 * s;
   ops.push(text(`Data de torra: ${d.dataTorra}`, BOLD, SIZE.date * s, LEFT, dateBase));
   const upperEnd = dateBase + 29.5 * s; // onde a linha 3 ficaria logo depois da data

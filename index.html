@@ -374,6 +374,9 @@ label > span small { display: inline; margin-left: 4px; }
   var FOOTER_BASELINES = [702, 722, 742, 762];
   var FOOTER_MAX_W = WIDTH - 2 * 24;
   var text = (text2, family, size, x, y, align = "left") => ({ t: "text", text: text2, family, size, x, y, align });
+  function moagemNoRotulo(moagem) {
+    return moagem === "Gr\xE3o" ? "Em gr\xE3os" : moagem;
+  }
   var lineText = (line) => line.map((t) => t.text).join(" ");
   function spreadRow(ctx, items, baseline) {
     if (!items.length) return [];
@@ -428,7 +431,7 @@ label > span small { display: inline; margin-left: 4px; }
     const rule2 = lastBase + 21.6 * s;
     ops.push({ t: "rule", y: rule2 });
     const rowBase = rule2 + 43.5 * s;
-    ops.push(...spreadRow(ctx, [c.especie, c.torra, `Moagem: ${d.moagem}`].filter((t) => t.trim()), rowBase));
+    ops.push(...spreadRow(ctx, [c.especie, c.torra, moagemNoRotulo(d.moagem)].filter((t) => t.trim()), rowBase));
     const dateBase = rowBase + 38.8 * s;
     ops.push(text(`Data de torra: ${d.dataTorra}`, BOLD, SIZE.date * s, LEFT, dateBase));
     const upperEnd = dateBase + 29.5 * s;
