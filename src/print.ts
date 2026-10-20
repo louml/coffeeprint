@@ -10,17 +10,25 @@ export interface ResultadoImpressao {
   altura: string;
 }
 
+export interface LoteImpressao {
+  bmp: Bitmap1bpp;
+  copias: number;
+}
+
 /**
  * Imprime pelo navegador (driver do Windows). Monta uma página por cópia, no tamanho exato da etiqueta,
- * e chama a impressão. O navegador não informa se a impressora realmente imprimiu.
+ * e chama a impressão uma única vez, com todos os rótulos na ordem dada (a fila de impressão usa isto).
+ * O navegador não informa se a impressora realmente imprimiu.
  */
-export async function imprimir(bmp: Bitmap1bpp, copias: number, rotacao: Rotacao): Promise<ResultadoImpressao> {
-  const final = rotateBitmap(bmp, rotacao);
-  const canvas = document.createElement('canvas');
-  drawBitmap(final, canvas);
-  const url = canvas.toDataURL('image/png');
-  const w = mm(final.width);
-  const h = mm(final.height);
+export async function imprimirLotes(lotes: LoteImpressao[], rotacao: Rotacao): Promise<ResultadoImpressao> {
+  const imagens = lotes.map((lote) => {
+    const final = rotateBitmap(lote.bmp, rotacao);
+    const canvas = document.createElement('canvas');
+    drawBitmap(final, canvas);
+    return { url: canvas.toDataURL('image/png'), copias: lote.copias, largura: final.width, altura: final.height };
+  });
+  const w = mm(imagens[0].largura);
+  const h = mm(imagens[0].altura);
 
   document.getElementById('print-root')?.remove();
   document.getElementById('print-style')?.remove();
@@ -38,10 +46,14 @@ export async function imprimir(bmp: Bitmap1bpp, copias: number, rotacao: Rotacao
     }`;
   const root = document.createElement('div');
   root.id = 'print-root';
-  for (let i = 0; i < copias; i++) {
-    const img = new Image();
-    img.src = url;
-    root.appendChild(img);
+  let total = 0;
+  for (const { url, copias } of imagens) {
+    for (let i = 0; i < copias; i++) {
+      const img = new Image();
+      img.src = url;
+      root.appendChild(img);
+      total++;
+    }
   }
   document.head.appendChild(style);
   document.body.appendChild(root);
@@ -59,7 +71,12 @@ export async function imprimir(bmp: Bitmap1bpp, copias: number, rotacao: Rotacao
   });
   root.remove();
   style.remove();
-  return { copias, largura: w, altura: h };
+  return { copias: total, largura: w, altura: h };
+}
+
+/** Imprime um único rótulo, `copias` vezes. */
+export function imprimir(bmp: Bitmap1bpp, copias: number, rotacao: Rotacao): Promise<ResultadoImpressao> {
+  return imprimirLotes([{ bmp, copias }], rotacao);
 }
 
 /** Modo sem impressora: baixa o rótulo como imagem. */

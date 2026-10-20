@@ -38,7 +38,12 @@ O Chrome imprime direto na **impressora padrão do Windows** com a opção `--ki
 
 1. Em **Emitir rótulo**: escolha o café, o peso e a moagem, digite o cliente, confira a pré-visualização e clique em **Imprimir** (cada cópia sai em uma página).
 2. Depois de imprimir, café, peso, moagem e data são mantidos; só o cliente é limpo.
-3. O navegador **não informa se a impressora imprimiu**: "enviadas para impressão" significa que o pedido foi entregue ao Windows. Se nada sair, veja a fila de impressão do Windows (impressora desligada, sem papel, offline).
+3. **Fila de impressão (vários rótulos de uma vez):** em vez de **Imprimir**, clique em **Adicionar à fila**. O rótulo entra na fila exatamente como está na pré-visualização, e o formulário se prepara para o próximo (só o cliente é limpo). Quando terminar de montar, clique em **Imprimir fila**: todos os rótulos, na ordem em que foram adicionados e com suas cópias, saem em **uma única impressão**.
+   - Em cada item da fila dá para mudar as cópias (**−** e **+**), **Editar** (volta ao formulário para corrigir; depois é só adicionar de novo, e ele entra no fim da fila) ou **Remover**.
+   - O botão **Imprimir** continua imprimindo só o rótulo do formulário, sem mexer na fila.
+   - Depois de imprimida, a fila continua na tela com os itens marcados como **Enviado** (o navegador não informa se a impressão deu certo; se cancelar a janela, nada se perde). Use **Imprimir de novo** se precisar repetir, e **Limpar fila** quando terminar. Ao adicionar um rótulo novo a uma fila já enviada, ela recomeça do zero.
+   - Limite de **500 etiquetas** na fila (soma das cópias). A fila fica guardada no navegador, então sobrevive a recarregar a página, mas **não entra na cópia de segurança**.
+4. O navegador **não informa se a impressora imprimiu**: "enviadas para impressão" significa que o pedido foi entregue ao Windows. Se nada sair, veja a fila de impressão do Windows (impressora desligada, sem papel, offline).
 
 ## Cafés, selo e cópia de segurança
 
@@ -69,6 +74,7 @@ src/env.ts              canvas e fontes no navegador
 src/print.ts            impressão pelo navegador (uma página por cópia)
 src/storage.ts          cadastro de cafés, configurações e cópia de segurança (interface Repository)
 src/request.ts          validação e textos da lista
+src/fila.ts             fila de impressão (itens, cópias, limite, itens enviados)
 src/label/draw.ts       desenho do rótulo em imagem de 1 bit (640 × 800 pontos, 203 dpi)
 src/label/cafes-iniciais.ts  cafés que já vêm cadastrados (com versão da lista)
 scripts/build.mjs       empacota tudo em um arquivo (esbuild; fontes e selo como data URI)

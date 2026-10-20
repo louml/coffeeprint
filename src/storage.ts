@@ -1,6 +1,7 @@
 import { CAFES_INICIAIS, SEED_VERSION, semDesde } from './label/cafes-iniciais.js';
 import type { Cafe } from './label/types.js';
 import type { Rotacao } from './label/rotate.js';
+import type { ItemFila } from './fila.js';
 
 export type { Cafe };
 export type CafeInput = Omit<Cafe, 'id'>;
@@ -18,6 +19,7 @@ export const DEFAULT_CONFIG: Config = { selo: true, modoSemImpressora: false, ro
 const KEY_CAFES = 'torralocal.cafes.v1';
 const KEY_CONFIG = 'torralocal.config.v1';
 const KEY_SEED = 'torralocal.seed.v1';
+const KEY_FILA = 'torralocal.fila.v1';
 
 /**
  * Onde os dados ficam guardados. Hoje: no próprio navegador deste computador.
@@ -28,6 +30,9 @@ export interface Repository {
   saveCafes(cafes: Cafe[]): void;
   getConfig(): Config;
   saveConfig(config: Config): void;
+  /** Fila de impressão (itens ainda por imprimir). Não entra na cópia de segurança. */
+  getFila(): ItemFila[];
+  saveFila(fila: ItemFila[]): void;
 }
 
 export class BrowserRepository implements Repository {
@@ -84,6 +89,13 @@ export class BrowserRepository implements Repository {
   }
   saveConfig(config: Config): void {
     this.write(KEY_CONFIG, config);
+  }
+  getFila(): ItemFila[] {
+    const fila = this.read<ItemFila[]>(KEY_FILA, []);
+    return Array.isArray(fila) ? fila : [];
+  }
+  saveFila(fila: ItemFila[]): void {
+    this.write(KEY_FILA, fila);
   }
 }
 

@@ -135,3 +135,42 @@ dialog form { gap: 16px; }
 @media (max-width: 420px) { .row { flex-direction: column; } }
 @media print { body > #app { display: none !important; } }
 label > span small { display: inline; margin-left: 4px; }
+
+/* ---------- botões Adicionar à fila / Imprimir */
+.coluna { display: flex; flex-direction: column; gap: 22px; min-width: 0; }
+.acoes { display: grid; grid-template-columns: 1fr 1.2fr; gap: 12px; }
+.add { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 68px; padding: 0 10px; border: 2px solid var(--ink); border-radius: 16px; background: var(--card); color: var(--ink); font: 400 17px var(--f-semi); cursor: pointer; }
+.add:hover { background: #f5f1ea; }
+.add:disabled { opacity: .55; cursor: wait; }
+@media (max-width: 420px) { .acoes { grid-template-columns: 1fr; } }
+
+/* ---------- fila de impressão */
+.fila[hidden] { display: none; }
+.fila-topo { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.fila-topo h3 { font-size: 19px; }
+.link { background: none; border: 0; padding: 6px 2px; color: var(--ink-2); font: 400 15px var(--f-semi); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.link:hover { color: var(--err); }
+#fila-lista { list-style: none; margin: 0; padding: 0 4px 0 0; display: flex; flex-direction: column; gap: 8px; max-height: min(64vh, 600px); overflow-y: auto; }
+.fila-item { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 4px 12px; padding: 12px 14px 10px; border: 1px solid var(--line); border-radius: 14px; background: var(--field); }
+.fila-item.enviado { background: #f3f1ec; }
+.fila-item.enviado .fila-info strong { color: var(--muted); }
+.fila-info { min-width: 0; line-height: 1.3; }
+.fila-info strong { font-size: 17px; }
+.fila-tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 5px 0 3px; }
+.fila-item .tag { margin-left: 0; white-space: nowrap; }
+.tag.enviado { background: var(--ok-bg); color: var(--ok); }
+.fila-info small { display: block; color: var(--muted); font-size: 14px; overflow-wrap: anywhere; }
+.fila-copias { display: flex; align-items: center; gap: 4px; }
+.fila-copias span { min-width: 30px; text-align: center; font: 400 17px var(--f-semi); }
+.fila-copias button { font: 400 20px/1 var(--f); min-height: 40px; min-width: 40px; padding: 0; border: 1.5px solid var(--line); border-radius: 10px; background: var(--card); color: var(--ink); cursor: pointer; }
+.fila-copias button:hover { border-color: var(--ink); }
+.fila-acoes { grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: 6px; padding-top: 6px; border-top: 1px solid var(--line); }
+.fila-btn { font: 400 14.5px var(--f-semi); min-height: 36px; padding: 0 12px; border: 0; border-radius: 8px; background: none; color: var(--ink-2); cursor: pointer; }
+.fila-btn:hover { background: #ece6dc; color: var(--ink); }
+.fila-btn.danger { color: var(--err); }
+.fila-btn.danger:hover { background: var(--err-bg); color: var(--err); }
+.print svg { flex: none; }
+.print .contagem { padding: 3px 12px; border-radius: 999px; background: rgba(255, 255, 255, .2); font: 400 15px var(--f-semi); white-space: nowrap; }
+.print .contagem:empty { display: none; }
+#fila-imprimir-texto { white-space: nowrap; }
+#aviso-fila:empty { display: none; }
