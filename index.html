@@ -146,45 +146,6 @@ dialog form { gap: 16px; }
 @media print { body > #app { display: none !important; } }
 label > span small { display: inline; margin-left: 4px; }
 
-/* ---------- botões Adicionar à fila / Imprimir */
-.coluna { display: flex; flex-direction: column; gap: 22px; min-width: 0; }
-.acoes { display: grid; grid-template-columns: 1fr 1.2fr; gap: 12px; }
-.add { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 68px; padding: 0 10px; border: 2px solid var(--ink); border-radius: 16px; background: var(--card); color: var(--ink); font: 400 17px var(--f-semi); cursor: pointer; }
-.add:hover { background: #f5f1ea; }
-.add:disabled { opacity: .55; cursor: wait; }
-@media (max-width: 420px) { .acoes { grid-template-columns: 1fr; } }
-
-/* ---------- fila de impressão */
-.fila[hidden] { display: none; }
-.fila-topo { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
-.fila-topo h3 { font-size: 19px; }
-.link { background: none; border: 0; padding: 6px 2px; color: var(--ink-2); font: 400 15px var(--f-semi); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
-.link:hover { color: var(--err); }
-#fila-lista { list-style: none; margin: 0; padding: 0 4px 0 0; display: flex; flex-direction: column; gap: 8px; max-height: min(64vh, 600px); overflow-y: auto; }
-.fila-item { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 4px 12px; padding: 12px 14px 10px; border: 1px solid var(--line); border-radius: 14px; background: var(--field); }
-.fila-item.enviado { background: #f3f1ec; }
-.fila-item.enviado .fila-info strong { color: var(--muted); }
-.fila-info { min-width: 0; line-height: 1.3; }
-.fila-info strong { font-size: 17px; }
-.fila-tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 5px 0 3px; }
-.fila-item .tag { margin-left: 0; white-space: nowrap; }
-.tag.enviado { background: var(--ok-bg); color: var(--ok); }
-.fila-info small { display: block; color: var(--muted); font-size: 14px; overflow-wrap: anywhere; }
-.fila-copias { display: flex; align-items: center; gap: 4px; }
-.fila-copias span { min-width: 30px; text-align: center; font: 400 17px var(--f-semi); }
-.fila-copias button { font: 400 20px/1 var(--f); min-height: 40px; min-width: 40px; padding: 0; border: 1.5px solid var(--line); border-radius: 10px; background: var(--card); color: var(--ink); cursor: pointer; }
-.fila-copias button:hover { border-color: var(--ink); }
-.fila-acoes { grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: 6px; padding-top: 6px; border-top: 1px solid var(--line); }
-.fila-btn { font: 400 14.5px var(--f-semi); min-height: 36px; padding: 0 12px; border: 0; border-radius: 8px; background: none; color: var(--ink-2); cursor: pointer; }
-.fila-btn:hover { background: #ece6dc; color: var(--ink); }
-.fila-btn.danger { color: var(--err); }
-.fila-btn.danger:hover { background: var(--err-bg); color: var(--err); }
-.print svg { flex: none; }
-.print .contagem { padding: 3px 12px; border-radius: 999px; background: rgba(255, 255, 255, .2); font: 400 15px var(--f-semi); white-space: nowrap; }
-.print .contagem:empty { display: none; }
-#fila-imprimir-texto { white-space: nowrap; }
-#aviso-fila:empty { display: none; }
-
 </style>
 </head>
 <body>
@@ -207,7 +168,6 @@ label > span small { display: inline; margin-left: 4px; }
 <!-- ============ EMITIR ============ -->
 <section id="emitir" class="panel active">
   <div class="split">
-    <div class="coluna">
     <form id="form" class="card" novalidate>
       <label><span>Cliente <small>(Produzido para)</small></span>
         <input id="cliente" type="text" autocomplete="off" maxlength="120" placeholder="Nome do cliente">
@@ -246,36 +206,12 @@ label > span small { display: inline; margin-left: 4px; }
           </div>
         </div>
       </div>
-      <div class="acoes">
-        <button id="adicionar" type="button" class="add">
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
-          <span>Adicionar à fila</span>
-        </button>
-        <button id="imprimir" type="submit" class="print">
-          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9V3h10v6"/><rect x="3" y="9" width="18" height="9" rx="2"/><path d="M7 14h10v7H7z"/></svg>
-          <span>Imprimir</span>
-        </button>
-      </div>
+      <button id="imprimir" type="submit" class="print">
+        <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9V3h10v6"/><rect x="3" y="9" width="18" height="9" rx="2"/><path d="M7 14h10v7H7z"/></svg>
+        <span>Imprimir</span>
+      </button>
       <div id="aviso" role="status" aria-live="polite"></div>
     </form>
-
-    <section id="fila-card" class="card fila" aria-labelledby="fila-titulo" hidden>
-      <div class="fila-topo">
-        <div>
-          <h3 id="fila-titulo">Fila de impressão</h3>
-          <span id="fila-resumo" class="sub"></span>
-        </div>
-        <button type="button" id="fila-limpar" class="link">Limpar fila</button>
-      </div>
-      <ul id="fila-lista"></ul>
-      <button id="fila-imprimir" type="button" class="print">
-        <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9V3h10v6"/><rect x="3" y="9" width="18" height="9" rx="2"/><path d="M7 14h10v7H7z"/></svg>
-        <span id="fila-imprimir-texto">Imprimir fila</span>
-        <span id="fila-contagem" class="contagem"></span>
-      </button>
-      <div id="aviso-fila" role="status" aria-live="polite"></div>
-    </section>
-    </div>
 
     <div class="preview">
       <div class="sheet">
@@ -696,6 +632,82 @@ label > span small { display: inline; margin-left: 4px; }
     ctx.putImageData(img, 0, 0);
   }
 
+  // src/label/rotate.ts
+  var get = (b, x, y) => (b.data[y * b.bytesPerRow + (x >> 3)] & 128 >> (x & 7)) !== 0;
+  function rotateBitmap(src, graus) {
+    if (graus === 0) return src;
+    const swap = graus !== 180;
+    const width = swap ? src.height : src.width;
+    const height = swap ? src.width : src.height;
+    const bytesPerRow = Math.ceil(width / 8);
+    const data = new Uint8Array(bytesPerRow * height);
+    for (let y = 0; y < src.height; y++) {
+      for (let x = 0; x < src.width; x++) {
+        if (!get(src, x, y)) continue;
+        const [nx, ny] = graus === 90 ? [src.height - 1 - y, x] : graus === 180 ? [src.width - 1 - x, src.height - 1 - y] : [y, src.width - 1 - x];
+        data[ny * bytesPerRow + (nx >> 3)] |= 128 >> (nx & 7);
+      }
+    }
+    return { width, height, bytesPerRow, data };
+  }
+
+  // src/print.ts
+  var mm = (dots) => `${(dots / 8).toFixed(2).replace(/\.00$/, "")}mm`;
+  async function imprimir(bmp, copias, rotacao) {
+    const final = rotateBitmap(bmp, rotacao);
+    const canvas = document.createElement("canvas");
+    drawBitmap(final, canvas);
+    const url = canvas.toDataURL("image/png");
+    const w = mm(final.width);
+    const h = mm(final.height);
+    document.getElementById("print-root")?.remove();
+    document.getElementById("print-style")?.remove();
+    const style = document.createElement("style");
+    style.id = "print-style";
+    style.textContent = `
+    @page { size: ${w} ${h}; margin: 0; }
+    #print-root { display: none; }
+    @media print {
+      html, body { margin: 0; padding: 0; background: #fff; }
+      body > *:not(#print-root) { display: none !important; }
+      #print-root { display: block; }
+      #print-root img { display: block; width: ${w}; height: ${h}; image-rendering: pixelated; break-after: page; }
+      #print-root img:last-child { break-after: auto; }
+    }`;
+    const root = document.createElement("div");
+    root.id = "print-root";
+    for (let i = 0; i < copias; i++) {
+      const img = new Image();
+      img.src = url;
+      root.appendChild(img);
+    }
+    document.head.appendChild(style);
+    document.body.appendChild(root);
+    await Promise.all([...root.querySelectorAll("img")].map((i) => i.decode()));
+    await new Promise((resolve) => {
+      const done = () => {
+        window.removeEventListener("afterprint", done);
+        resolve();
+      };
+      window.addEventListener("afterprint", done);
+      window.print();
+      setTimeout(done, 400);
+    });
+    root.remove();
+    style.remove();
+    return { copias, largura: w, altura: h };
+  }
+  function baixarPng(bmp, nome) {
+    const canvas = document.createElement("canvas");
+    drawBitmap(bmp, canvas);
+    const a = document.createElement("a");
+    a.href = canvas.toDataURL("image/png");
+    a.download = nome;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+
   // src/request.ts
   var PESOS = ["100g", "250g", "500g", "1kg"];
   var MOAGENS = ["Gr\xE3o", "Mo\xEDdo"];
@@ -764,7 +776,6 @@ label > span small { display: inline; margin-left: 4px; }
   var KEY_CAFES = "torralocal.cafes.v1";
   var KEY_CONFIG = "torralocal.config.v1";
   var KEY_SEED = "torralocal.seed.v1";
-  var KEY_FILA = "torralocal.fila.v1";
   var BrowserRepository = class {
     constructor(store = tryStorage()) {
       this.store = store;
@@ -817,13 +828,6 @@ label > span small { display: inline; margin-left: 4px; }
     }
     saveConfig(config) {
       this.write(KEY_CONFIG, config);
-    }
-    getFila() {
-      const fila2 = this.read(KEY_FILA, []);
-      return Array.isArray(fila2) ? fila2 : [];
-    }
-    saveFila(fila2) {
-      this.write(KEY_FILA, fila2);
     }
   };
   function tryStorage() {
@@ -903,153 +907,10 @@ label > span small { display: inline; margin-left: 4px; }
     if (b.config) repo2.saveConfig({ ...DEFAULT_CONFIG, ...b.config });
   }
 
-  // src/fila.ts
-  var LIMITE_ETIQUETAS = 500;
-  function dadosDoItem(item) {
-    return { cafe: item.cafe, cliente: item.cliente, peso: item.peso, moagem: item.moagem, dataTorra: formatDate(item.dataTorra) };
-  }
-  var totalEtiquetas = (fila2) => fila2.reduce((soma, i) => soma + i.copias, 0);
-  var FilaDeImpressao = class {
-    constructor(repo2) {
-      this.repo = repo2;
-    }
-    repo;
-    list() {
-      return this.repo.getFila();
-    }
-    total() {
-      return totalEtiquetas(this.list());
-    }
-    /** Acrescenta o rótulo do formulário (já validado) ao fim da fila. */
-    adicionar(p) {
-      const dados = dadosDoPedido(p);
-      if (!dados || !p.cafe) throw new Error("Escolha um caf\xE9.");
-      if (!Number.isInteger(p.copias) || p.copias < 1) throw new Error("O n\xFAmero de c\xF3pias deve ser um inteiro a partir de 1.");
-      let fila2 = this.list();
-      if (fila2.length && fila2.every((i) => i.enviado)) fila2 = [];
-      const total = totalEtiquetas(fila2);
-      if (total + p.copias > LIMITE_ETIQUETAS) {
-        throw new Error(`A fila n\xE3o pode passar de ${LIMITE_ETIQUETAS} etiquetas (hoje tem ${total}). Imprima a fila e comece outra.`);
-      }
-      const item = { id: newId(), cafeId: p.cafe.id, cafe: dados.cafe, cliente: dados.cliente, peso: dados.peso, moagem: dados.moagem, dataTorra: p.dataTorra, copias: p.copias };
-      this.repo.saveFila([...fila2, item]);
-      return item;
-    }
-    /** Tira um item da fila e o devolve (para "Remover" ou "Editar"). */
-    remover(id) {
-      const fila2 = this.list();
-      const item = fila2.find((i) => i.id === id);
-      if (item) this.repo.saveFila(fila2.filter((i) => i.id !== id));
-      return item;
-    }
-    /** Muda o número de cópias de um item (mínimo 1; respeita o limite da fila). Devolve o valor aplicado. */
-    alterarCopias(id, copias) {
-      const fila2 = this.list();
-      const item = fila2.find((i) => i.id === id);
-      if (!item) return void 0;
-      const maximo = LIMITE_ETIQUETAS - (totalEtiquetas(fila2) - item.copias);
-      item.copias = Math.max(1, Math.min(Math.trunc(copias) || 1, maximo));
-      this.repo.saveFila(fila2);
-      return item.copias;
-    }
-    limpar() {
-      this.repo.saveFila([]);
-    }
-    marcarEnviadas() {
-      this.repo.saveFila(this.list().map((i) => ({ ...i, enviado: true })));
-    }
-  };
-
-  // src/label/rotate.ts
-  var get = (b, x, y) => (b.data[y * b.bytesPerRow + (x >> 3)] & 128 >> (x & 7)) !== 0;
-  function rotateBitmap(src, graus) {
-    if (graus === 0) return src;
-    const swap = graus !== 180;
-    const width = swap ? src.height : src.width;
-    const height = swap ? src.width : src.height;
-    const bytesPerRow = Math.ceil(width / 8);
-    const data = new Uint8Array(bytesPerRow * height);
-    for (let y = 0; y < src.height; y++) {
-      for (let x = 0; x < src.width; x++) {
-        if (!get(src, x, y)) continue;
-        const [nx, ny] = graus === 90 ? [src.height - 1 - y, x] : graus === 180 ? [src.width - 1 - x, src.height - 1 - y] : [y, src.width - 1 - x];
-        data[ny * bytesPerRow + (nx >> 3)] |= 128 >> (nx & 7);
-      }
-    }
-    return { width, height, bytesPerRow, data };
-  }
-
-  // src/print.ts
-  var mm = (dots) => `${(dots / 8).toFixed(2).replace(/\.00$/, "")}mm`;
-  async function imprimirLotes(lotes, rotacao) {
-    const imagens = lotes.map((lote) => {
-      const final = rotateBitmap(lote.bmp, rotacao);
-      const canvas = document.createElement("canvas");
-      drawBitmap(final, canvas);
-      return { url: canvas.toDataURL("image/png"), copias: lote.copias, largura: final.width, altura: final.height };
-    });
-    const w = mm(imagens[0].largura);
-    const h = mm(imagens[0].altura);
-    document.getElementById("print-root")?.remove();
-    document.getElementById("print-style")?.remove();
-    const style = document.createElement("style");
-    style.id = "print-style";
-    style.textContent = `
-    @page { size: ${w} ${h}; margin: 0; }
-    #print-root { display: none; }
-    @media print {
-      html, body { margin: 0; padding: 0; background: #fff; }
-      body > *:not(#print-root) { display: none !important; }
-      #print-root { display: block; }
-      #print-root img { display: block; width: ${w}; height: ${h}; image-rendering: pixelated; break-after: page; }
-      #print-root img:last-child { break-after: auto; }
-    }`;
-    const root = document.createElement("div");
-    root.id = "print-root";
-    let total = 0;
-    for (const { url, copias } of imagens) {
-      for (let i = 0; i < copias; i++) {
-        const img = new Image();
-        img.src = url;
-        root.appendChild(img);
-        total++;
-      }
-    }
-    document.head.appendChild(style);
-    document.body.appendChild(root);
-    await Promise.all([...root.querySelectorAll("img")].map((i) => i.decode()));
-    await new Promise((resolve) => {
-      const done = () => {
-        window.removeEventListener("afterprint", done);
-        resolve();
-      };
-      window.addEventListener("afterprint", done);
-      window.print();
-      setTimeout(done, 400);
-    });
-    root.remove();
-    style.remove();
-    return { copias: total, largura: w, altura: h };
-  }
-  function imprimir(bmp, copias, rotacao) {
-    return imprimirLotes([{ bmp, copias }], rotacao);
-  }
-  function baixarPng(bmp, nome) {
-    const canvas = document.createElement("canvas");
-    drawBitmap(bmp, canvas);
-    const a = document.createElement("a");
-    a.href = canvas.toDataURL("image/png");
-    a.download = nome;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-  }
-
   // src/app.ts
   var $ = (id) => document.getElementById(id);
   var repo = new BrowserRepository();
   var book = new CafeBook(repo);
-  var fila = new FilaDeImpressao(repo);
   var today = () => {
     const d = /* @__PURE__ */ new Date();
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -1167,7 +1028,8 @@ label > span small { display: inline; margin-left: 4px; }
     const r = await imprimir(bmp, copias, cfg.rotacao);
     return `${copias === 1 ? "1 etiqueta enviada" : `${copias} etiquetas enviadas`} para impress\xE3o (${r.largura} \xD7 ${r.altura}). Confira na impressora.`;
   }
-  function lerFormulario(acao) {
+  $("form").addEventListener("submit", async (ev) => {
+    ev.preventDefault();
     document.querySelectorAll(".invalido").forEach((e) => e.classList.remove("invalido"));
     const p = pedido();
     const faltam = [];
@@ -1179,152 +1041,23 @@ label > span small { display: inline; margin-left: 4px; }
     if (camposFaltando(p).some((f) => f.startsWith("N\xFAmero"))) faltam.push("copias");
     if (faltam.length) {
       faltam.forEach((id) => $(id).classList.add("invalido"));
-      aviso($("aviso"), "fail", `N\xE3o ${acao}. Falta preencher: ${faltam.map((id) => FIELDS[id]).join(", ")}.`);
+      aviso($("aviso"), "fail", `N\xE3o imprimi. Falta preencher: ${faltam.map((id) => FIELDS[id]).join(", ")}.`);
       $(faltam[0]).focus();
-      return null;
+      return;
     }
-    return p;
-  }
-  function prepararProximo() {
-    $("cliente").value = "";
-    refreshPreview();
-    $("cliente").focus();
-  }
-  $("form").addEventListener("submit", async (ev) => {
-    ev.preventDefault();
-    const p = lerFormulario("imprimi");
-    if (!p) return;
     const dados = dadosDoPedido(p);
     $("imprimir").disabled = true;
     aviso($("aviso"), "", "Preparando a impress\xE3o\u2026");
     try {
       const msg = await emitir(dados, p.copias);
       aviso($("aviso"), "ok", "\u2714 " + msg);
-      prepararProximo();
+      $("cliente").value = "";
+      refreshPreview();
+      $("cliente").focus();
     } catch (e) {
       aviso($("aviso"), "fail", "\u2716 " + (e instanceof Error ? e.message : "Erro inesperado."));
     } finally {
       $("imprimir").disabled = false;
-    }
-  });
-  var plural = (n, um, varios) => `${n} ${n === 1 ? um : varios}`;
-  $("adicionar").addEventListener("click", () => {
-    const p = lerFormulario("adicionei");
-    if (!p) return;
-    try {
-      fila.adicionar(p);
-    } catch (e) {
-      aviso($("aviso"), "fail", "\u2716 " + (e instanceof Error ? e.message : "Erro inesperado."));
-      return;
-    }
-    const itens = fila.list();
-    aviso($("aviso"), "ok", `\u2714 Adicionado \xE0 fila: ${plural(p.copias, "etiqueta", "etiquetas")} de "${p.cliente.trim()}". Na fila: ${plural(fila.total(), "etiqueta", "etiquetas")} (${plural(itens.length, "item", "itens")}).`);
-    renderFila();
-    prepararProximo();
-  });
-  function renderFila() {
-    const itens = fila.list();
-    const card = $("fila-card");
-    card.hidden = itens.length === 0;
-    if (!itens.length) return;
-    const todos = book.list();
-    const pendentes = itens.filter((i) => !i.enviado);
-    $("fila-resumo").textContent = `${plural(totalEtiquetas(itens), "etiqueta", "etiquetas")} \xB7 ${plural(itens.length, "item", "itens")}`;
-    $("fila-lista").innerHTML = itens.map((i) => {
-      const nome = textoNaLista({ id: i.cafeId, nome: i.cafe.nome, torra: i.cafe.torra }, todos);
-      const data = i.dataTorra.split("-").reverse().join("/");
-      return `<li class="fila-item ${i.enviado ? "enviado" : ""}" data-id="${esc(i.id)}">
-        <div class="fila-info">
-          <strong>${esc(nome)}</strong>
-          <div class="fila-tags"><span class="tag">${esc(i.peso)} \xB7 ${esc(i.moagem)}</span>${i.enviado ? '<span class="tag enviado">\u2714 Enviado</span>' : ""}</div>
-          <small>${esc(i.cliente)} \xB7 torra ${esc(data)}</small>
-        </div>
-        <div class="fila-copias"><button type="button" data-act="menos" aria-label="Menos uma c\xF3pia de ${esc(i.cliente)}">\u2212</button><span aria-label="${i.copias} c\xF3pias">${i.copias}</span><button type="button" data-act="mais" aria-label="Mais uma c\xF3pia de ${esc(i.cliente)}">+</button></div>
-        <div class="fila-acoes">
-          <button type="button" class="fila-btn" data-act="editar">Editar</button>
-          <button type="button" class="fila-btn danger" data-act="remover" aria-label="Remover ${esc(i.cliente)} da fila">Remover</button>
-        </div>
-      </li>`;
-    }).join("");
-    const aImprimir = pendentes.length ? totalEtiquetas(pendentes) : totalEtiquetas(itens);
-    $("fila-imprimir-texto").textContent = pendentes.length ? "Imprimir fila" : "Imprimir de novo";
-    $("fila-contagem").textContent = plural(aImprimir, "etiqueta", "etiquetas");
-  }
-  $("fila-lista").addEventListener("click", (ev) => {
-    const b = ev.target.closest("button");
-    const li = ev.target.closest("li");
-    if (!b || !li) return;
-    const id = li.dataset.id ?? "";
-    const item = fila.list().find((i) => i.id === id);
-    if (!item) return;
-    aviso($("aviso-fila"), "", "");
-    if (b.dataset.act === "mais" || b.dataset.act === "menos") {
-      const novo = fila.alterarCopias(id, item.copias + (b.dataset.act === "mais" ? 1 : -1));
-      if (b.dataset.act === "mais" && novo === item.copias) aviso($("aviso-fila"), "fail", `A fila n\xE3o pode passar de ${LIMITE_ETIQUETAS} etiquetas.`);
-      renderFila();
-    } else if (b.dataset.act === "remover") {
-      fila.remover(id);
-      renderFila();
-    } else if (b.dataset.act === "editar") {
-      editarItem(id);
-    }
-  });
-  function editarItem(id) {
-    const item = fila.remover(id);
-    if (!item) return;
-    const cafeSelect = $("cafe");
-    const existe = [...cafeSelect.options].some((o) => o.value === item.cafeId);
-    cafeSelect.value = existe ? item.cafeId : "";
-    for (const [campo, valor] of [["peso", item.peso], ["moagem", item.moagem]]) {
-      $(campo).value = valor;
-      $(campo).dispatchEvent(new Event("change"));
-    }
-    $("cliente").value = item.cliente;
-    $("data").value = item.dataTorra;
-    $("copias").value = String(item.copias);
-    document.querySelectorAll(".invalido").forEach((e) => e.classList.remove("invalido"));
-    refreshPreview();
-    renderFila();
-    aviso($("aviso"), existe ? "ok" : "fail", existe ? '\u2714 Item levado para o formul\xE1rio. Corrija e clique em "Adicionar \xE0 fila" de novo.' : `Item levado para o formul\xE1rio, mas o caf\xE9 "${item.cafe.nome}" n\xE3o est\xE1 mais ativo. Escolha um caf\xE9 para continuar.`);
-    $("cliente").focus();
-  }
-  $("fila-limpar").addEventListener("click", () => {
-    const itens = fila.list();
-    if (itens.some((i) => !i.enviado) && !confirm(`Remover ${plural(itens.length, "item", "itens")} da fila? Eles ainda n\xE3o foram impressos.`)) return;
-    fila.limpar();
-    aviso($("aviso-fila"), "", "");
-    renderFila();
-  });
-  $("fila-imprimir").addEventListener("click", async () => {
-    const itens = fila.list();
-    if (!itens.length) return;
-    const btn = $("fila-imprimir");
-    btn.disabled = true;
-    const aviso2 = $("aviso-fila");
-    try {
-      const cfg = repo.getConfig();
-      const lotes = [];
-      for (let k = 0; k < itens.length; k++) {
-        aviso(aviso2, "", `Preparando o r\xF3tulo ${k + 1} de ${itens.length}\u2026`);
-        await new Promise((r) => setTimeout(r, 0));
-        lotes.push({ bmp: await renderLabel(dadosDoItem(itens[k]), { selo: cfg.selo }), copias: itens[k].copias });
-      }
-      let msg;
-      if (cfg.modoSemImpressora) {
-        const carimbo = (/* @__PURE__ */ new Date()).toISOString().replace(/[:.]/g, "-").slice(0, 19);
-        lotes.forEach((l, k) => baixarPng(l.bmp, `rotulo-fila-${carimbo}-${String(k + 1).padStart(2, "0")}.png`));
-        msg = `Modo sem impressora: ${plural(lotes.length, "r\xF3tulo foi baixado", "r\xF3tulos foram baixados")} como imagem.`;
-      } else {
-        const r = await imprimirLotes(lotes, cfg.rotacao);
-        msg = `${plural(r.copias, "etiqueta enviada", "etiquetas enviadas")} para impress\xE3o (${r.largura} \xD7 ${r.altura}), de ${plural(itens.length, "item", "itens")}. Confira na impressora.`;
-      }
-      fila.marcarEnviadas();
-      renderFila();
-      aviso(aviso2, "ok", `\u2714 ${msg} Os itens ficam marcados como enviados; use "Limpar fila" quando terminar.`);
-    } catch (e) {
-      aviso(aviso2, "fail", "\u2716 " + (e instanceof Error ? e.message : "Erro inesperado."));
-    } finally {
-      btn.disabled = false;
     }
   });
   var editId = null;
@@ -1449,7 +1182,6 @@ label > span small { display: inline; margin-left: 4px; }
   } else if (navigator.storage?.persist) {
     navigator.storage.persist().catch(() => void 0);
   }
-  renderFila();
   loadFonts().then(loadCafes);
 })();
 

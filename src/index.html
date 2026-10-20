@@ -30,7 +30,6 @@
 <!-- ============ EMITIR ============ -->
 <section id="emitir" class="panel active">
   <div class="split">
-    <div class="coluna">
     <form id="form" class="card" novalidate>
       <label><span>Cliente <small>(Produzido para)</small></span>
         <input id="cliente" type="text" autocomplete="off" maxlength="120" placeholder="Nome do cliente">
@@ -69,36 +68,12 @@
           </div>
         </div>
       </div>
-      <div class="acoes">
-        <button id="adicionar" type="button" class="add">
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
-          <span>Adicionar à fila</span>
-        </button>
-        <button id="imprimir" type="submit" class="print">
-          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9V3h10v6"/><rect x="3" y="9" width="18" height="9" rx="2"/><path d="M7 14h10v7H7z"/></svg>
-          <span>Imprimir</span>
-        </button>
-      </div>
+      <button id="imprimir" type="submit" class="print">
+        <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9V3h10v6"/><rect x="3" y="9" width="18" height="9" rx="2"/><path d="M7 14h10v7H7z"/></svg>
+        <span>Imprimir</span>
+      </button>
       <div id="aviso" role="status" aria-live="polite"></div>
     </form>
-
-    <section id="fila-card" class="card fila" aria-labelledby="fila-titulo" hidden>
-      <div class="fila-topo">
-        <div>
-          <h3 id="fila-titulo">Fila de impressão</h3>
-          <span id="fila-resumo" class="sub"></span>
-        </div>
-        <button type="button" id="fila-limpar" class="link">Limpar fila</button>
-      </div>
-      <ul id="fila-lista"></ul>
-      <button id="fila-imprimir" type="button" class="print">
-        <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9V3h10v6"/><rect x="3" y="9" width="18" height="9" rx="2"/><path d="M7 14h10v7H7z"/></svg>
-        <span id="fila-imprimir-texto">Imprimir fila</span>
-        <span id="fila-contagem" class="contagem"></span>
-      </button>
-      <div id="aviso-fila" role="status" aria-live="polite"></div>
-    </section>
-    </div>
 
     <div class="preview">
       <div class="sheet">

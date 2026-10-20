@@ -2,15 +2,13 @@ import { formatDate } from './label/format.js';
 import type { Rotacao } from './label/rotate.js';
 import type { Bitmap1bpp, DadosRotulo } from './label/types.js';
 import { drawBitmap, loadFonts, renderLabel } from './env.js';
-import { FilaDeImpressao, LIMITE_ETIQUETAS, dadosDoItem, totalEtiquetas } from './fila.js';
-import { baixarPng, imprimir, imprimirLotes } from './print.js';
+import { baixarPng, imprimir } from './print.js';
 import { camposFaltando, dadosDoPedido, ordenarCafes, textoNaLista, type Pedido } from './request.js';
 import { BrowserRepository, CafeBook, exportBackup, importBackup, type Cafe } from './storage.js';
 
 const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
 const repo = new BrowserRepository();
 const book = new CafeBook(repo);
-const fila = new FilaDeImpressao(repo);
 
 const today = () => {
   const d = new Date();
@@ -143,8 +141,8 @@ async function emitir(dados: DadosRotulo, copias: number): Promise<string> {
   return `${copias === 1 ? '1 etiqueta enviada' : `${copias} etiquetas enviadas`} para impressão (${r.largura} × ${r.altura}). Confira na impressora.`;
 }
 
-/** Confere os campos obrigatórios. Se faltar algo, destaca os campos, avisa e devolve null. */
-function lerFormulario(acao: 'imprimi' | 'adicionei'): Pedido | null {
+$('form').addEventListener('submit', async (ev) => {
+  ev.preventDefault();
   document.querySelectorAll('.invalido').forEach((e) => e.classList.remove('invalido'));
   const p = pedido();
   const faltam: string[] = [];
@@ -156,166 +154,24 @@ function lerFormulario(acao: 'imprimi' | 'adicionei'): Pedido | null {
   if (camposFaltando(p).some((f) => f.startsWith('Número'))) faltam.push('copias');
   if (faltam.length) {
     faltam.forEach((id) => $(id).classList.add('invalido'));
-    aviso($('aviso'), 'fail', `Não ${acao}. Falta preencher: ${faltam.map((id) => FIELDS[id]).join(', ')}.`);
+    aviso($('aviso'), 'fail', `Não imprimi. Falta preencher: ${faltam.map((id) => FIELDS[id]).join(', ')}.`);
     $(faltam[0]).focus();
-    return null;
+    return;
   }
-  return p;
-}
-
-/** Depois de imprimir ou adicionar à fila: mantém café, peso, moagem e data; limpa só o cliente. */
-function prepararProximo(): void {
-  ($('cliente') as HTMLInputElement).value = '';
-  refreshPreview();
-  $('cliente').focus();
-}
-
-$('form').addEventListener('submit', async (ev) => {
-  ev.preventDefault();
-  const p = lerFormulario('imprimi');
-  if (!p) return;
   const dados = dadosDoPedido(p)!;
   ($('imprimir') as HTMLButtonElement).disabled = true;
   aviso($('aviso'), '', 'Preparando a impressão…');
   try {
     const msg = await emitir(dados, p.copias);
     aviso($('aviso'), 'ok', '✔ ' + msg);
-    prepararProximo();
+    // mantém café, peso, moagem e data; limpa só o cliente
+    ($('cliente') as HTMLInputElement).value = '';
+    refreshPreview();
+    $('cliente').focus();
   } catch (e) {
     aviso($('aviso'), 'fail', '✖ ' + (e instanceof Error ? e.message : 'Erro inesperado.'));
   } finally {
     ($('imprimir') as HTMLButtonElement).disabled = false;
-  }
-});
-
-// ---------- fila de impressão
-const plural = (n: number, um: string, varios: string) => `${n} ${n === 1 ? um : varios}`;
-
-$('adicionar').addEventListener('click', () => {
-  const p = lerFormulario('adicionei');
-  if (!p) return;
-  try {
-    fila.adicionar(p);
-  } catch (e) {
-    aviso($('aviso'), 'fail', '✖ ' + (e instanceof Error ? e.message : 'Erro inesperado.'));
-    return;
-  }
-  const itens = fila.list();
-  aviso($('aviso'), 'ok', `✔ Adicionado à fila: ${plural(p.copias, 'etiqueta', 'etiquetas')} de "${p.cliente.trim()}". Na fila: ${plural(fila.total(), 'etiqueta', 'etiquetas')} (${plural(itens.length, 'item', 'itens')}).`);
-  renderFila();
-  prepararProximo();
-});
-
-function renderFila(): void {
-  const itens = fila.list();
-  const card = $('fila-card');
-  card.hidden = itens.length === 0;
-  if (!itens.length) return;
-  const todos = book.list();
-  const pendentes = itens.filter((i) => !i.enviado);
-  $('fila-resumo').textContent = `${plural(totalEtiquetas(itens), 'etiqueta', 'etiquetas')} · ${plural(itens.length, 'item', 'itens')}`;
-  $('fila-lista').innerHTML = itens
-    .map((i) => {
-      const nome = textoNaLista({ id: i.cafeId, nome: i.cafe.nome, torra: i.cafe.torra }, todos);
-      const data = i.dataTorra.split('-').reverse().join('/');
-      return `<li class="fila-item ${i.enviado ? 'enviado' : ''}" data-id="${esc(i.id)}">
-        <div class="fila-info">
-          <strong>${esc(nome)}</strong>
-          <div class="fila-tags"><span class="tag">${esc(i.peso)} · ${esc(i.moagem)}</span>${i.enviado ? '<span class="tag enviado">✔ Enviado</span>' : ''}</div>
-          <small>${esc(i.cliente)} · torra ${esc(data)}</small>
-        </div>
-        <div class="fila-copias"><button type="button" data-act="menos" aria-label="Menos uma cópia de ${esc(i.cliente)}">−</button><span aria-label="${i.copias} cópias">${i.copias}</span><button type="button" data-act="mais" aria-label="Mais uma cópia de ${esc(i.cliente)}">+</button></div>
-        <div class="fila-acoes">
-          <button type="button" class="fila-btn" data-act="editar">Editar</button>
-          <button type="button" class="fila-btn danger" data-act="remover" aria-label="Remover ${esc(i.cliente)} da fila">Remover</button>
-        </div>
-      </li>`;
-    })
-    .join('');
-  const aImprimir = pendentes.length ? totalEtiquetas(pendentes) : totalEtiquetas(itens);
-  $('fila-imprimir-texto').textContent = pendentes.length ? 'Imprimir fila' : 'Imprimir de novo';
-  $('fila-contagem').textContent = plural(aImprimir, 'etiqueta', 'etiquetas');
-}
-
-$('fila-lista').addEventListener('click', (ev) => {
-  const b = (ev.target as HTMLElement).closest('button');
-  const li = (ev.target as HTMLElement).closest('li');
-  if (!b || !li) return;
-  const id = li.dataset.id ?? '';
-  const item = fila.list().find((i) => i.id === id);
-  if (!item) return;
-  aviso($('aviso-fila'), '', '');
-  if (b.dataset.act === 'mais' || b.dataset.act === 'menos') {
-    const novo = fila.alterarCopias(id, item.copias + (b.dataset.act === 'mais' ? 1 : -1));
-    if (b.dataset.act === 'mais' && novo === item.copias) aviso($('aviso-fila'), 'fail', `A fila não pode passar de ${LIMITE_ETIQUETAS} etiquetas.`);
-    renderFila();
-  } else if (b.dataset.act === 'remover') {
-    fila.remover(id);
-    renderFila();
-  } else if (b.dataset.act === 'editar') {
-    editarItem(id);
-  }
-});
-
-/** Devolve o item ao formulário (e o tira da fila) para corrigir; depois é só adicionar de novo. */
-function editarItem(id: string): void {
-  const item = fila.remover(id);
-  if (!item) return;
-  const cafeSelect = $('cafe') as HTMLSelectElement;
-  const existe = [...cafeSelect.options].some((o) => o.value === item.cafeId);
-  cafeSelect.value = existe ? item.cafeId : '';
-  for (const [campo, valor] of [['peso', item.peso], ['moagem', item.moagem]] as const) {
-    ($(campo) as HTMLSelectElement).value = valor;
-    $(campo).dispatchEvent(new Event('change')); // atualiza os botões de escolha
-  }
-  ($('cliente') as HTMLInputElement).value = item.cliente;
-  ($('data') as HTMLInputElement).value = item.dataTorra;
-  ($('copias') as HTMLInputElement).value = String(item.copias);
-  document.querySelectorAll('.invalido').forEach((e) => e.classList.remove('invalido'));
-  refreshPreview();
-  renderFila();
-  aviso($('aviso'), existe ? 'ok' : 'fail', existe ? '✔ Item levado para o formulário. Corrija e clique em "Adicionar à fila" de novo.' : `Item levado para o formulário, mas o café "${item.cafe.nome}" não está mais ativo. Escolha um café para continuar.`);
-  $('cliente').focus();
-}
-
-$('fila-limpar').addEventListener('click', () => {
-  const itens = fila.list();
-  if (itens.some((i) => !i.enviado) && !confirm(`Remover ${plural(itens.length, 'item', 'itens')} da fila? Eles ainda não foram impressos.`)) return;
-  fila.limpar();
-  aviso($('aviso-fila'), '', '');
-  renderFila();
-});
-
-$('fila-imprimir').addEventListener('click', async () => {
-  const itens = fila.list();
-  if (!itens.length) return;
-  const btn = $('fila-imprimir') as HTMLButtonElement;
-  btn.disabled = true;
-  const aviso2 = $('aviso-fila');
-  try {
-    const cfg = repo.getConfig();
-    const lotes = [];
-    for (let k = 0; k < itens.length; k++) {
-      aviso(aviso2, '', `Preparando o rótulo ${k + 1} de ${itens.length}…`);
-      await new Promise((r) => setTimeout(r, 0)); // deixa a tela atualizar entre um rótulo e outro
-      lotes.push({ bmp: await renderLabel(dadosDoItem(itens[k]), { selo: cfg.selo }), copias: itens[k].copias });
-    }
-    let msg: string;
-    if (cfg.modoSemImpressora) {
-      const carimbo = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-      lotes.forEach((l, k) => baixarPng(l.bmp, `rotulo-fila-${carimbo}-${String(k + 1).padStart(2, '0')}.png`));
-      msg = `Modo sem impressora: ${plural(lotes.length, 'rótulo foi baixado', 'rótulos foram baixados')} como imagem.`;
-    } else {
-      const r = await imprimirLotes(lotes, cfg.rotacao);
-      msg = `${plural(r.copias, 'etiqueta enviada', 'etiquetas enviadas')} para impressão (${r.largura} × ${r.altura}), de ${plural(itens.length, 'item', 'itens')}. Confira na impressora.`;
-    }
-    fila.marcarEnviadas();
-    renderFila();
-    aviso(aviso2, 'ok', `✔ ${msg} Os itens ficam marcados como enviados; use "Limpar fila" quando terminar.`);
-  } catch (e) {
-    aviso(aviso2, 'fail', '✖ ' + (e instanceof Error ? e.message : 'Erro inesperado.'));
-  } finally {
-    btn.disabled = false;
   }
 });
 
@@ -451,5 +307,4 @@ if (!repo.persistent) {
 } else if (navigator.storage?.persist) {
   navigator.storage.persist().catch(() => undefined); // pede ao navegador para não apagar os dados sozinho
 }
-renderFila();
 loadFonts().then(loadCafes);
