@@ -66,14 +66,12 @@ label.check input { width: 24px; min-height: 0; height: 24px; accent-color: var(
 
 /* ---------- botões */
 button { font-family: inherit; }
-button.big { font: 400 17px var(--f-semi); min-height: 54px; padding: 0 24px; border-radius: 12px; border: 1.5px solid var(--ink); background: var(--card); color: var(--ink); cursor: pointer; }
+button.big { font: 400 17px var(--f-semi); min-height: 54px; padding: 0 24px; border-radius: 12px; border: 2px solid var(--ink); background: var(--card); color: var(--ink); cursor: pointer; }
 button.big:hover { background: #f5f1ea; }
 button.primary { background: var(--ink); color: #fff; }
 button.primary:hover { background: #2b2521; }
 button:focus-visible { outline: none; box-shadow: 0 0 0 4px var(--ring); }
 button:disabled { opacity: .55; cursor: wait; }
-.print { display: flex; align-items: center; justify-content: center; gap: 12px; min-height: 68px; border: 0; border-radius: 16px; background: var(--ink); color: #fff; font: 400 23px var(--f-bold); letter-spacing: -.2px; cursor: pointer; }
-.print:hover { background: #2b2521; }
 
 /* ---------- avisos */
 #aviso:empty, #aviso-config:empty, #aviso-backup:empty, .erro:empty { display: none; }
@@ -138,10 +136,7 @@ label > span small { display: inline; margin-left: 4px; }
 
 /* ---------- botões Adicionar à fila / Imprimir */
 .coluna { display: flex; flex-direction: column; gap: 22px; min-width: 0; }
-.acoes { display: grid; grid-template-columns: 1fr 1.2fr; gap: 12px; }
-.add { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 68px; padding: 0 10px; border: 2px solid var(--ink); border-radius: 16px; background: var(--card); color: var(--ink); font: 400 17px var(--f-semi); cursor: pointer; }
-.add:hover { background: #f5f1ea; }
-.add:disabled { opacity: .55; cursor: wait; }
+.acoes { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 @media (max-width: 420px) { .acoes { grid-template-columns: 1fr; } }
 
 /* ---------- fila de impressão */
@@ -169,8 +164,28 @@ label > span small { display: inline; margin-left: 4px; }
 .fila-btn:hover { background: #ece6dc; color: var(--ink); }
 .fila-btn.danger { color: var(--err); }
 .fila-btn.danger:hover { background: var(--err-bg); color: var(--err); }
-.print svg { flex: none; }
 .print .contagem { padding: 3px 12px; border-radius: 999px; background: rgba(255, 255, 255, .2); font: 400 15px var(--f-semi); white-space: nowrap; }
 .print .contagem:empty { display: none; }
 #fila-imprimir-texto { white-space: nowrap; }
 #aviso-fila:empty { display: none; }
+
+/* ---------- botões de ação principais (Adicionar à fila, Imprimir, Imprimir fila)
+   Mesmo tamanho, fonte, borda e raio; só as cores mudam: primário (cheio) e secundário (contorno). */
+.print, .add { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 68px; padding: 0 12px; border: 2px solid var(--ink); border-radius: 16px; font: 400 19px var(--f-bold); letter-spacing: -.1px; white-space: nowrap; cursor: pointer; }
+.print { background: var(--ink); color: #fff; }
+.print:hover { background: #2b2521; border-color: #2b2521; }
+.add { background: var(--card); color: var(--ink); }
+.add:hover { background: #f5f1ea; }
+.print:disabled, .add:disabled { opacity: .55; cursor: wait; }
+.print svg, .add svg { flex: none; width: 24px; height: 24px; }
+
+/* ---------- aviso temporário (toast) no canto superior direito */
+#toasts { position: fixed; top: 16px; right: 16px; z-index: 1000; display: flex; flex-direction: column; gap: 10px; width: min(380px, calc(100vw - 32px)); pointer-events: none; }
+.toast { pointer-events: auto; display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; border-radius: 14px; background: var(--ink); color: #fff; box-shadow: 0 12px 32px rgba(22, 19, 17, .3); cursor: pointer; animation: toast-entra .22s ease-out; transition: opacity .2s, transform .2s; }
+.toast.saindo { opacity: 0; transform: translateX(16px); }
+.toast-icone { flex: none; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: #3fa36a; font-size: 14px; line-height: 1; }
+.toast strong { display: block; font: 400 16px var(--f-bold); }
+.toast small { display: block; margin-top: 2px; color: #d9d2c8; font: 400 14px/1.35 var(--f); overflow-wrap: anywhere; }
+@keyframes toast-entra { from { opacity: 0; transform: translate(16px, -6px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .toast { animation: none; transition: none; } }
+@media print { #toasts { display: none !important; } }

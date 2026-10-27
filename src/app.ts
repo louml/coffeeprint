@@ -4,6 +4,7 @@ import type { Bitmap1bpp, DadosRotulo } from './label/types.js';
 import { drawBitmap, loadFonts, renderLabel } from './env.js';
 import { FilaDeImpressao, LIMITE_ETIQUETAS, dadosDoItem, totalEtiquetas } from './fila.js';
 import { baixarPng, imprimir, imprimirLotes } from './print.js';
+import { mostrarToast } from './toast.js';
 import { camposFaltando, dadosDoPedido, ordenarCafes, textoNaLista, type Pedido } from './request.js';
 import { BrowserRepository, CafeBook, exportBackup, importBackup, type Cafe } from './storage.js';
 
@@ -201,7 +202,8 @@ $('adicionar').addEventListener('click', () => {
     return;
   }
   const itens = fila.list();
-  aviso($('aviso'), 'ok', `✔ Adicionado à fila: ${plural(p.copias, 'etiqueta', 'etiquetas')} de "${p.cliente.trim()}". Na fila: ${plural(fila.total(), 'etiqueta', 'etiquetas')} (${plural(itens.length, 'item', 'itens')}).`);
+  aviso($('aviso'), '', ''); // limpa qualquer aviso anterior; o sucesso aparece como aviso temporário
+  mostrarToast('Adicionado à fila', `${plural(p.copias, 'etiqueta', 'etiquetas')} de "${p.cliente.trim()}" · Na fila: ${plural(fila.total(), 'etiqueta', 'etiquetas')} (${plural(itens.length, 'item', 'itens')})`);
   renderFila();
   prepararProximo();
 });
