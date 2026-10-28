@@ -439,41 +439,39 @@ label > span small { display: inline; margin-left: 4px; }
     return { size, lines };
   }
   var LEFT = 46;
-  var RIGHT = 591;
+  var RIGHT = 598;
   var CW = RIGHT - LEFT;
-  var RULE4_Y = 659;
-  var RULE_H = 2;
+  var RULE4_Y = 655;
+  var RULE_H = 3;
   var NAME_SIZE = 43.8;
-  var SIZE = { title: NAME_SIZE, peso: 38.8, label: 22.6, value: 28, row: 22.4, date: 22.9, produzido: 28.1, client: NAME_SIZE, footer: 17.1 };
+  var SIZE = { title: NAME_SIZE, peso: 38.8, label: 22.6, value: 28, sub: 28, row: 22.9, produzido: 28.1, client: NAME_SIZE, footer: 17.1 };
   var FOOTER_LINES = [
     "Produto artesanal. Conservar em local fresco e arejado.",
     "Validade de 6 meses a partir da data de torra.",
     "G. Gomes de Carvalho Ltda - CNPJ 36530500000182 - Porto Alegre, RS",
     "sac@torralocal.com.br - www.torralocal.com.br"
   ];
-  var FOOTER_BASELINES = [702, 722, 742, 762];
+  var FOOTER_BASELINES = [696.5, 716.5, 736.5, 756.5];
   var FOOTER_MAX_W = WIDTH - 2 * 24;
   var text = (text2, family, size, x, y, align = "left") => ({ t: "text", text: text2, family, size, x, y, align });
   function moagemNoRotulo(moagem) {
     return moagem === "Gr\xE3o" ? "Em gr\xE3os" : moagem;
   }
   var lineText = (line) => line.map((t) => t.text).join(" ");
-  function spreadRow(ctx, items, baseline) {
-    if (!items.length) return [];
-    let size = SIZE.row;
-    let widths = [];
-    for (; size >= 14; size -= 0.5) {
-      ctx.font = font(BOLD, size);
-      widths = items.map((t) => ctx.measureText(t).width);
-      if (items.length === 1 || (CW - widths.reduce((a, b) => a + b, 0)) / (items.length - 1) >= 14) break;
+  function duasPontas(ctx, esq, dir, baseline, family, size) {
+    const a = esq.trim();
+    const b = dir.trim();
+    let tam = size;
+    if (a && b) {
+      for (; tam >= 14; tam -= 0.5) {
+        ctx.font = font(family, tam);
+        if (ctx.measureText(a).width + ctx.measureText(b).width + 16 <= CW) break;
+      }
     }
-    const gap = items.length > 1 ? (CW - widths.reduce((a, b) => a + b, 0)) / (items.length - 1) : 0;
-    let x = LEFT;
-    return items.map((t, i) => {
-      const op = text(t, BOLD, size, x, baseline);
-      x += widths[i] + gap;
-      return op;
-    });
+    const ops = [];
+    if (a) ops.push(text(a, family, tam, LEFT, baseline));
+    if (b) ops.push(text(b, family, tam, RIGHT + 2, baseline, "right"));
+    return ops;
   }
   function plan(ctx, d, s) {
     const ops = [];
@@ -481,10 +479,14 @@ label > span small { display: inline; margin-left: 4px; }
     ctx.font = font(SEMI, SIZE.peso);
     const pesoW = ctx.measureText(d.peso).width;
     const title = fitTokens(ctx, tokenize([{ text: c.nome, family: SEMI }]), CW - pesoW - 24, SIZE.title, 22, 2, 30);
-    const base1 = 49 + 0.757 * title.size;
+    const base1 = 38 + 0.757 * title.size;
     title.lines.forEach((line, i) => ops.push(text(lineText(line), SEMI, title.size, LEFT, base1 + i * Math.round(title.size * 1.15))));
-    ops.push(text(d.peso, SEMI, SIZE.peso, RIGHT, base1 - 3.3, "right"));
-    const rule1 = base1 + (title.lines.length - 1) * Math.round(title.size * 1.15) + 24;
+    ops.push(text(d.peso, SEMI, SIZE.peso, RIGHT + 4, base1 - 3.3, "right"));
+    const tituloFim = base1 + (title.lines.length - 1) * Math.round(title.size * 1.15);
+    const temSub = c.especie.trim() !== "" || d.moagem.trim() !== "";
+    const subBase = tituloFim + 47.5;
+    ops.push(...duasPontas(ctx, c.especie, moagemNoRotulo(d.moagem), subBase, REG, SIZE.sub));
+    const rule1 = temSub ? subBase + 22.5 : tituloFim + 24;
     ops.push({ t: "rule", y: rule1 });
     const fields = [
       ["Notas sensoriais:", c.notas],
@@ -492,7 +494,7 @@ label > span small { display: inline; margin-left: 4px; }
       ["Variedade:", c.variedade],
       ["Regi\xE3o:", c.regiao]
     ];
-    let lb = rule1 + 40.5 * s;
+    let lb = rule1 + 38.4 * s;
     let lastBase = rule1;
     for (const [label, value] of fields) {
       if (!value.trim()) continue;
@@ -508,21 +510,19 @@ label > span small { display: inline; margin-left: 4px; }
       }
       lb = lastBase + 38.7 * s;
     }
-    const rule2 = lastBase + 21.6 * s;
+    const rule2 = lastBase + 22.5 * s;
     ops.push({ t: "rule", y: rule2 });
-    const rowBase = rule2 + 43.5 * s;
-    ops.push(...spreadRow(ctx, [c.especie, c.torra, moagemNoRotulo(d.moagem)].filter((t) => t.trim()), rowBase));
-    const dateBase = rowBase + 38.8 * s;
-    ops.push(text(`Data de torra: ${d.dataTorra}`, BOLD, SIZE.date * s, LEFT, dateBase));
-    const upperEnd = dateBase + 29.5 * s;
+    const dateBase = rule2 + 43.1 * s;
+    ops.push(...duasPontas(ctx, `Data de torra: ${d.dataTorra}`, c.torra, dateBase, BOLD, SIZE.row * s));
+    const upperEnd = dateBase + 21.8 * s;
     const client = tokenize([{ text: d.cliente.trim(), family: SEMI }]);
     const cfit = client.length ? fitTokens(ctx, client, CW, SIZE.client, 20, 2, 30) : { size: SIZE.client, lines: [] };
     const clh = Math.round(cfit.size * 1.2);
     const nLines = Math.max(1, cfit.lines.length);
     const clientSpan = 0.757 * cfit.size + (nLines - 1) * clh;
-    const lowerH = 42.1 * s + 22.8 * s + clientSpan + 27 * s;
+    const lowerH = 53.2 * s + 22.8 * s + clientSpan + 23.4 * s;
     const rule3 = RULE4_Y - lowerH;
-    const prodBase = rule3 + 42.1 * s;
+    const prodBase = rule3 + 53.2 * s;
     const lowerOps = [{ t: "rule", y: rule3 }, text("Produzido para:", REG, SIZE.produzido * s, LEFT, prodBase)];
     cfit.lines.forEach((line, i) => lowerOps.push(text(lineText(line), SEMI, cfit.size, LEFT, prodBase + 22.8 * s + 0.757 * cfit.size + i * clh)));
     return { ops: [...ops, ...lowerOps], overflow: upperEnd - rule3 };
@@ -538,27 +538,27 @@ label > span small { display: inline; margin-left: 4px; }
     }
     for (const op of p.ops) {
       if (op.t === "rule") {
-        ctx.fillRect(LEFT + 2, Math.round(op.y), CW - 2, RULE_H);
+        ctx.fillRect(LEFT, Math.round(op.y), CW, RULE_H);
       } else {
         ctx.font = font(op.family, op.size);
         ctx.textAlign = op.align;
         ctx.fillText(op.text, op.x, op.y);
       }
     }
-    ctx.fillRect(LEFT + 2, RULE4_Y, CW - 2, RULE_H);
+    ctx.fillRect(LEFT, RULE4_Y, CW, RULE_H);
     ctx.textAlign = "center";
     FOOTER_LINES.forEach((line, i) => {
       const { size } = fitTokens(ctx, [{ text: line, family: REG }], FOOTER_MAX_W, SIZE.footer, 11, 1);
       ctx.font = font(REG, size);
-      ctx.fillText(line, WIDTH / 2, FOOTER_BASELINES[i]);
+      ctx.fillText(line, (LEFT + RIGHT) / 2, FOOTER_BASELINES[i]);
     });
     ctx.textAlign = "left";
   }
   var SEAL_DENSITY = 0.2;
   var DITHER_NOISE = 0.35;
-  var SEAL_DIAMETER = 370;
-  var SEAL_CX = 437;
-  var SEAL_CY = 316;
+  var SEAL_DIAMETER = 263;
+  var SEAL_CX = 468;
+  var SEAL_CY = 305;
   var INK_THRESHOLD = 170;
   var HALO = 3;
   function mulberry32(seed) {

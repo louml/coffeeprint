@@ -102,17 +102,17 @@ function fitTokens(
 }
 
 // ---------------------------------------------------------------- layout
-// Medidas tiradas do modelo de referência (imagem 945x1181 reduzida para 640x800 pontos, 203 dpi).
+// Medidas tiradas do modelo de referência (docs/modelo-do-rotulo.png, reduzido para 640x800 pontos, 203 dpi).
 
 const LEFT = 46;
-const RIGHT = 591;
+const RIGHT = 598;
 const CW = RIGHT - LEFT;
-const RULE4_Y = 659; // última linha: o rodapé fica fixo abaixo dela
-const RULE_H = 2;
+const RULE4_Y = 655; // última linha: o rodapé fica fixo abaixo dela
+const RULE_H = 3;
 
 // O nome do café (título) e o do cliente têm o mesmo tamanho e o mesmo peso (semibold), como no modelo.
 const NAME_SIZE = 43.8;
-const SIZE = { title: NAME_SIZE, peso: 38.8, label: 22.6, value: 28, row: 22.4, date: 22.9, produzido: 28.1, client: NAME_SIZE, footer: 17.1 };
+const SIZE = { title: NAME_SIZE, peso: 38.8, label: 22.6, value: 28, sub: 28, row: 22.9, produzido: 28.1, client: NAME_SIZE, footer: 17.1 };
 
 const FOOTER_LINES = [
   'Produto artesanal. Conservar em local fresco e arejado.',
@@ -120,7 +120,7 @@ const FOOTER_LINES = [
   'G. Gomes de Carvalho Ltda - CNPJ 36530500000182 - Porto Alegre, RS',
   'sac@torralocal.com.br - www.torralocal.com.br',
 ];
-const FOOTER_BASELINES = [702, 722, 742, 762];
+const FOOTER_BASELINES = [696.5, 716.5, 736.5, 756.5];
 const FOOTER_MAX_W = WIDTH - 2 * 24;
 
 type Op =
@@ -136,23 +136,24 @@ export function moagemNoRotulo(moagem: string): string {
 
 const lineText = (line: Token[]) => line.map((t) => t.text).join(' ');
 
-/** Posições dos itens da linha "espécie / torra / moagem": espaços iguais entre eles, de ponta a ponta. */
-function spreadRow(ctx: Ctx, items: string[], baseline: number): Op[] {
-  if (!items.length) return [];
-  let size = SIZE.row;
-  let widths: number[] = [];
-  for (; size >= 14; size -= 0.5) {
-    ctx.font = font(BOLD, size);
-    widths = items.map((t) => ctx.measureText(t).width);
-    if (items.length === 1 || (CW - widths.reduce((a, b) => a + b, 0)) / (items.length - 1) >= 14) break;
+/**
+ * Dois textos na mesma linha: um colado na margem esquerda e o outro na direita. Se não couberem juntos,
+ * a fonte diminui um pouco. Um texto vazio simplesmente não aparece.
+ */
+function duasPontas(ctx: Ctx, esq: string, dir: string, baseline: number, family: string, size: number): Op[] {
+  const a = esq.trim();
+  const b = dir.trim();
+  let tam = size;
+  if (a && b) {
+    for (; tam >= 14; tam -= 0.5) {
+      ctx.font = font(family, tam);
+      if (ctx.measureText(a).width + ctx.measureText(b).width + 16 <= CW) break;
+    }
   }
-  const gap = items.length > 1 ? (CW - widths.reduce((a, b) => a + b, 0)) / (items.length - 1) : 0;
-  let x = LEFT;
-  return items.map((t, i) => {
-    const op = text(t, BOLD, size, x, baseline);
-    x += widths[i] + gap;
-    return op;
-  });
+  const ops: Op[] = [];
+  if (a) ops.push(text(a, family, tam, LEFT, baseline));
+  if (b) ops.push(text(b, family, tam, RIGHT + 2, baseline, 'right')); // +2: a tinta termina na margem
+  return ops;
 }
 
 /** Calcula onde cada texto e linha vai ficar, com tudo reduzido na escala `s` (1 = tamanho do modelo). */
@@ -164,10 +165,16 @@ function plan(ctx: Ctx, d: DadosRotulo, s: number) {
   ctx.font = font(SEMI, SIZE.peso);
   const pesoW = ctx.measureText(d.peso).width;
   const title = fitTokens(ctx, tokenize([{ text: c.nome, family: SEMI }]), CW - pesoW - 24, SIZE.title, 22, 2, 30);
-  const base1 = 49 + 0.757 * title.size;
+  const base1 = 38 + 0.757 * title.size;
   title.lines.forEach((line, i) => ops.push(text(lineText(line), SEMI, title.size, LEFT, base1 + i * Math.round(title.size * 1.15))));
-  ops.push(text(d.peso, SEMI, SIZE.peso, RIGHT, base1 - 3.3, 'right')); // o peso fica um pouco acima da linha de base do título, como no modelo
-  const rule1 = base1 + (title.lines.length - 1) * Math.round(title.size * 1.15) + 24;
+  ops.push(text(d.peso, SEMI, SIZE.peso, RIGHT + 4, base1 - 3.3, 'right')); // o peso fica um pouco acima da linha de base do título, como no modelo
+  const tituloFim = base1 + (title.lines.length - 1) * Math.round(title.size * 1.15);
+
+  // Espécie (esquerda) e moagem (direita) logo abaixo do título: a moagem fica bem à vista
+  const temSub = c.especie.trim() !== '' || d.moagem.trim() !== '';
+  const subBase = tituloFim + 47.5;
+  ops.push(...duasPontas(ctx, c.especie, moagemNoRotulo(d.moagem), subBase, REG, SIZE.sub));
+  const rule1 = temSub ? subBase + 22.5 : tituloFim + 24;
   ops.push({ t: 'rule', y: rule1 });
 
   // Rótulo em negrito numa linha e valor na linha de baixo
@@ -177,7 +184,7 @@ function plan(ctx: Ctx, d: DadosRotulo, s: number) {
     ['Variedade:', c.variedade],
     ['Região:', c.regiao],
   ];
-  let lb = rule1 + 40.5 * s;
+  let lb = rule1 + 38.4 * s;
   let lastBase = rule1;
   for (const [label, value] of fields) {
     if (!value.trim()) continue;
@@ -193,14 +200,13 @@ function plan(ctx: Ctx, d: DadosRotulo, s: number) {
     }
     lb = lastBase + 38.7 * s;
   }
-  const rule2 = lastBase + 21.6 * s;
+  const rule2 = lastBase + 22.5 * s;
   ops.push({ t: 'rule', y: rule2 });
 
-  const rowBase = rule2 + 43.5 * s;
-  ops.push(...spreadRow(ctx, [c.especie, c.torra, moagemNoRotulo(d.moagem)].filter((t) => t.trim()), rowBase));
-  const dateBase = rowBase + 38.8 * s;
-  ops.push(text(`Data de torra: ${d.dataTorra}`, BOLD, SIZE.date * s, LEFT, dateBase));
-  const upperEnd = dateBase + 29.5 * s; // onde a linha 3 ficaria logo depois da data
+  // Data de torra (esquerda) e nível de torra (direita)
+  const dateBase = rule2 + 43.1 * s;
+  ops.push(...duasPontas(ctx, `Data de torra: ${d.dataTorra}`, c.torra, dateBase, BOLD, SIZE.row * s));
+  const upperEnd = dateBase + 21.8 * s; // onde a linha 3 ficaria logo depois da data
 
   // Bloco "Produzido para": ancorado na última linha, para o rodapé não se mexer
   const client = tokenize([{ text: d.cliente.trim(), family: SEMI }]);
@@ -208,9 +214,9 @@ function plan(ctx: Ctx, d: DadosRotulo, s: number) {
   const clh = Math.round(cfit.size * 1.2);
   const nLines = Math.max(1, cfit.lines.length);
   const clientSpan = 0.757 * cfit.size + (nLines - 1) * clh;
-  const lowerH = 42.1 * s + 22.8 * s + clientSpan + 27 * s;
+  const lowerH = 53.2 * s + 22.8 * s + clientSpan + 23.4 * s;
   const rule3 = RULE4_Y - lowerH;
-  const prodBase = rule3 + 42.1 * s;
+  const prodBase = rule3 + 53.2 * s;
   const lowerOps: Op[] = [{ t: 'rule', y: rule3 }, text('Produzido para:', REG, SIZE.produzido * s, LEFT, prodBase)];
   cfit.lines.forEach((line, i) => lowerOps.push(text(lineText(line), SEMI, cfit.size, LEFT, prodBase + 22.8 * s + 0.757 * cfit.size + i * clh)));
   return { ops: [...ops, ...lowerOps], overflow: upperEnd - rule3 };
@@ -229,21 +235,21 @@ function drawContent(ctx: Ctx, d: DadosRotulo): void {
   }
   for (const op of p.ops) {
     if (op.t === 'rule') {
-      ctx.fillRect(LEFT + 2, Math.round(op.y), CW - 2, RULE_H);
+      ctx.fillRect(LEFT, Math.round(op.y), CW, RULE_H);
     } else {
       ctx.font = font(op.family, op.size);
       ctx.textAlign = op.align;
       ctx.fillText(op.text, op.x, op.y);
     }
   }
-  ctx.fillRect(LEFT + 2, RULE4_Y, CW - 2, RULE_H);
+  ctx.fillRect(LEFT, RULE4_Y, CW, RULE_H);
 
   // Rodapé fixo
   ctx.textAlign = 'center';
   FOOTER_LINES.forEach((line, i) => {
     const { size } = fitTokens(ctx, [{ text: line, family: REG }], FOOTER_MAX_W, SIZE.footer, 11, 1);
     ctx.font = font(REG, size);
-    ctx.fillText(line, WIDTH / 2, FOOTER_BASELINES[i]);
+    ctx.fillText(line, (LEFT + RIGHT) / 2, FOOTER_BASELINES[i]);
   });
   ctx.textAlign = 'left';
 }
@@ -252,9 +258,9 @@ function drawContent(ctx: Ctx, d: DadosRotulo): void {
 
 const SEAL_DENSITY = 0.2; // fração de pontos pretos no fundo (cinza claro pontilhado)
 const DITHER_NOISE = 0.35; // ruído no limiar da difusão de erro (quebra padrões regulares)
-const SEAL_DIAMETER = 370;
-const SEAL_CX = 437;
-const SEAL_CY = 316;
+const SEAL_DIAMETER = 263;
+const SEAL_CX = 468;
+const SEAL_CY = 305;
 const INK_THRESHOLD = 170; // cinza abaixo do qual o ponto vira preto (mais alto = traço um pouco mais grosso)
 const HALO = 3; // área em branco ao redor do texto para o selo não atrapalhar a leitura
 

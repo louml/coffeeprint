@@ -17,7 +17,9 @@ test('rótulo: 640x800 pontos, 1 bit, e o selo muda a imagem', async () => {
 
 test('rótulo segue o modelo: linhas horizontais nas posições certas', async () => {
   const bmp = await renderLabel(arara, { selo: false });
-  for (const y of [106, 423, 534, 659]) assert.ok(pontosNaLinha(bmp, y) >= 540, `linha em y=${y} deveria cruzar a etiqueta`);
+  // 4 réguas de 3 pontos de espessura, de margem a margem
+  for (const y of [141, 457, 522, 655]) for (const dy of [0, 1, 2]) assert.ok(pontosNaLinha(bmp, y + dy) >= 540, `régua em y=${y + dy} deveria cruzar a etiqueta`);
+  assert.ok(pontosNaLinha(bmp, 144) < 300 && pontosNaLinha(bmp, 138) < 300, 'a régua tem só 3 pontos de espessura');
   assert.ok(pontosNaLinha(bmp, 300) < 300, 'no meio do bloco de informações não há linha contínua');
 });
 
@@ -28,10 +30,10 @@ test('textos muito longos cabem sem sair da área nem quebrar', async () => {
     cliente: 'Cafeteria e Empório Dona Maria Aparecida de Albuquerque Ltda',
   };
   const bmp = await renderLabel(longo, { selo: false });
-  for (const y of [659]) assert.ok(pontosNaLinha(bmp, y) >= 540);
+  for (const y of [655]) assert.ok(pontosNaLinha(bmp, y) >= 540);
   for (let y = 0; y < 800; y++) for (let b = 0; b < 3; b++) assert.equal(bmp.data[y * 80 + b], 0, `esquerda y=${y}`);
   // sem texto no rodapé acima da última linha: o cliente não invade a área abaixo dela
-  assert.ok(pontosNaLinha(bmp, 662) < 10);
+  assert.ok(pontosNaLinha(bmp, 664) < 10);
 });
 
 test('título do campo produtor ("Produtora") muda o rótulo', async () => {
@@ -68,13 +70,13 @@ test('selo: pontilhado orgânico (sem grade regular) e sempre igual para o mesmo
   assert.deepEqual(a.com.data, b.data, 'mesmo rótulo, mesma imagem (tela e impressão iguais)');
   // Em grade regular (tramado ordenado), o ponto a 4 pixels de distância repete o padrão quase sempre.
   let pretos = 0, repete4 = 0, repete8 = 0;
-  for (let y = 100; y < 560; y++) for (let x = 250; x < 600; x++) {
+  for (let y = 170; y < 440; y++) for (let x = 335; x < 600; x++) {
     if (!a.selo(x, y)) continue;
     pretos++;
     if (a.selo(x + 4, y)) repete4++;
     if (a.selo(x + 8, y)) repete8++;
   }
-  assert.ok(pretos > 5000, `o selo tem pontos (${pretos})`);
+  assert.ok(pretos > 2000, `o selo tem pontos (${pretos})`);
   assert.ok(repete4 / pretos < 0.45, `padrão a 4 px não pode repetir como grade (${(repete4 / pretos).toFixed(2)})`);
   assert.ok(repete8 / pretos < 0.45, `padrão a 8 px não pode repetir como grade (${(repete8 / pretos).toFixed(2)})`);
 });
@@ -84,7 +86,7 @@ test('selo: densidade de pontos próxima à configurada (cinza claro)', async ()
   // dentro das letras de TORRA LOCAL, a janela mais cheia deve ter ~20% de pontos pretos
   const W = 9;
   let maior = 0;
-  for (let y = 150; y < 320; y += W) for (let x = 270; x < 440; x += W) {
+  for (let y = 175; y < 435; y += W) for (let x = 335; x < 600; x += W) {
     let n = 0;
     for (let j = 0; j < W; j++) for (let i = 0; i < W; i++) if (selo(x + i, y + j)) n++;
     maior = Math.max(maior, n / (W * W));
@@ -97,11 +99,11 @@ test('nome do café e nome do cliente têm o mesmo tamanho e o mesmo peso', asyn
   const frase = 'Eliezer Ramos';
   const bmp = await renderLabel({ ...arara, cafe: { ...arara.cafe, nome: frase }, cliente: frase, peso: '' }, { selo: false });
   const tinta = (y0, y1) => { let n = 0; for (let y = y0; y <= y1; y++) n += pontosNaLinha(bmp, y); return n; };
-  const titulo = tinta(40, 95), cliente = tinta(590, 640);
+  const titulo = tinta(30, 90), cliente = tinta(590, 640);
   assert.ok(Math.abs(titulo - cliente) / cliente < 0.03, `título ${titulo} x cliente ${cliente}`);
 });
 
-test('moagem: a etiqueta mostra só "Em grãos" ou "Moído", sem a legenda "Moagem:"', async () => {
+test('moagem: logo abaixo do título, só "Em grãos" ou "Moído" (sem a legenda "Moagem:")', async () => {
   assert.equal(moagemNoRotulo('Grão'), 'Em grãos');
   assert.equal(moagemNoRotulo('Moído'), 'Moído');
   assert.equal(moagemNoRotulo(''), '');
@@ -110,7 +112,16 @@ test('moagem: a etiqueta mostra só "Em grãos" ou "Moído", sem a legenda "Moag
   const sem = await renderLabel({ ...arara, moagem: '' }, { selo: false });
   assert.notDeepEqual(grao.data, moido.data);
   assert.notDeepEqual(moido.data, sem.data);
-  // o item da direita da linha 100% Arábica / Torra / moagem termina junto da margem direita
-  const ultimaTinta = (b) => { let max = 0; for (let y = 440; y < 480; y++) for (let x = 400; x < 640; x++) if (b.data[y * 80 + (x >> 3)] & (0x80 >> (x & 7))) max = Math.max(max, x); return max; };
-  for (const b of [grao, moido]) assert.ok(ultimaTinta(b) >= 586 && ultimaTinta(b) <= 592, `termina na margem direita (${ultimaTinta(b)})`);
+  // a linha logo abaixo do título (y 90-130): espécie colada na esquerda e moagem colada na direita
+  const pontaEsquerda = (b) => { for (let x = 0; x < 320; x++) for (let y = 90; y < 130; y++) if (b.data[y * 80 + (x >> 3)] & (0x80 >> (x & 7))) return x; return -1; };
+  const pontaDireita = (b) => { let max = -1; for (let y = 90; y < 130; y++) for (let x = 330; x < 640; x++) if (b.data[y * 80 + (x >> 3)] & (0x80 >> (x & 7))) max = Math.max(max, x); return max; };
+  for (const b of [grao, moido]) {
+    assert.ok(pontaEsquerda(b) >= 44 && pontaEsquerda(b) <= 50, `espécie começa na margem esquerda (${pontaEsquerda(b)})`);
+    assert.ok(pontaDireita(b) >= 594 && pontaDireita(b) <= 600, `moagem termina na margem direita (${pontaDireita(b)})`);
+  }
+  // sem moagem escolhida (pré-visualização) não aparece nada à direita nessa linha
+  assert.ok(pontaDireita(sem) < 330 || pontaDireita(sem) === -1, 'sem moagem, o lado direito da linha fica vazio');
+  // e a moagem não aparece mais na linha da data de torra (lá fica só a torra)
+  const tintaDireita = (b, y0, y1, x0, x1) => { let n = 0; for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) if (b.data[y * 80 + (x >> 3)] & (0x80 >> (x & 7))) n++; return n; };
+  assert.equal(tintaDireita(grao, 478, 506, 330, 640), tintaDireita(moido, 478, 506, 330, 640), 'a linha da data não depende da moagem');
 });
