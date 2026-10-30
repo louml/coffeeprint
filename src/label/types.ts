@@ -19,6 +19,8 @@ export interface DadosRotulo {
   cliente: string;
   peso: string;
   moagem: string;
+  /** Tipo de entrega: "Uber", "Coleta" (na loja) ou "Motoboy". Vazio = sem tag. */
+  entrega?: string;
   /** Texto já formatado, ex.: 05/10/2026 */
   dataTorra: string;
 }

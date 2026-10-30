@@ -248,6 +248,15 @@ label > span small { display: inline; margin-left: 4px; }
           <option value="Moído">Moído</option>
         </select>
       </div>
+      <div class="field">
+        <span class="label-text" id="lbl-entrega">Entrega <small>(tag na etiqueta, opcional)</small></span>
+        <select id="entrega" class="choice-select" aria-labelledby="lbl-entrega">
+          <option value="">Sem tag</option>
+          <option value="Uber">Uber</option>
+          <option value="Coleta">Coleta</option>
+          <option value="Motoboy">Motoboy</option>
+        </select>
+      </div>
       <div class="row">
         <label>Data de torra
           <input id="data" type="date">
@@ -441,8 +450,11 @@ label > span small { display: inline; margin-left: 4px; }
   var LEFT = 46;
   var RIGHT = 598;
   var CW = RIGHT - LEFT;
-  var RULE4_Y = 655;
+  var RULE4_Y = 670;
+  var DATE_BASE = RULE4_Y - 22.8;
+  var MARGEM_V = 25;
   var RULE_H = 3;
+  var TAG_D = 33;
   var NAME_SIZE = 43.8;
   var SIZE = { title: NAME_SIZE, peso: 38.8, label: 22.6, value: 28, sub: 28, row: 22.9, produzido: 28.1, client: NAME_SIZE, footer: 17.1 };
   var FOOTER_LINES = [
@@ -451,11 +463,14 @@ label > span small { display: inline; margin-left: 4px; }
     "G. Gomes de Carvalho Ltda - CNPJ 36530500000182 - Porto Alegre, RS",
     "sac@torralocal.com.br - www.torralocal.com.br"
   ];
-  var FOOTER_BASELINES = [696.5, 716.5, 736.5, 756.5];
+  var FOOTER_BASELINES = [710.5, 730.5, 750.5, 770.5];
   var FOOTER_MAX_W = WIDTH - 2 * 24;
   var text = (text2, family, size, x, y, align = "left") => ({ t: "text", text: text2, family, size, x, y, align });
   function moagemNoRotulo(moagem) {
     return moagem === "Gr\xE3o" ? "Em gr\xE3os" : moagem;
+  }
+  function letraEntrega(entrega) {
+    return { Uber: "U", Coleta: "C", Motoboy: "E" }[entrega ?? ""] ?? "";
   }
   var lineText = (line) => line.map((t) => t.text).join(" ");
   function duasPontas(ctx, esq, dir, baseline, family, size) {
@@ -479,7 +494,7 @@ label > span small { display: inline; margin-left: 4px; }
     ctx.font = font(SEMI, SIZE.peso);
     const pesoW = ctx.measureText(d.peso).width;
     const title = fitTokens(ctx, tokenize([{ text: c.nome, family: SEMI }]), CW - pesoW - 24, SIZE.title, 22, 2, 30);
-    const base1 = 38 + 0.757 * title.size;
+    const base1 = MARGEM_V + 0.757 * title.size;
     title.lines.forEach((line, i) => ops.push(text(lineText(line), SEMI, title.size, LEFT, base1 + i * Math.round(title.size * 1.15))));
     ops.push(text(d.peso, SEMI, SIZE.peso, RIGHT + 4, base1 - 3.3, "right"));
     const tituloFim = base1 + (title.lines.length - 1) * Math.round(title.size * 1.15);
@@ -488,44 +503,58 @@ label > span small { display: inline; margin-left: 4px; }
     ops.push(...duasPontas(ctx, c.especie, moagemNoRotulo(d.moagem), subBase, REG, SIZE.sub));
     const rule1 = temSub ? subBase + 22.5 : tituloFim + 24;
     ops.push({ t: "rule", y: rule1 });
-    const fields = [
-      ["Notas sensoriais:", c.notas],
-      [`${c.rotuloProdutor?.trim() || "Produtor"}:`, c.produtor],
-      ["Variedade:", c.variedade],
-      ["Regi\xE3o:", c.regiao]
-    ];
-    let lb = rule1 + 38.4 * s;
-    let lastBase = rule1;
-    for (const [label, value] of fields) {
-      if (!value.trim()) continue;
-      ops.push(text(label, BOLD, SIZE.label * s, LEFT, lb));
-      const vs = SIZE.value * s;
-      const fit = fitTokens(ctx, tokenize([{ text: value, family: REG }]), CW, vs, vs * 0.8, 2, vs * 0.86);
-      const vlh = Math.round(fit.size * 1.25);
-      let vb = lb + 34.7 * s;
-      for (const line of fit.lines) {
-        ops.push(text(lineText(line), REG, fit.size, LEFT, vb));
-        lastBase = vb;
-        vb += vlh;
-      }
-      lb = lastBase + 38.7 * s;
-    }
-    const rule2 = lastBase + 22.5 * s;
-    ops.push({ t: "rule", y: rule2 });
-    const dateBase = rule2 + 43.1 * s;
-    ops.push(...duasPontas(ctx, `Data de torra: ${d.dataTorra}`, c.torra, dateBase, BOLD, SIZE.row * s));
-    const upperEnd = dateBase + 21.8 * s;
     const client = tokenize([{ text: d.cliente.trim(), family: SEMI }]);
     const cfit = client.length ? fitTokens(ctx, client, CW, SIZE.client, 20, 2, 30) : { size: SIZE.client, lines: [] };
     const clh = Math.round(cfit.size * 1.2);
     const nLines = Math.max(1, cfit.lines.length);
     const clientSpan = 0.757 * cfit.size + (nLines - 1) * clh;
-    const lowerH = 53.2 * s + 22.8 * s + clientSpan + 23.4 * s;
-    const rule3 = RULE4_Y - lowerH;
-    const prodBase = rule3 + 53.2 * s;
-    const lowerOps = [{ t: "rule", y: rule3 }, text("Produzido para:", REG, SIZE.produzido * s, LEFT, prodBase)];
-    cfit.lines.forEach((line, i) => lowerOps.push(text(lineText(line), SEMI, cfit.size, LEFT, prodBase + 22.8 * s + 0.757 * cfit.size + i * clh)));
-    return { ops: [...ops, ...lowerOps], overflow: upperEnd - rule3 };
+    const rule3 = DATE_BASE - 45;
+    const lowerH = 53.2 * s + 22.8 * s + clientSpan + 22 * s;
+    const rule2 = rule3 - lowerH;
+    const fields = [
+      ["Notas sensoriais:", c.notas],
+      [`${c.rotuloProdutor?.trim() || "Produtor"}:`, c.produtor],
+      ["Variedade:", c.variedade],
+      ["Regi\xE3o:", c.regiao]
+    ].filter(([, v]) => v.trim());
+    const fieldOps = [];
+    let lb = rule1 + 38.4 * s;
+    let lastBase = rule1;
+    const gaps = [];
+    for (const [label, value] of fields) {
+      gaps.push(fieldOps.length);
+      fieldOps.push(text(label, BOLD, SIZE.label * s, LEFT, lb));
+      const vs = SIZE.value * s;
+      const fit = fitTokens(ctx, tokenize([{ text: value, family: REG }]), CW, vs, vs * 0.8, 2, vs * 0.86);
+      const vlh = Math.round(fit.size * 1.25);
+      let vb = lb + 34.7 * s;
+      for (const line of fit.lines) {
+        fieldOps.push(text(lineText(line), REG, fit.size, LEFT, vb));
+        lastBase = vb;
+        vb += vlh;
+      }
+      lb = lastBase + 38.7 * s;
+    }
+    const naturalRule2 = lastBase + 22.5 * s;
+    const folga = rule2 - naturalRule2;
+    const extra = fields.length && folga > 0 ? Math.min(6, folga / (fields.length + 1)) : 0;
+    fields.forEach((_, k) => {
+      const from = gaps[k];
+      const to = k + 1 < gaps.length ? gaps[k + 1] : fieldOps.length;
+      for (let i = from; i < to; i++) {
+        const op = fieldOps[i];
+        if (op.t === "text") op.y += extra * (k + 1);
+      }
+    });
+    ops.push(...fieldOps);
+    ops.push({ t: "rule", y: rule2 });
+    const prodBase = rule2 + 53.2 * s;
+    ops.push(text("Produzido para:", REG, SIZE.produzido * s, LEFT, prodBase));
+    cfit.lines.forEach((line, i) => ops.push(text(lineText(line), SEMI, cfit.size, LEFT, prodBase + 22.8 * s + 0.757 * cfit.size + i * clh)));
+    ops.push({ t: "rule", y: rule3 });
+    ops.push(...duasPontas(ctx, `Data de torra: ${d.dataTorra}`, c.torra, DATE_BASE, BOLD, SIZE.row));
+    const tag = letraEntrega(d.entrega);
+    return { ops, overflow: naturalRule2 - rule2, tag: tag ? { letra: tag, cy: prodBase - TAG_D / 2 } : null };
   }
   function drawContent(ctx, d) {
     ctx.fillStyle = "#000";
@@ -546,6 +575,17 @@ label > span small { display: inline; margin-left: 4px; }
       }
     }
     ctx.fillRect(LEFT, RULE4_Y, CW, RULE_H);
+    if (p.tag) {
+      const cx = RIGHT - TAG_D / 2;
+      ctx.beginPath();
+      ctx.arc(cx, p.tag.cy, TAG_D / 2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#fff";
+      ctx.font = font(BOLD, 22);
+      ctx.textAlign = "center";
+      ctx.fillText(p.tag.letra, cx, p.tag.cy + 0.727 * 11);
+      ctx.fillStyle = "#000";
+    }
     ctx.textAlign = "center";
     FOOTER_LINES.forEach((line, i) => {
       const { size } = fitTokens(ctx, [{ text: line, family: REG }], FOOTER_MAX_W, SIZE.footer, 11, 1);
@@ -556,8 +596,8 @@ label > span small { display: inline; margin-left: 4px; }
   }
   var SEAL_DENSITY = 0.2;
   var DITHER_NOISE = 0.35;
-  var SEAL_DIAMETER = 263;
-  var SEAL_CX = 468;
+  var SEAL_DIAMETER = 289;
+  var SEAL_CX = 454;
   var SEAL_CY = 305;
   var INK_THRESHOLD = 170;
   var HALO = 3;
@@ -715,12 +755,14 @@ label > span small { display: inline; margin-left: 4px; }
   // src/request.ts
   var PESOS = ["100g", "250g", "500g", "1kg"];
   var MOAGENS = ["Gr\xE3o", "Mo\xEDdo"];
+  var ENTREGAS = ["Uber", "Coleta", "Motoboy"];
   function camposFaltando(p) {
     const f = [];
     if (!p.cliente.trim()) f.push("Cliente");
     if (!p.cafe) f.push("Caf\xE9");
     if (!PESOS.includes(p.peso)) f.push("Peso");
     if (!MOAGENS.includes(p.moagem)) f.push("Moagem");
+    if (p.entrega && !ENTREGAS.includes(p.entrega)) f.push("Entrega");
     if (!/^\d{4}-\d{2}-\d{2}$/.test(p.dataTorra)) f.push("Data de torra");
     if (!Number.isInteger(p.copias) || p.copias < 1 || p.copias > 500) f.push("N\xFAmero de c\xF3pias (1 a 500)");
     return f;
@@ -728,7 +770,7 @@ label > span small { display: inline; margin-left: 4px; }
   function dadosDoPedido(p) {
     if (!p.cafe) return null;
     const { id: _id, ativo: _ativo, ...cafe } = p.cafe;
-    return { cafe, cliente: p.cliente.trim(), peso: p.peso, moagem: p.moagem, dataTorra: p.dataTorra ? formatDate(p.dataTorra) : "" };
+    return { cafe, cliente: p.cliente.trim(), peso: p.peso, moagem: p.moagem, entrega: p.entrega, dataTorra: p.dataTorra ? formatDate(p.dataTorra) : "" };
   }
   function ordenarCafes(lista) {
     return [...lista].sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR") || a.torra.localeCompare(b.torra, "pt-BR"));
@@ -922,7 +964,7 @@ label > span small { display: inline; margin-left: 4px; }
   // src/fila.ts
   var LIMITE_ETIQUETAS = 500;
   function dadosDoItem(item) {
-    return { cafe: item.cafe, cliente: item.cliente, peso: item.peso, moagem: item.moagem, dataTorra: formatDate(item.dataTorra) };
+    return { cafe: item.cafe, cliente: item.cliente, peso: item.peso, moagem: item.moagem, entrega: item.entrega ?? "", dataTorra: formatDate(item.dataTorra) };
   }
   var totalEtiquetas = (fila2) => fila2.reduce((soma, i) => soma + i.copias, 0);
   var FilaDeImpressao = class {
@@ -947,7 +989,7 @@ label > span small { display: inline; margin-left: 4px; }
       if (total + p.copias > LIMITE_ETIQUETAS) {
         throw new Error(`A fila n\xE3o pode passar de ${LIMITE_ETIQUETAS} etiquetas (hoje tem ${total}). Imprima a fila e comece outra.`);
       }
-      const item = { id: newId(), cafeId: p.cafe.id, cafe: dados.cafe, cliente: dados.cliente, peso: dados.peso, moagem: dados.moagem, dataTorra: p.dataTorra, copias: p.copias };
+      const item = { id: newId(), cafeId: p.cafe.id, cafe: dados.cafe, cliente: dados.cliente, peso: dados.peso, moagem: dados.moagem, entrega: p.entrega, dataTorra: p.dataTorra, copias: p.copias };
       this.repo.saveFila([...fila2, item]);
       return item;
     }
@@ -1121,7 +1163,7 @@ label > span small { display: inline; margin-left: 4px; }
       if (b.dataset.tab === "config") loadConfig();
     })
   );
-  function botoesDeEscolha(id) {
+  function botoesDeEscolha(id, opcional = false) {
     const select = $(id);
     const opcoes = [...select.options].filter((o) => o.value);
     const grupo = document.createElement("div");
@@ -1137,7 +1179,7 @@ label > span small { display: inline; margin-left: 4px; }
       b.dataset.valor = o.value;
       b.textContent = o.textContent;
       b.addEventListener("click", () => {
-        select.value = o.value;
+        select.value = opcional && select.value === o.value ? "" : o.value;
         marcar();
         select.dispatchEvent(new Event("input", { bubbles: true }));
       });
@@ -1149,6 +1191,7 @@ label > span small { display: inline; margin-left: 4px; }
   }
   botoesDeEscolha("peso");
   botoesDeEscolha("moagem");
+  botoesDeEscolha("entrega", true);
   function contadorDeCopias() {
     const campo = $("copias");
     const ajustar = (delta) => {
@@ -1160,10 +1203,10 @@ label > span small { display: inline; margin-left: 4px; }
     $("mais").addEventListener("click", () => ajustar(1));
   }
   contadorDeCopias();
-  var FIELDS = { cliente: "Cliente", cafe: "Caf\xE9", peso: "Peso", moagem: "Moagem", data: "Data de torra", copias: "N\xFAmero de c\xF3pias" };
+  var FIELDS = { cliente: "Cliente", cafe: "Caf\xE9", peso: "Peso", moagem: "Moagem", entrega: "Entrega", data: "Data de torra", copias: "N\xFAmero de c\xF3pias" };
   var val = (id) => $(id).value;
   function pedido() {
-    return { cafe: book.get(val("cafe")), cliente: val("cliente"), peso: val("peso"), moagem: val("moagem"), dataTorra: val("data"), copias: Number(val("copias")) };
+    return { cafe: book.get(val("cafe")), cliente: val("cliente"), peso: val("peso"), moagem: val("moagem"), entrega: val("entrega"), dataTorra: val("data"), copias: Number(val("copias")) };
   }
   function loadCafes() {
     const atual = val("cafe");
@@ -1237,6 +1280,8 @@ label > span small { display: inline; margin-left: 4px; }
   }
   function prepararProximo() {
     $("cliente").value = "";
+    $("entrega").value = "";
+    $("entrega").dispatchEvent(new Event("change"));
     refreshPreview();
     $("cliente").focus();
   }
@@ -1287,7 +1332,7 @@ label > span small { display: inline; margin-left: 4px; }
       return `<li class="fila-item ${i.enviado ? "enviado" : ""}" data-id="${esc(i.id)}">
         <div class="fila-info">
           <strong>${esc(nome)}</strong>
-          <div class="fila-tags"><span class="tag">${esc(i.peso)} \xB7 ${esc(i.moagem)}</span>${i.enviado ? '<span class="tag enviado">\u2714 Enviado</span>' : ""}</div>
+          <div class="fila-tags"><span class="tag">${esc(i.peso)} \xB7 ${esc(i.moagem)}</span>${i.entrega ? `<span class="tag">${esc(i.entrega)}</span>` : ""}${i.enviado ? '<span class="tag enviado">\u2714 Enviado</span>' : ""}</div>
           <small>${esc(i.cliente)} \xB7 torra ${esc(data)}</small>
         </div>
         <div class="fila-copias"><button type="button" data-act="menos" aria-label="Menos uma c\xF3pia de ${esc(i.cliente)}">\u2212</button><span aria-label="${i.copias} c\xF3pias">${i.copias}</span><button type="button" data-act="mais" aria-label="Mais uma c\xF3pia de ${esc(i.cliente)}">+</button></div>
@@ -1326,7 +1371,7 @@ label > span small { display: inline; margin-left: 4px; }
     const cafeSelect = $("cafe");
     const existe = [...cafeSelect.options].some((o) => o.value === item.cafeId);
     cafeSelect.value = existe ? item.cafeId : "";
-    for (const [campo, valor] of [["peso", item.peso], ["moagem", item.moagem]]) {
+    for (const [campo, valor] of [["peso", item.peso], ["moagem", item.moagem], ["entrega", item.entrega ?? ""]]) {
       $(campo).value = valor;
       $(campo).dispatchEvent(new Event("change"));
     }
@@ -1459,7 +1504,7 @@ label > span small { display: inline; margin-left: 4px; }
     try {
       const cafe = book.list()[0];
       const { id: _i, ativo: _a, ...base2 } = cafe ?? { id: "", ativo: true, nome: "Caf\xE9 de teste", notas: "Chocolate e laranja", produtor: "Produtor", variedade: "Variedade", regiao: "Regi\xE3o", especie: "100% Ar\xE1bica", torra: "Torra m\xE9dia" };
-      const msg = await emitir({ cafe: base2, cliente: "ETIQUETA DE TESTE", peso: "250g", moagem: "Gr\xE3o", dataTorra: formatDate(today()) }, 1);
+      const msg = await emitir({ cafe: base2, cliente: "ETIQUETA DE TESTE", peso: "250g", moagem: "Gr\xE3o", entrega: "", dataTorra: formatDate(today()) }, 1);
       aviso($("aviso-config"), "ok", "\u2714 " + msg);
     } catch (e) {
       aviso($("aviso-config"), "fail", "\u2716 " + (e instanceof Error ? e.message : "Erro inesperado."));

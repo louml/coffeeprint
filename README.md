@@ -37,8 +37,9 @@ O Chrome imprime direto na **impressora padrão do Windows** com a opção `--ki
 ## Uso diário
 
 1. Em **Emitir rótulo**: escolha o café, o peso e a moagem, digite o cliente, confira a pré-visualização e clique em **Imprimir** (cada cópia sai em uma página).
-2. Depois de imprimir, café, peso, moagem e data são mantidos; só o cliente é limpo.
-3. **Fila de impressão (vários rótulos de uma vez):** em vez de **Imprimir**, clique em **Adicionar à fila**. O rótulo entra na fila exatamente como está na pré-visualização e aparece um aviso rápido (3 segundos) no canto superior direito da tela; o formulário se prepara para o próximo (só o cliente é limpo). Quando terminar de montar, clique em **Imprimir fila**: todos os rótulos, na ordem em que foram adicionados e com suas cópias, saem em **uma única impressão**.
+2. Opcional: em **Entrega**, escolha **Uber** (U), **Coleta** na loja (C) ou **Motoboy** (E) para imprimir uma tag circular com a letra ao lado de "Produzido para" (clique de novo no botão para tirar a tag).
+3. Depois de imprimir, café, peso, moagem e data são mantidos; só o cliente e a entrega são limpos.
+4. **Fila de impressão (vários rótulos de uma vez):** em vez de **Imprimir**, clique em **Adicionar à fila**. O rótulo entra na fila exatamente como está na pré-visualização e aparece um aviso rápido (3 segundos) no canto superior direito da tela; o formulário se prepara para o próximo (só o cliente é limpo). Quando terminar de montar, clique em **Imprimir fila**: todos os rótulos, na ordem em que foram adicionados e com suas cópias, saem em **uma única impressão**.
    - Em cada item da fila dá para mudar as cópias (**−** e **+**), **Editar** (volta ao formulário para corrigir; depois é só adicionar de novo, e ele entra no fim da fila) ou **Remover**.
    - O botão **Imprimir** continua imprimindo só o rótulo do formulário, sem mexer na fila.
    - Depois de imprimida, a fila continua na tela com os itens marcados como **Enviado** (o navegador não informa se a impressão deu certo; se cancelar a janela, nada se perde). Use **Imprimir de novo** se precisar repetir, e **Limpar fila** quando terminar. Ao adicionar um rótulo novo a uma fila já enviada, ela recomeça do zero.

@@ -15,6 +15,8 @@ export interface ItemFila {
   cliente: string;
   peso: string;
   moagem: string;
+  /** Tag de entrega ("" = sem tag). Itens guardados por versões antigas não têm este campo. */
+  entrega?: string;
   /** AAAA-MM-DD */
   dataTorra: string;
   copias: number;
@@ -24,7 +26,7 @@ export interface ItemFila {
 
 /** Dados prontos para desenhar o rótulo deste item. */
 export function dadosDoItem(item: ItemFila): DadosRotulo {
-  return { cafe: item.cafe, cliente: item.cliente, peso: item.peso, moagem: item.moagem, dataTorra: formatDate(item.dataTorra) };
+  return { cafe: item.cafe, cliente: item.cliente, peso: item.peso, moagem: item.moagem, entrega: item.entrega ?? '', dataTorra: formatDate(item.dataTorra) };
 }
 
 export const totalEtiquetas = (fila: ItemFila[]): number => fila.reduce((soma, i) => soma + i.copias, 0);
@@ -53,7 +55,7 @@ export class FilaDeImpressao {
     if (total + p.copias > LIMITE_ETIQUETAS) {
       throw new Error(`A fila não pode passar de ${LIMITE_ETIQUETAS} etiquetas (hoje tem ${total}). Imprima a fila e comece outra.`);
     }
-    const item: ItemFila = { id: newId(), cafeId: p.cafe.id, cafe: dados.cafe, cliente: dados.cliente, peso: dados.peso, moagem: dados.moagem, dataTorra: p.dataTorra, copias: p.copias };
+    const item: ItemFila = { id: newId(), cafeId: p.cafe.id, cafe: dados.cafe, cliente: dados.cliente, peso: dados.peso, moagem: dados.moagem, entrega: p.entrega, dataTorra: p.dataTorra, copias: p.copias };
     this.repo.saveFila([...fila, item]);
     return item;
   }

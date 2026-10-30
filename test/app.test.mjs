@@ -48,11 +48,14 @@ test('web: cópia de segurança vai e volta; arquivo inválido é recusado', () 
 
 test('web: validação lista o que falta e monta os dados do rótulo', () => {
   const cafe = new CafeBook(new BrowserRepository(new FakeStorage())).list()[0];
-  const vazio = { cliente: '', peso: '', moagem: '', dataTorra: '', copias: 1 };
+  const vazio = { cliente: '', peso: '', moagem: '', entrega: '', dataTorra: '', copias: 1 };
   assert.deepEqual(camposFaltando(vazio), ['Cliente', 'Café', 'Peso', 'Moagem', 'Data de torra']);
   assert.ok(camposFaltando({ ...vazio, cafe, cliente: 'X', peso: '1kg', moagem: 'Grão', dataTorra: '2026-10-05', copias: 0 })[0].startsWith('Número'));
-  const ok = { cafe, cliente: ' Padaria ', peso: '250g', moagem: 'Moído', dataTorra: '2026-10-05', copias: 3 };
+  const ok = { cafe, cliente: ' Padaria ', peso: '250g', moagem: 'Moído', entrega: '', dataTorra: '2026-10-05', copias: 3 };
   assert.deepEqual(camposFaltando(ok), []);
+  for (const e of ['Uber', 'Coleta', 'Motoboy']) assert.deepEqual(camposFaltando({ ...ok, entrega: e }), [], 'entrega é opcional e aceita os três tipos');
+  assert.deepEqual(camposFaltando({ ...ok, entrega: 'Drone' }), ['Entrega']);
+  assert.equal(dadosDoPedido({ ...ok, entrega: 'Uber' }).entrega, 'Uber');
   const d = dadosDoPedido(ok);
   assert.equal(d.dataTorra, '05/10/2026');
   assert.equal(d.cliente, 'Padaria');
@@ -110,7 +113,7 @@ test('web: o título do campo produtor ("Produtora") vai do cadastro ao rótulo 
   const repo = new BrowserRepository(new FakeStorage());
   const geisha = repo.listCafes().find((c) => c.id === 'geisha');
   assert.equal(geisha.rotuloProdutor, 'Produtora');
-  assert.equal(dadosDoPedido({ cafe: geisha, cliente: 'X', peso: '250g', moagem: 'Grão', dataTorra: '2026-10-05', copias: 1 }).cafe.rotuloProdutor, 'Produtora');
+  assert.equal(dadosDoPedido({ cafe: geisha, cliente: 'X', peso: '250g', moagem: 'Grão', entrega: '', dataTorra: '2026-10-05', copias: 1 }).cafe.rotuloProdutor, 'Produtora');
   const outro = new BrowserRepository(new FakeStorage());
   importBackup(outro, JSON.parse(JSON.stringify(exportBackup(repo))));
   assert.equal(outro.listCafes().find((c) => c.id === 'geisha').rotuloProdutor, 'Produtora');

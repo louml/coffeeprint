@@ -11,7 +11,7 @@ class FakeStorage {
   removeItem(k) { this.m.delete(k); }
 }
 const novo = () => { const store = new FakeStorage(); const repo = new BrowserRepository(store); return { store, repo, fila: new FilaDeImpressao(repo), cafes: repo.listCafes() }; };
-const pedido = (cafe, extra = {}) => ({ cafe, cliente: 'Padaria Pão Quente', peso: '250g', moagem: 'Grão', dataTorra: '2026-10-05', copias: 3, ...extra });
+const pedido = (cafe, extra = {}) => ({ cafe, cliente: 'Padaria Pão Quente', peso: '250g', moagem: 'Grão', entrega: '', dataTorra: '2026-10-05', copias: 3, ...extra });
 
 test('fila: adiciona itens em ordem e soma as etiquetas', () => {
   const { fila, cafes } = novo();

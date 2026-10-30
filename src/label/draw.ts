@@ -107,8 +107,11 @@ function fitTokens(
 const LEFT = 46;
 const RIGHT = 598;
 const CW = RIGHT - LEFT;
-const RULE4_Y = 655; // última linha: o rodapé fica fixo abaixo dela
+const RULE4_Y = 670; // última linha: o rodapé fica fixo abaixo dela
+const DATE_BASE = RULE4_Y - 22.8; // linha com a data e o nível de torra (acima da última linha)
+const MARGEM_V = 25; // distância da tinta até a borda: igual no topo (título) e embaixo (último texto do rodapé)
 const RULE_H = 3;
+const TAG_D = 33; // tag de entrega: círculo preto com a letra em branco
 
 // O nome do café (título) e o do cliente têm o mesmo tamanho e o mesmo peso (semibold), como no modelo.
 const NAME_SIZE = 43.8;
@@ -120,7 +123,7 @@ const FOOTER_LINES = [
   'G. Gomes de Carvalho Ltda - CNPJ 36530500000182 - Porto Alegre, RS',
   'sac@torralocal.com.br - www.torralocal.com.br',
 ];
-const FOOTER_BASELINES = [696.5, 716.5, 736.5, 756.5];
+const FOOTER_BASELINES = [710.5, 730.5, 750.5, 770.5]; // a tinta da última linha termina em 800 - MARGEM_V
 const FOOTER_MAX_W = WIDTH - 2 * 24;
 
 type Op =
@@ -132,6 +135,11 @@ const text = (text: string, family: string, size: number, x: number, y: number, 
 /** Como a moagem aparece na etiqueta (a lista de escolha do usuário continua com "Grão" e "Moído"). */
 export function moagemNoRotulo(moagem: string): string {
   return moagem === 'Grão' ? 'Em grãos' : moagem;
+}
+
+/** Letra da tag de entrega: Uber (U), coleta pelo cliente na loja (C) ou motoboy (E). */
+export function letraEntrega(entrega?: string): string {
+  return ({ Uber: 'U', Coleta: 'C', Motoboy: 'E' } as Record<string, string>)[entrega ?? ''] ?? '';
 }
 
 const lineText = (line: Token[]) => line.map((t) => t.text).join(' ');
@@ -165,7 +173,7 @@ function plan(ctx: Ctx, d: DadosRotulo, s: number) {
   ctx.font = font(SEMI, SIZE.peso);
   const pesoW = ctx.measureText(d.peso).width;
   const title = fitTokens(ctx, tokenize([{ text: c.nome, family: SEMI }]), CW - pesoW - 24, SIZE.title, 22, 2, 30);
-  const base1 = 38 + 0.757 * title.size;
+  const base1 = MARGEM_V + 0.757 * title.size;
   title.lines.forEach((line, i) => ops.push(text(lineText(line), SEMI, title.size, LEFT, base1 + i * Math.round(title.size * 1.15))));
   ops.push(text(d.peso, SEMI, SIZE.peso, RIGHT + 4, base1 - 3.3, 'right')); // o peso fica um pouco acima da linha de base do título, como no modelo
   const tituloFim = base1 + (title.lines.length - 1) * Math.round(title.size * 1.15);
@@ -177,49 +185,69 @@ function plan(ctx: Ctx, d: DadosRotulo, s: number) {
   const rule1 = temSub ? subBase + 22.5 : tituloFim + 24;
   ops.push({ t: 'rule', y: rule1 });
 
+  // Parte de baixo, ancorada de baixo para cima: última linha > data/torra > "Produzido para" > campos do café
+  const client = tokenize([{ text: d.cliente.trim(), family: SEMI }]);
+  const cfit = client.length ? fitTokens(ctx, client, CW, SIZE.client, 20, 2, 30) : { size: SIZE.client, lines: [] as Token[][] };
+  const clh = Math.round(cfit.size * 1.2);
+  const nLines = Math.max(1, cfit.lines.length);
+  const clientSpan = 0.757 * cfit.size + (nLines - 1) * clh;
+  const rule3 = DATE_BASE - 45;
+  const lowerH = 53.2 * s + 22.8 * s + clientSpan + 22 * s;
+  const rule2 = rule3 - lowerH;
+
   // Rótulo em negrito numa linha e valor na linha de baixo
   const fields: Array<[string, string]> = [
     ['Notas sensoriais:', c.notas],
     [`${c.rotuloProdutor?.trim() || 'Produtor'}:`, c.produtor],
     ['Variedade:', c.variedade],
     ['Região:', c.regiao],
-  ];
+  ].filter(([, v]) => v.trim()) as Array<[string, string]>;
+  const fieldOps: Op[] = [];
   let lb = rule1 + 38.4 * s;
   let lastBase = rule1;
+  const gaps: number[] = []; // índices (em fieldOps) onde começa cada campo, para repartir a folga
   for (const [label, value] of fields) {
-    if (!value.trim()) continue;
-    ops.push(text(label, BOLD, SIZE.label * s, LEFT, lb));
+    gaps.push(fieldOps.length);
+    fieldOps.push(text(label, BOLD, SIZE.label * s, LEFT, lb));
     const vs = SIZE.value * s;
     const fit = fitTokens(ctx, tokenize([{ text: value, family: REG }]), CW, vs, vs * 0.8, 2, vs * 0.86);
     const vlh = Math.round(fit.size * 1.25);
     let vb = lb + 34.7 * s;
     for (const line of fit.lines) {
-      ops.push(text(lineText(line), REG, fit.size, LEFT, vb));
+      fieldOps.push(text(lineText(line), REG, fit.size, LEFT, vb));
       lastBase = vb;
       vb += vlh;
     }
     lb = lastBase + 38.7 * s;
   }
-  const rule2 = lastBase + 22.5 * s;
+  const naturalRule2 = lastBase + 22.5 * s;
+
+  // A folga entre o fim natural dos campos e a linha 2 é repartida entre os espaços (até 6 pontos cada)
+  const folga = rule2 - naturalRule2;
+  const extra = fields.length && folga > 0 ? Math.min(6, folga / (fields.length + 1)) : 0;
+  fields.forEach((_, k) => {
+    const from = gaps[k];
+    const to = k + 1 < gaps.length ? gaps[k + 1] : fieldOps.length;
+    for (let i = from; i < to; i++) {
+      const op = fieldOps[i];
+      if (op.t === 'text') op.y += extra * (k + 1);
+    }
+  });
+  ops.push(...fieldOps);
   ops.push({ t: 'rule', y: rule2 });
 
-  // Data de torra (esquerda) e nível de torra (direita)
-  const dateBase = rule2 + 43.1 * s;
-  ops.push(...duasPontas(ctx, `Data de torra: ${d.dataTorra}`, c.torra, dateBase, BOLD, SIZE.row * s));
-  const upperEnd = dateBase + 21.8 * s; // onde a linha 3 ficaria logo depois da data
+  // "Produzido para" (com a tag de entrega à direita) e o cliente
+  const prodBase = rule2 + 53.2 * s;
+  ops.push(text('Produzido para:', REG, SIZE.produzido * s, LEFT, prodBase));
+  cfit.lines.forEach((line, i) => ops.push(text(lineText(line), SEMI, cfit.size, LEFT, prodBase + 22.8 * s + 0.757 * cfit.size + i * clh)));
+  ops.push({ t: 'rule', y: rule3 });
 
-  // Bloco "Produzido para": ancorado na última linha, para o rodapé não se mexer
-  const client = tokenize([{ text: d.cliente.trim(), family: SEMI }]);
-  const cfit = client.length ? fitTokens(ctx, client, CW, SIZE.client, 20, 2, 30) : { size: SIZE.client, lines: [] as Token[][] };
-  const clh = Math.round(cfit.size * 1.2);
-  const nLines = Math.max(1, cfit.lines.length);
-  const clientSpan = 0.757 * cfit.size + (nLines - 1) * clh;
-  const lowerH = 53.2 * s + 22.8 * s + clientSpan + 23.4 * s;
-  const rule3 = RULE4_Y - lowerH;
-  const prodBase = rule3 + 53.2 * s;
-  const lowerOps: Op[] = [{ t: 'rule', y: rule3 }, text('Produzido para:', REG, SIZE.produzido * s, LEFT, prodBase)];
-  cfit.lines.forEach((line, i) => lowerOps.push(text(lineText(line), SEMI, cfit.size, LEFT, prodBase + 22.8 * s + 0.757 * cfit.size + i * clh)));
-  return { ops: [...ops, ...lowerOps], overflow: upperEnd - rule3 };
+  // Data de torra (esquerda) e nível de torra (direita)
+  ops.push(...duasPontas(ctx, `Data de torra: ${d.dataTorra}`, c.torra, DATE_BASE, BOLD, SIZE.row));
+
+  // Quanto o conteúdo passa do espaço disponível (positivo = não cabe)
+  const tag = letraEntrega(d.entrega);
+  return { ops, overflow: naturalRule2 - rule2, tag: tag ? { letra: tag, cy: prodBase - TAG_D / 2 } : null };
 }
 
 function drawContent(ctx: Ctx, d: DadosRotulo): void {
@@ -244,6 +272,19 @@ function drawContent(ctx: Ctx, d: DadosRotulo): void {
   }
   ctx.fillRect(LEFT, RULE4_Y, CW, RULE_H);
 
+  // Tag de entrega: círculo preto com a letra em branco, na linha do "Produzido para"
+  if (p.tag) {
+    const cx = RIGHT - TAG_D / 2;
+    ctx.beginPath();
+    ctx.arc(cx, p.tag.cy, TAG_D / 2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.font = font(BOLD, 22);
+    ctx.textAlign = 'center';
+    ctx.fillText(p.tag.letra, cx, p.tag.cy + 0.727 * 11);
+    ctx.fillStyle = '#000';
+  }
+
   // Rodapé fixo
   ctx.textAlign = 'center';
   FOOTER_LINES.forEach((line, i) => {
@@ -258,8 +299,8 @@ function drawContent(ctx: Ctx, d: DadosRotulo): void {
 
 const SEAL_DENSITY = 0.2; // fração de pontos pretos no fundo (cinza claro pontilhado)
 const DITHER_NOISE = 0.35; // ruído no limiar da difusão de erro (quebra padrões regulares)
-const SEAL_DIAMETER = 263;
-const SEAL_CX = 468;
+const SEAL_DIAMETER = 289;
+const SEAL_CX = 454;
 const SEAL_CY = 305;
 const INK_THRESHOLD = 170; // cinza abaixo do qual o ponto vira preto (mais alto = traço um pouco mais grosso)
 const HALO = 3; // área em branco ao redor do texto para o selo não atrapalhar a leitura

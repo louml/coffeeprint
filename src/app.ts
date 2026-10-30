@@ -40,7 +40,7 @@ document.querySelectorAll<HTMLButtonElement>('.tab').forEach((b) =>
 // ---------- emissão
 
 /** Peso e moagem viram botões de escolha (menos cliques); o <select> continua como fonte do valor. */
-function botoesDeEscolha(id: string): void {
+function botoesDeEscolha(id: string, opcional = false): void {
   const select = $(id) as HTMLSelectElement;
   const opcoes = [...select.options].filter((o) => o.value);
   const grupo = document.createElement('div');
@@ -56,7 +56,7 @@ function botoesDeEscolha(id: string): void {
     b.dataset.valor = o.value;
     b.textContent = o.textContent;
     b.addEventListener('click', () => {
-      select.value = o.value;
+      select.value = opcional && select.value === o.value ? '' : o.value; // campo opcional: clicar de novo desmarca
       marcar();
       select.dispatchEvent(new Event('input', { bubbles: true }));
     });
@@ -68,6 +68,7 @@ function botoesDeEscolha(id: string): void {
 }
 botoesDeEscolha('peso');
 botoesDeEscolha('moagem');
+botoesDeEscolha('entrega', true);
 
 /** Botões − e + do número de cópias. */
 function contadorDeCopias(): void {
@@ -81,11 +82,11 @@ function contadorDeCopias(): void {
   $('mais').addEventListener('click', () => ajustar(1));
 }
 contadorDeCopias();
-const FIELDS: Record<string, string> = { cliente: 'Cliente', cafe: 'Café', peso: 'Peso', moagem: 'Moagem', data: 'Data de torra', copias: 'Número de cópias' };
+const FIELDS: Record<string, string> = { cliente: 'Cliente', cafe: 'Café', peso: 'Peso', moagem: 'Moagem', entrega: 'Entrega', data: 'Data de torra', copias: 'Número de cópias' };
 const val = (id: string) => ($(id) as HTMLInputElement | HTMLSelectElement).value;
 
 function pedido(): Pedido {
-  return { cafe: book.get(val('cafe')), cliente: val('cliente'), peso: val('peso'), moagem: val('moagem'), dataTorra: val('data'), copias: Number(val('copias')) };
+  return { cafe: book.get(val('cafe')), cliente: val('cliente'), peso: val('peso'), moagem: val('moagem'), entrega: val('entrega'), dataTorra: val('data'), copias: Number(val('copias')) };
 }
 
 function loadCafes(): void {
@@ -164,9 +165,11 @@ function lerFormulario(acao: 'imprimi' | 'adicionei'): Pedido | null {
   return p;
 }
 
-/** Depois de imprimir ou adicionar à fila: mantém café, peso, moagem e data; limpa só o cliente. */
+/** Depois de imprimir ou adicionar à fila: mantém café, peso, moagem e data; limpa o cliente e a entrega (variam a cada pedido). */
 function prepararProximo(): void {
   ($('cliente') as HTMLInputElement).value = '';
+  ($('entrega') as HTMLSelectElement).value = '';
+  $('entrega').dispatchEvent(new Event('change')); // atualiza os botões de escolha
   refreshPreview();
   $('cliente').focus();
 }
@@ -223,7 +226,7 @@ function renderFila(): void {
       return `<li class="fila-item ${i.enviado ? 'enviado' : ''}" data-id="${esc(i.id)}">
         <div class="fila-info">
           <strong>${esc(nome)}</strong>
-          <div class="fila-tags"><span class="tag">${esc(i.peso)} · ${esc(i.moagem)}</span>${i.enviado ? '<span class="tag enviado">✔ Enviado</span>' : ''}</div>
+          <div class="fila-tags"><span class="tag">${esc(i.peso)} · ${esc(i.moagem)}</span>${i.entrega ? `<span class="tag">${esc(i.entrega)}</span>` : ''}${i.enviado ? '<span class="tag enviado">✔ Enviado</span>' : ''}</div>
           <small>${esc(i.cliente)} · torra ${esc(data)}</small>
         </div>
         <div class="fila-copias"><button type="button" data-act="menos" aria-label="Menos uma cópia de ${esc(i.cliente)}">−</button><span aria-label="${i.copias} cópias">${i.copias}</span><button type="button" data-act="mais" aria-label="Mais uma cópia de ${esc(i.cliente)}">+</button></div>
@@ -266,7 +269,7 @@ function editarItem(id: string): void {
   const cafeSelect = $('cafe') as HTMLSelectElement;
   const existe = [...cafeSelect.options].some((o) => o.value === item.cafeId);
   cafeSelect.value = existe ? item.cafeId : '';
-  for (const [campo, valor] of [['peso', item.peso], ['moagem', item.moagem]] as const) {
+  for (const [campo, valor] of [['peso', item.peso], ['moagem', item.moagem], ['entrega', item.entrega ?? '']] as const) {
     ($(campo) as HTMLSelectElement).value = valor;
     $(campo).dispatchEvent(new Event('change')); // atualiza os botões de escolha
   }
@@ -408,7 +411,7 @@ $('teste').addEventListener('click', async () => {
   try {
     const cafe = book.list()[0];
     const { id: _i, ativo: _a, ...base } = cafe ?? { id: '', ativo: true, nome: 'Café de teste', notas: 'Chocolate e laranja', produtor: 'Produtor', variedade: 'Variedade', regiao: 'Região', especie: '100% Arábica', torra: 'Torra média' };
-    const msg = await emitir({ cafe: base, cliente: 'ETIQUETA DE TESTE', peso: '250g', moagem: 'Grão', dataTorra: formatDate(today()) }, 1);
+    const msg = await emitir({ cafe: base, cliente: 'ETIQUETA DE TESTE', peso: '250g', moagem: 'Grão', entrega: '', dataTorra: formatDate(today()) }, 1);
     aviso($('aviso-config'), 'ok', '✔ ' + msg);
   } catch (e) {
     aviso($('aviso-config'), 'fail', '✖ ' + (e instanceof Error ? e.message : 'Erro inesperado.'));

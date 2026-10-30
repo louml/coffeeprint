@@ -7,6 +7,8 @@ export interface Pedido {
   cliente: string;
   peso: string;
   moagem: string;
+  /** "" (sem tag) ou um dos valores de ENTREGAS */
+  entrega: string;
   /** AAAA-MM-DD */
   dataTorra: string;
   copias: number;
@@ -14,6 +16,7 @@ export interface Pedido {
 
 export const PESOS = ['100g', '250g', '500g', '1kg'];
 export const MOAGENS = ['Grão', 'Moído'];
+export const ENTREGAS = ['Uber', 'Coleta', 'Motoboy'];
 
 /** Nomes dos campos obrigatórios que ainda faltam. */
 export function camposFaltando(p: Pedido): string[] {
@@ -22,6 +25,7 @@ export function camposFaltando(p: Pedido): string[] {
   if (!p.cafe) f.push('Café');
   if (!PESOS.includes(p.peso)) f.push('Peso');
   if (!MOAGENS.includes(p.moagem)) f.push('Moagem');
+  if (p.entrega && !ENTREGAS.includes(p.entrega)) f.push('Entrega');
   if (!/^\d{4}-\d{2}-\d{2}$/.test(p.dataTorra)) f.push('Data de torra');
   if (!Number.isInteger(p.copias) || p.copias < 1 || p.copias > 500) f.push('Número de cópias (1 a 500)');
   return f;
@@ -30,7 +34,7 @@ export function camposFaltando(p: Pedido): string[] {
 export function dadosDoPedido(p: Pedido): DadosRotulo | null {
   if (!p.cafe) return null;
   const { id: _id, ativo: _ativo, ...cafe } = p.cafe;
-  return { cafe, cliente: p.cliente.trim(), peso: p.peso, moagem: p.moagem, dataTorra: p.dataTorra ? formatDate(p.dataTorra) : '' };
+  return { cafe, cliente: p.cliente.trim(), peso: p.peso, moagem: p.moagem, entrega: p.entrega, dataTorra: p.dataTorra ? formatDate(p.dataTorra) : '' };
 }
 
 /** Cafés em ordem alfabética (e, no mesmo nome, por torra). */
