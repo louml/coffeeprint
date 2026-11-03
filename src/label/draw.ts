@@ -107,9 +107,9 @@ function fitTokens(
 const LEFT = 46;
 const RIGHT = 598;
 const CW = RIGHT - LEFT;
-const RULE4_Y = 670; // última linha: o rodapé fica fixo abaixo dela
+const RULE4_Y = 672; // última linha: o rodapé fica fixo abaixo dela
 const DATE_BASE = RULE4_Y - 22.8; // linha com a data e o nível de torra (acima da última linha)
-const MARGEM_V = 25; // distância da tinta até a borda: igual no topo (título) e embaixo (último texto do rodapé)
+const MARGEM_V = 27; // centralizado: topo do título à borda de cima = linha de base da última linha à borda de baixo (a olho, a tinta de baixo é a linha de base)
 const RULE_H = 3;
 const TAG_D = 33; // tag de entrega: círculo preto com a letra em branco
 
@@ -123,7 +123,7 @@ const FOOTER_LINES = [
   'G. Gomes de Carvalho Ltda - CNPJ 36530500000182 - Porto Alegre, RS',
   'sac@torralocal.com.br - www.torralocal.com.br',
 ];
-const FOOTER_BASELINES = [710.5, 730.5, 750.5, 770.5]; // a tinta da última linha termina em 800 - MARGEM_V
+const FOOTER_BASELINES = [712.5, 732.5, 752.5, 772.5]; // a última linha de base fica a MARGEM_V da borda de baixo (800 - 772,5 = 27,5)
 const FOOTER_MAX_W = WIDTH - 2 * 24;
 
 type Op =
@@ -299,9 +299,9 @@ function drawContent(ctx: Ctx, d: DadosRotulo): void {
 
 const SEAL_DENSITY = 0.2; // fração de pontos pretos no fundo (cinza claro pontilhado)
 const DITHER_NOISE = 0.35; // ruído no limiar da difusão de erro (quebra padrões regulares)
-const SEAL_DIAMETER = 289;
-const SEAL_CX = 454;
-const SEAL_CY = 305;
+const SEAL_DIAMETER = 325;
+const SEAL_CX = 450;
+const SEAL_CY = 302;
 const INK_THRESHOLD = 170; // cinza abaixo do qual o ponto vira preto (mais alto = traço um pouco mais grosso)
 const HALO = 3; // área em branco ao redor do texto para o selo não atrapalhar a leitura
 

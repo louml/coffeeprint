@@ -247,12 +247,12 @@ label > span small { display: inline; margin-left: 4px; }
         </select>
       </div>
       <div class="field">
-        <span class="label-text" id="lbl-entrega">Entrega <small>(tag na etiqueta, opcional)</small></span>
+        <span class="label-text" id="lbl-entrega">Tipo de entrega <small>(tag na etiqueta, opcional)</small></span>
         <select id="entrega" class="choice-select" aria-labelledby="lbl-entrega">
           <option value="">Sem tag</option>
           <option value="Uber">Uber</option>
           <option value="Coleta">Coleta</option>
-          <option value="Motoboy">Motoboy</option>
+          <option value="Motoboy">Entrega</option>
         </select>
       </div>
       <div class="row">
@@ -458,9 +458,9 @@ label > span small { display: inline; margin-left: 4px; }
   var LEFT = 46;
   var RIGHT = 598;
   var CW = RIGHT - LEFT;
-  var RULE4_Y = 670;
+  var RULE4_Y = 672;
   var DATE_BASE = RULE4_Y - 22.8;
-  var MARGEM_V = 25;
+  var MARGEM_V = 27;
   var RULE_H = 3;
   var TAG_D = 33;
   var NAME_SIZE = 43.8;
@@ -471,7 +471,7 @@ label > span small { display: inline; margin-left: 4px; }
     "G. Gomes de Carvalho Ltda - CNPJ 36530500000182 - Porto Alegre, RS",
     "sac@torralocal.com.br - www.torralocal.com.br"
   ];
-  var FOOTER_BASELINES = [710.5, 730.5, 750.5, 770.5];
+  var FOOTER_BASELINES = [712.5, 732.5, 752.5, 772.5];
   var FOOTER_MAX_W = WIDTH - 2 * 24;
   var text = (text2, family, size, x, y, align = "left") => ({ t: "text", text: text2, family, size, x, y, align });
   function moagemNoRotulo(moagem) {
@@ -604,9 +604,9 @@ label > span small { display: inline; margin-left: 4px; }
   }
   var SEAL_DENSITY = 0.2;
   var DITHER_NOISE = 0.35;
-  var SEAL_DIAMETER = 289;
-  var SEAL_CX = 454;
-  var SEAL_CY = 305;
+  var SEAL_DIAMETER = 325;
+  var SEAL_CX = 450;
+  var SEAL_CY = 302;
   var INK_THRESHOLD = 170;
   var HALO = 3;
   function mulberry32(seed) {
