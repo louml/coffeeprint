@@ -1297,10 +1297,12 @@ label > span small { display: inline; margin-left: 4px; }
     }
     return p;
   }
-  function prepararProximo() {
-    $("cliente").value = "";
-    $("entrega").value = "";
-    $("entrega").dispatchEvent(new Event("change"));
+  function prepararProximo(manterCliente = false) {
+    if (!manterCliente) {
+      $("cliente").value = "";
+      $("entrega").value = "";
+      $("entrega").dispatchEvent(new Event("change"));
+    }
     refreshPreview();
     $("cliente").focus();
   }
@@ -1335,7 +1337,7 @@ label > span small { display: inline; margin-left: 4px; }
     aviso($("aviso"), "", "");
     mostrarToast("Adicionado \xE0 fila", `${plural(p.copias, "etiqueta", "etiquetas")} de "${p.cliente.trim()}" \xB7 Na fila: ${plural(fila.total(), "etiqueta", "etiquetas")} (${plural(itens.length, "item", "itens")})`);
     renderFila();
-    prepararProximo();
+    prepararProximo(true);
   });
   function renderFila() {
     const itens = fila.list();

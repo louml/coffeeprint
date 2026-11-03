@@ -166,11 +166,16 @@ function lerFormulario(acao: 'imprimi' | 'adicionei'): Pedido | null {
   return p;
 }
 
-/** Depois de imprimir ou adicionar à fila: mantém café, peso, moagem e data; limpa o cliente e a entrega (variam a cada pedido). */
-function prepararProximo(): void {
-  ($('cliente') as HTMLInputElement).value = '';
-  ($('entrega') as HTMLSelectElement).value = '';
-  $('entrega').dispatchEvent(new Event('change')); // atualiza os botões de escolha
+/**
+ * Depois de imprimir: mantém café, peso, moagem e data; limpa o cliente e a entrega (variam a cada pedido).
+ * Depois de adicionar à fila (`manterCliente`): mantém também o cliente e a entrega, para montar vários itens do mesmo pedido.
+ */
+function prepararProximo(manterCliente = false): void {
+  if (!manterCliente) {
+    ($('cliente') as HTMLInputElement).value = '';
+    ($('entrega') as HTMLSelectElement).value = '';
+    $('entrega').dispatchEvent(new Event('change')); // atualiza os botões de escolha
+  }
   refreshPreview();
   $('cliente').focus();
 }
@@ -209,7 +214,7 @@ $('adicionar').addEventListener('click', () => {
   aviso($('aviso'), '', ''); // limpa qualquer aviso anterior; o sucesso aparece como aviso temporário
   mostrarToast('Adicionado à fila', `${plural(p.copias, 'etiqueta', 'etiquetas')} de "${p.cliente.trim()}" · Na fila: ${plural(fila.total(), 'etiqueta', 'etiquetas')} (${plural(itens.length, 'item', 'itens')})`);
   renderFila();
-  prepararProximo();
+  prepararProximo(true);
 });
 
 /** Como o item aparece na lista flutuante: cliente em cima; café / quantidade / moagem embaixo. */
