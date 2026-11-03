@@ -1,8 +1,9 @@
 import { formatDate } from './label/format.js';
 import type { Rotacao } from './label/rotate.js';
 import type { Bitmap1bpp, DadosRotulo } from './label/types.js';
+import { moagemNoRotulo } from './label/draw.js';
 import { drawBitmap, loadFonts, renderLabel } from './env.js';
-import { FilaDeImpressao, LIMITE_ETIQUETAS, dadosDoItem, totalEtiquetas } from './fila.js';
+import { FilaDeImpressao, dadosDoItem, totalEtiquetas } from './fila.js';
 import { baixarPng, imprimir, imprimirLotes } from './print.js';
 import { mostrarToast } from './toast.js';
 import { camposFaltando, dadosDoPedido, ordenarCafes, textoNaLista, type Pedido } from './request.js';
@@ -39,31 +40,28 @@ document.querySelectorAll<HTMLButtonElement>('.tab').forEach((b) =>
 
 // ---------- emissão
 
-/** Peso, moagem e entrega viram botões de rádio (ocupam menos espaço); o <select> continua como fonte do valor. */
+/** Peso e moagem viram botões de escolha (menos cliques); o <select> continua como fonte do valor. */
 function botoesDeEscolha(id: string, opcional = false): void {
   const select = $(id) as HTMLSelectElement;
-  // campo opcional: a opção vazia ("Sem tag") também vira um rádio; nos obrigatórios o vazio é só "Escolha…"
-  const opcoes = [...select.options].filter((o) => o.value || opcional);
+  const opcoes = [...select.options].filter((o) => o.value);
   const grupo = document.createElement('div');
-  grupo.className = 'radios';
-  grupo.setAttribute('role', 'radiogroup');
+  grupo.className = 'chips';
+  grupo.style.setProperty('--n', String(opcoes.length));
+  grupo.setAttribute('role', 'group');
   grupo.setAttribute('aria-labelledby', `lbl-${id}`);
-  const marcar = () => grupo.querySelectorAll('input').forEach((r) => (r.checked = r.value === select.value));
+  const marcar = () => grupo.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.valor === select.value)));
   for (const o of opcoes) {
-    const rotulo = document.createElement('label');
-    rotulo.className = 'radio';
-    const r = document.createElement('input');
-    r.type = 'radio';
-    r.name = `rd-${id}`;
-    r.value = o.value;
-    r.addEventListener('change', () => {
-      select.value = o.value;
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'chip';
+    b.dataset.valor = o.value;
+    b.textContent = o.textContent;
+    b.addEventListener('click', () => {
+      select.value = opcional && select.value === o.value ? '' : o.value; // campo opcional: clicar de novo desmarca
+      marcar();
       select.dispatchEvent(new Event('input', { bubbles: true }));
     });
-    const texto = document.createElement('span');
-    texto.textContent = o.textContent;
-    rotulo.append(r, texto);
-    grupo.appendChild(rotulo);
+    grupo.appendChild(b);
   }
   select.after(grupo);
   select.addEventListener('change', marcar);
@@ -214,53 +212,65 @@ $('adicionar').addEventListener('click', () => {
   prepararProximo();
 });
 
+/** Como o item aparece na lista flutuante: cliente em cima; café / quantidade / moagem embaixo. */
 function renderFila(): void {
   const itens = fila.list();
-  const card = $('fila-card');
-  card.hidden = itens.length === 0;
-  if (!itens.length) return;
+  $('fila-flutuante').hidden = itens.length === 0;
+  if (!itens.length) {
+    fecharFila();
+    return;
+  }
   const todos = book.list();
   const pendentes = itens.filter((i) => !i.enviado);
+  const aImprimir = pendentes.length ? totalEtiquetas(pendentes) : totalEtiquetas(itens);
+  $('fila-badge').textContent = String(totalEtiquetas(itens));
+  $('fila-fab').setAttribute('aria-label', `Fila de impressão: ${plural(totalEtiquetas(itens), 'etiqueta', 'etiquetas')}`);
   $('fila-resumo').textContent = `${plural(totalEtiquetas(itens), 'etiqueta', 'etiquetas')} · ${plural(itens.length, 'item', 'itens')}`;
   $('fila-lista').innerHTML = itens
     .map((i) => {
       const nome = textoNaLista({ id: i.cafeId, nome: i.cafe.nome, torra: i.cafe.torra }, todos);
-      const data = i.dataTorra.split('-').reverse().join('/');
       return `<li class="fila-item ${i.enviado ? 'enviado' : ''}" data-id="${esc(i.id)}">
         <div class="fila-info">
-          <strong>${esc(nome)}</strong>
-          <div class="fila-tags"><span class="tag">${esc(i.peso)} · ${esc(i.moagem)}</span>${i.entrega ? `<span class="tag">${esc(i.entrega)}</span>` : ''}${i.enviado ? '<span class="tag enviado">✔ Enviado</span>' : ''}</div>
-          <small>${esc(i.cliente)} · torra ${esc(data)}</small>
+          <strong>${esc(i.cliente)}${i.enviado ? ' <span class="tag enviado">✔ Enviado</span>' : ''}</strong>
+          <small>${esc(nome)} / ${i.copias} / ${esc(moagemNoRotulo(i.moagem))}</small>
         </div>
-        <div class="fila-copias"><button type="button" data-act="menos" aria-label="Menos uma cópia de ${esc(i.cliente)}">−</button><span aria-label="${i.copias} cópias">${i.copias}</span><button type="button" data-act="mais" aria-label="Mais uma cópia de ${esc(i.cliente)}">+</button></div>
-        <div class="fila-acoes">
-          <button type="button" class="fila-btn" data-act="editar">Editar</button>
-          <button type="button" class="fila-btn danger" data-act="remover" aria-label="Remover ${esc(i.cliente)} da fila">Remover</button>
-        </div>
+        <button type="button" class="fila-btn" data-act="editar" aria-label="Editar ${esc(i.cliente)}" title="Editar">✎</button>
+        <button type="button" class="fila-btn danger" data-act="remover" aria-label="Remover ${esc(i.cliente)} da fila" title="Remover">✕</button>
       </li>`;
     })
     .join('');
-  const aImprimir = pendentes.length ? totalEtiquetas(pendentes) : totalEtiquetas(itens);
   $('fila-imprimir-texto').textContent = pendentes.length ? 'Imprimir fila' : 'Imprimir de novo';
   $('fila-contagem').textContent = plural(aImprimir, 'etiqueta', 'etiquetas');
 }
+
+function abrirFila(abrir: boolean): void {
+  $('fila-card').hidden = !abrir;
+  $('fila-fab').setAttribute('aria-expanded', String(abrir));
+}
+const fecharFila = () => abrirFila(false);
+$('fila-fab').addEventListener('click', () => abrirFila($('fila-card').hidden === true));
+document.addEventListener('click', (ev) => {
+  if ($('fila-card').hidden !== true && !(ev.target as HTMLElement).closest('#fila-flutuante')) fecharFila();
+});
+document.addEventListener('keydown', (ev) => {
+  if (ev.key === 'Escape' && $('fila-card').hidden !== true) {
+    fecharFila();
+    $('fila-fab').focus();
+  }
+});
 
 $('fila-lista').addEventListener('click', (ev) => {
   const b = (ev.target as HTMLElement).closest('button');
   const li = (ev.target as HTMLElement).closest('li');
   if (!b || !li) return;
   const id = li.dataset.id ?? '';
-  const item = fila.list().find((i) => i.id === id);
-  if (!item) return;
+  if (!fila.list().some((i) => i.id === id)) return;
   aviso($('aviso-fila'), '', '');
-  if (b.dataset.act === 'mais' || b.dataset.act === 'menos') {
-    const novo = fila.alterarCopias(id, item.copias + (b.dataset.act === 'mais' ? 1 : -1));
-    if (b.dataset.act === 'mais' && novo === item.copias) aviso($('aviso-fila'), 'fail', `A fila não pode passar de ${LIMITE_ETIQUETAS} etiquetas.`);
-    renderFila();
-  } else if (b.dataset.act === 'remover') {
+  if (b.dataset.act === 'remover') {
     fila.remover(id);
     renderFila();
   } else if (b.dataset.act === 'editar') {
+    fecharFila();
     editarItem(id);
   }
 });

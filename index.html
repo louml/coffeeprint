@@ -11,125 +11,123 @@
 :root {
   --ink: #161311; --ink-2: #4a423b; --muted: #7a7068;
   --paper: #f5f1ea; --card: #fff; --field: #fcfaf7; --line: #e4ddd2;
-  --accent: #a4571d; --ring: rgba(164, 87, 29, .28);
+  --accent: #a4571d; --fab: #e8731a; --ring: rgba(164, 87, 29, .28);
   --ok: #1f7a3d; --ok-bg: #e8f5ec; --err: #b3261e; --err-bg: #fdecea;
   --f: "TLInter", system-ui, "Segoe UI", sans-serif;
   --f-med: "TLInterMed", var(--f); --f-semi: "TLInterSemi", var(--f); --f-bold: "TLInterBold", var(--f);
 }
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
-body { margin: 0; background: var(--paper); color: var(--ink); font: 400 15px/1.4 var(--f); }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 400 15.5px/1.45 var(--f); }
 h1, h2, h3, strong, b { font-weight: 400; font-family: var(--f-bold); }
-h2 { margin: 0 0 4px; font-size: 21px; letter-spacing: -.3px; }
-h3 { margin: 0; font-size: 16px; }
+h2 { margin: 0 0 6px; font-size: 23px; letter-spacing: -.3px; }
+h3 { margin: 0; font-size: 16.5px; }
 p { margin: 0; }
-.sub { color: var(--muted); font-size: 13.5px; }
+.sub { color: var(--muted); font-size: 14px; }
 
 /* ---------- topo */
-.topbar { display: flex; align-items: stretch; flex-wrap: wrap; gap: 0 28px; padding: 0 20px; background: var(--card); border-bottom: 1px solid var(--line); }
-.brand { display: flex; align-items: center; gap: 10px; padding: 8px 0; }
-.logo { width: 38px; height: 38px; display: block; }
+.topbar { display: flex; align-items: stretch; flex-wrap: wrap; gap: 0 32px; padding: 0 84px 0 24px; background: var(--card); border-bottom: 1px solid var(--line); }
+.brand { display: flex; align-items: center; gap: 12px; padding: 10px 0; }
+.logo { width: 44px; height: 44px; display: block; }
 .brand-text { display: flex; flex-direction: column; line-height: 1.15; }
-.brand-text strong { font-size: 16.5px; letter-spacing: -.2px; }
-.brand-text span { color: var(--muted); font-size: 12px; }
+.brand-text strong { font-size: 18.5px; letter-spacing: -.2px; }
+.brand-text span { color: var(--muted); font-size: 13px; }
 /* abas: texto com traço embaixo (não parecem botões) */
-.tabs { display: flex; align-items: stretch; gap: 22px; margin-left: auto; }
-.tab { position: relative; display: flex; align-items: center; padding: 0 2px; margin-bottom: -1px; border: 0; border-bottom: 2px solid transparent; border-radius: 0; background: none; color: var(--muted); font: 400 14px var(--f-semi); cursor: pointer; white-space: nowrap; }
+.tabs { display: flex; align-items: stretch; gap: 26px; margin-left: auto; }
+.tab { position: relative; display: flex; align-items: center; padding: 0 2px; margin-bottom: -1px; border: 0; border-bottom: 3px solid transparent; border-radius: 0; background: none; color: var(--muted); font: 400 15px var(--f-semi); cursor: pointer; white-space: nowrap; }
 .tab:hover { color: var(--ink); border-bottom-color: var(--line); }
 .tab.active { color: var(--ink); border-bottom-color: var(--ink); }
 .tab:focus-visible { outline: none; box-shadow: none; }
 .tab:focus-visible { text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 2px; text-decoration-color: var(--accent); }
 
-main { max-width: 1040px; margin: 0 auto; padding: 18px 20px; }
+main { max-width: 1080px; margin: 0 auto; padding: 22px 24px; }
 .panel { display: none; } .panel.active { display: block; }
 
 /* ---------- cartões e formulários */
-.card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; box-shadow: 0 1px 2px rgba(22, 19, 17, .04); display: flex; flex-direction: column; gap: 11px; }
-form { display: flex; flex-direction: column; gap: 11px; }
-label, .field { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; font: 400 13px var(--f-semi); color: var(--ink-2); }
-label small, .field small, label span small { font: 400 12px/1.35 var(--f); color: var(--muted); }
-.label-text { font: 400 13px var(--f-semi); color: var(--ink-2); }
-.row { display: flex; gap: 10px; }
-input, select { font: 400 14.5px var(--f); color: var(--ink); width: 100%; min-height: 36px; padding: 0 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--field); }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 20px; box-shadow: 0 1px 2px rgba(22, 19, 17, .04); display: flex; flex-direction: column; gap: 14px; }
+form { display: flex; flex-direction: column; gap: 14px; }
+label, .field { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 0; font: 400 14px var(--f-semi); color: var(--ink-2); }
+label small, .field small, label span small { font: 400 12.5px/1.35 var(--f); color: var(--muted); }
+.label-text { font: 400 14px var(--f-semi); color: var(--ink-2); }
+.row { display: flex; gap: 12px; }
+input, select { font: 400 15.5px var(--f); color: var(--ink); width: 100%; min-height: 44px; padding: 0 12px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--field); }
 input::placeholder { color: #aaa095; }
 input:hover, select:hover { border-color: #cfc5b6; }
-input:focus, select:focus { outline: none; border-color: var(--ink); box-shadow: 0 0 0 3px var(--ring); }
+input:focus, select:focus { outline: none; border-color: var(--ink); box-shadow: 0 0 0 4px var(--ring); }
 input.invalido, select.invalido { border-color: var(--err); background: var(--err-bg); }
-label.check { flex-direction: row; align-items: center; gap: 10px; font: 400 14px var(--f); color: var(--ink); }
-label.check input { width: 18px; min-height: 0; height: 18px; accent-color: var(--ink); }
+label.check { flex-direction: row; align-items: center; gap: 12px; font: 400 15px var(--f); color: var(--ink); }
+label.check input { width: 20px; min-height: 0; height: 20px; accent-color: var(--ink); }
 
-/* escolha por botões de rádio (peso, moagem e entrega): o select fica só como apoio */
+/* escolha por botões (peso e moagem): o select fica só como apoio */
 .choice-select { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
-.field.inline { flex-direction: row; align-items: center; gap: 8px; flex: none; }
-.field.inline .label-text { width: 54px; flex: none; }
-.radios { display: flex; flex-wrap: wrap; gap: 4px 11px; flex: 1; min-width: 0; padding: 3px 0; }
-.radio { display: inline-flex; flex-direction: row; align-items: center; gap: 5px; flex: none; font: 400 13.5px var(--f); color: var(--ink); cursor: pointer; }
-.radio input { width: 16px; height: 16px; min-height: 0; margin: 0; padding: 0; accent-color: var(--ink); cursor: pointer; }
-.radio:hover span { text-decoration: underline; text-underline-offset: 3px; }
-.radio input:checked + span { font-family: var(--f-semi); }
-.choice-select:focus-visible + .radios { outline: 2px solid var(--ring); outline-offset: 3px; border-radius: 8px; }
-.choice-select.invalido + .radios { outline: 2px solid var(--err); outline-offset: 3px; border-radius: 8px; }
+.chips { display: grid; gap: 8px; grid-template-columns: repeat(var(--n, 4), 1fr); }
+.chip { font: 400 15.5px var(--f-semi); min-height: 44px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--field); color: var(--ink); cursor: pointer; }
+.chip:hover { border-color: var(--ink); }
+.chip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: #fff; }
+.chip:focus-visible, .choice-select:focus-visible + .chips .chip[aria-pressed="true"] { outline: none; box-shadow: 0 0 0 4px var(--ring); }
+.choice-select:focus-visible + .chips { outline: 3px solid var(--ring); outline-offset: 4px; border-radius: 14px; }
+.choice-select.invalido + .chips { outline: 2px solid var(--err); outline-offset: 4px; border-radius: 14px; }
 
-.stepper { display: grid; grid-template-columns: 36px 1fr 36px; gap: 4px; }
+.stepper { display: grid; grid-template-columns: 44px 1fr 44px; gap: 6px; }
 .stepper input { text-align: center; font-family: var(--f-semi); padding: 0 4px; -moz-appearance: textfield; }
 .stepper input::-webkit-outer-spin-button, .stepper input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-.stepper button { font: 400 20px/1 var(--f); min-height: 36px; border: 1px solid var(--line); border-radius: 8px; background: var(--field); color: var(--ink); cursor: pointer; }
+.stepper button { font: 400 22px/1 var(--f); min-height: 44px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--field); color: var(--ink); cursor: pointer; }
 .stepper button:hover { border-color: var(--ink); }
 
 /* ---------- botões */
 button { font-family: inherit; }
-button.big { font: 400 14px var(--f-semi); min-height: 36px; padding: 0 16px; border-radius: 8px; border: 1.5px solid var(--ink); background: var(--card); color: var(--ink); cursor: pointer; }
+button.big { font: 400 15px var(--f-semi); min-height: 44px; padding: 0 20px; border-radius: 10px; border: 2px solid var(--ink); background: var(--card); color: var(--ink); cursor: pointer; }
 button.big:hover { background: #f5f1ea; }
 button.primary { background: var(--ink); color: #fff; }
 button.primary:hover { background: #2b2521; }
-button:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--ring); }
+button:focus-visible { outline: none; box-shadow: 0 0 0 4px var(--ring); }
 button:disabled { opacity: .55; cursor: wait; }
 
 /* ---------- avisos */
 #aviso:empty, #aviso-config:empty, #aviso-backup:empty, .erro:empty { display: none; }
-.ok, .fail, .erro { padding: 9px 12px; border-radius: 8px; font: 400 14px/1.4 var(--f-semi); }
+.ok, .fail, .erro { padding: 11px 14px; border-radius: 10px; font: 400 14.5px/1.4 var(--f-semi); }
 .ok { background: var(--ok-bg); color: var(--ok); border: 1.5px solid var(--ok); }
 .fail, .erro { background: var(--err-bg); color: var(--err); border: 1.5px solid var(--err); }
 #aviso:not(.ok):not(.fail), #aviso-config:not(.ok):not(.fail), #aviso-backup:not(.ok):not(.fail) { color: var(--muted); font: 400 15px var(--f); }
-.aviso-topo { background: #fff6dc; color: #6a4f06; border: 1.5px solid #e6c766; border-radius: 12px; padding: 14px 16px; margin-bottom: 18px; font: 400 14px/1.4 var(--f-semi); }
+.aviso-topo { background: #fff6dc; color: #6a4f06; border: 1.5px solid #e6c766; border-radius: 12px; padding: 14px 16px; margin-bottom: 18px; font: 400 14.5px/1.4 var(--f-semi); }
 .aviso-topo[hidden] { display: none; }
 
 /* ---------- emissão */
-.split { display: grid; grid-template-columns: minmax(320px, 440px) 1fr; gap: 24px; align-items: start; }
+.split { display: grid; grid-template-columns: minmax(320px, 440px) 1fr; gap: 28px; align-items: start; }
 .preview { display: flex; flex-direction: column; align-items: center; gap: 14px; position: sticky; top: 20px; }
-.sheet { width: 100%; max-width: 400px; aspect-ratio: 4 / 5; background: #fff; border-radius: 4px; box-shadow: 0 1px 2px rgba(22,19,17,.18), 0 14px 38px rgba(22,19,17,.16); display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.sheet { width: 100%; max-width: 420px; aspect-ratio: 4 / 5; background: #fff; border-radius: 4px; box-shadow: 0 1px 2px rgba(22,19,17,.18), 0 14px 38px rgba(22,19,17,.16); display: flex; align-items: center; justify-content: center; overflow: hidden; }
 #previa { width: 100%; height: 100%; display: block; }
 #previa[hidden], #previa-vazia[hidden] { display: none; }
 #previa-vazia { color: var(--muted); text-align: center; padding: 24px; font-size: 16px; }
-.preview small { color: var(--muted); font-size: 12.5px; text-align: center; max-width: 440px; }
+.preview small { color: var(--muted); font-size: 14px; text-align: center; max-width: 440px; }
 
 /* ---------- cafés */
-.bar { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+.bar { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
 .bar h2 { margin: 0; }
-.cafe-item { display: flex; align-items: center; gap: 10px; background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px 8px 16px; margin-bottom: 6px; flex-wrap: wrap; }
+.cafe-item { display: flex; align-items: center; gap: 10px; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 11px 14px 11px 18px; margin-bottom: 8px; flex-wrap: wrap; }
 .cafe-item .info { flex: 1; min-width: 220px; }
-.cafe-item .info strong { font-size: 15px; }
-.cafe-item .info small { color: var(--muted); display: block; margin-top: 1px; font-size: 12.5px; }
+.cafe-item .info strong { font-size: 16px; }
+.cafe-item .info small { color: var(--muted); display: block; margin-top: 2px; font-size: 13.5px; }
 .cafe-item.inativo { background: #faf7f2; }
 .cafe-item.inativo .info strong { color: var(--muted); }
 .tag { font: 400 12.5px var(--f-semi); background: #ece6dc; color: var(--ink-2); border-radius: 999px; padding: 3px 10px; margin-left: 10px; vertical-align: 2px; }
-.cafe-item button { font: 400 13.5px var(--f-semi); min-height: 32px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer; }
+.cafe-item button { font: 400 14px var(--f-semi); min-height: 38px; padding: 0 14px; border-radius: 9px; border: 1.5px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer; }
 .cafe-item button:hover { border-color: var(--ink); }
 .cafe-item button.danger { color: var(--err); }
 .cafe-item button.danger:hover { border-color: var(--err); background: var(--err-bg); }
 
-dialog { border: 0; border-radius: 16px; padding: 20px; width: min(620px, 94vw); max-height: 94vh; overflow: auto; box-shadow: 0 24px 70px rgba(22,19,17,.4); background: var(--card); color: var(--ink); }
+dialog { border: 0; border-radius: 20px; padding: 24px; width: min(620px, 94vw); max-height: 94vh; overflow: auto; box-shadow: 0 24px 70px rgba(22,19,17,.4); background: var(--card); color: var(--ink); }
 dialog::backdrop { background: rgba(22, 19, 17, .55); }
-dialog form { gap: 10px; }
-.actions { display: flex; gap: 8px; justify-content: flex-end; }
+dialog form { gap: 13px; }
+.actions { display: flex; gap: 12px; justify-content: flex-end; }
 
 /* ---------- configurações */
-.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; align-items: start; margin-top: 10px; }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(330px, 1fr)); gap: 18px; align-items: start; margin-top: 14px; }
 .card .sub { line-height: 1.5; }
-.arquivo { display: inline-flex; align-items: center; justify-content: center; cursor: pointer; flex: none; min-height: 36px; border: 1.5px solid var(--ink); border-radius: 8px; font: 400 14px var(--f-semi); color: var(--ink); }
+.arquivo { display: inline-flex; align-items: center; justify-content: center; cursor: pointer; flex: none; min-height: 44px; border: 1.5px solid var(--ink); border-radius: 10px; font: 400 15px var(--f-semi); color: var(--ink); }
 .arquivo:hover { background: #f5f1ea; }
 .arquivo input { position: absolute; width: 1px; height: 1px; opacity: 0; }
-.arquivo:focus-within { box-shadow: 0 0 0 3px var(--ring); }
+.arquivo:focus-within { box-shadow: 0 0 0 4px var(--ring); }
 
 /* ---------- telas estreitas */
 @media (max-width: 880px) {
@@ -138,60 +136,59 @@ dialog form { gap: 10px; }
   .topbar { padding: 0 16px; }
   .brand { padding: 12px 0 8px; }
   .tabs { margin-left: 0; width: 100%; gap: 0; }
-  .tab { flex: 1 1 0; justify-content: center; min-height: 42px; padding: 0 4px; font-size: 14px; }
-  main { padding: 14px 12px; }
+  .tab { flex: 1 1 0; justify-content: center; min-height: 50px; padding: 0 4px; font-size: 15px; }
+  main { padding: 18px 16px; }
+  .card { padding: 20px; }
 }
 @media (max-width: 420px) { .row { flex-direction: column; } }
 @media print { body > #app { display: none !important; } }
 label > span small { display: inline; margin-left: 4px; }
 
 /* ---------- botões Adicionar à fila / Imprimir */
-.coluna { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
-.acoes { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 2px; }
+.coluna { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+.acoes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 @media (max-width: 420px) { .acoes { grid-template-columns: 1fr; } }
 
-/* ---------- fila de impressão */
+/* ---------- fila de impressão: botão laranja flutuante que abre a lista */
+#fila-flutuante { position: fixed; top: 12px; right: 16px; z-index: 900; }
+#fila-flutuante[hidden] { display: none; }
+#fila-fab { position: relative; display: grid; place-items: center; margin-left: auto; width: 52px; height: 52px; border: 0; border-radius: 50%; background: var(--fab); color: #fff; box-shadow: 0 6px 18px rgba(200, 90, 10, .45); cursor: pointer; transition: transform .12s, background .12s; }
+#fila-fab:hover { background: #cf620f; transform: translateY(-1px); }
+#fila-fab[aria-expanded="true"] { background: #b5540c; }
+#fila-badge { position: absolute; top: -4px; right: -4px; min-width: 22px; height: 22px; padding: 0 5px; border-radius: 11px; background: var(--ink); color: #fff; border: 2px solid var(--paper); font: 400 12px/18px var(--f-bold); text-align: center; }
+.fila { position: absolute; top: 62px; right: 0; width: min(360px, calc(100vw - 32px)); max-height: calc(100vh - 90px); overflow: hidden; display: flex; flex-direction: column; gap: 10px; padding: 14px; background: var(--card); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 16px 44px rgba(22, 19, 17, .28); }
 .fila[hidden] { display: none; }
 .fila-topo { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
-.fila-topo h3 { font-size: 15px; }
-.link { background: none; border: 0; padding: 4px 2px; color: var(--ink-2); font: 400 13px var(--f-semi); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.fila-topo h3 { font-size: 16px; }
+.link { background: none; border: 0; padding: 4px 2px; color: var(--ink-2); font: 400 13.5px var(--f-semi); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 .link:hover { color: var(--err); }
-#fila-lista { list-style: none; margin: 0; padding: 0 4px 0 0; display: flex; flex-direction: column; gap: 6px; max-height: min(56vh, 520px); overflow-y: auto; }
-.fila-item { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 2px 10px; padding: 8px 10px 6px; border: 1px solid var(--line); border-radius: 10px; background: var(--field); }
-.fila-item.enviado { background: #f3f1ec; }
+#fila-lista { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; overflow-y: auto; min-height: 0; border-top: 1px solid var(--line); }
+.fila-item { display: flex; align-items: center; gap: 2px; padding: 8px 0; border-bottom: 1px solid var(--line); }
 .fila-item.enviado .fila-info strong { color: var(--muted); }
-.fila-info { min-width: 0; line-height: 1.3; }
-.fila-info strong { font-size: 14.5px; }
-.fila-tags { display: flex; flex-wrap: wrap; gap: 4px; margin: 3px 0 2px; }
-.fila-item .tag { margin-left: 0; white-space: nowrap; }
+.fila-info { flex: 1; min-width: 0; line-height: 1.3; }
+.fila-info strong { display: block; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fila-info small { display: block; color: var(--muted); font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tag.enviado { background: var(--ok-bg); color: var(--ok); }
-.fila-info small { display: block; color: var(--muted); font-size: 12.5px; overflow-wrap: anywhere; }
-.fila-copias { display: flex; align-items: center; gap: 4px; }
-.fila-copias span { min-width: 24px; text-align: center; font: 400 14.5px var(--f-semi); }
-.fila-copias button { font: 400 17px/1 var(--f); min-height: 30px; min-width: 30px; padding: 0; border: 1px solid var(--line); border-radius: 8px; background: var(--card); color: var(--ink); cursor: pointer; }
-.fila-copias button:hover { border-color: var(--ink); }
-.fila-acoes { grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: 4px; padding-top: 4px; border-top: 1px solid var(--line); }
-.fila-btn { font: 400 13px var(--f-semi); min-height: 28px; padding: 0 12px; border: 0; border-radius: 8px; background: none; color: var(--ink-2); cursor: pointer; }
+.fila-btn { flex: none; width: 30px; height: 30px; padding: 0; border: 0; border-radius: 8px; background: none; color: var(--muted); font: 400 15px/1 var(--f); cursor: pointer; }
 .fila-btn:hover { background: #ece6dc; color: var(--ink); }
-.fila-btn.danger { color: var(--err); }
 .fila-btn.danger:hover { background: var(--err-bg); color: var(--err); }
-.print .contagem { padding: 1px 9px; border-radius: 999px; background: rgba(255, 255, 255, .2); font: 400 13px var(--f-semi); white-space: nowrap; }
+.print .contagem { padding: 2px 10px; border-radius: 999px; background: rgba(255, 255, 255, .2); font: 400 13.5px var(--f-semi); white-space: nowrap; }
 .print .contagem:empty { display: none; }
 #fila-imprimir-texto { white-space: nowrap; }
 #aviso-fila:empty { display: none; }
 
 /* ---------- botões de ação principais (Adicionar à fila, Imprimir, Imprimir fila)
    Mesmo tamanho, fonte, borda e raio; só as cores mudam: primário (cheio) e secundário (contorno). */
-.print, .add { display: flex; align-items: center; justify-content: center; gap: 7px; min-height: 40px; padding: 0 10px; border: 1.5px solid var(--ink); border-radius: 10px; font: 400 14.5px var(--f-bold); letter-spacing: -.1px; white-space: nowrap; cursor: pointer; }
+.print, .add { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; padding: 0 12px; border: 2px solid var(--ink); border-radius: 13px; font: 400 16.5px var(--f-bold); letter-spacing: -.1px; white-space: nowrap; cursor: pointer; }
 .print { background: var(--ink); color: #fff; }
 .print:hover { background: #2b2521; border-color: #2b2521; }
 .add { background: var(--card); color: var(--ink); }
 .add:hover { background: #f5f1ea; }
 .print:disabled, .add:disabled { opacity: .55; cursor: wait; }
-.print svg, .add svg { flex: none; width: 18px; height: 18px; }
+.print svg, .add svg { flex: none; width: 21px; height: 21px; }
 
 /* ---------- aviso temporário (toast) no canto superior direito */
-#toasts { position: fixed; top: 16px; right: 16px; z-index: 1000; display: flex; flex-direction: column; gap: 10px; width: min(380px, calc(100vw - 32px)); pointer-events: none; }
+#toasts { position: fixed; top: 76px; right: 16px; z-index: 1000; display: flex; flex-direction: column; gap: 10px; width: min(380px, calc(100vw - 32px)); pointer-events: none; }
 .toast { pointer-events: auto; display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; border-radius: 14px; background: var(--ink); color: #fff; box-shadow: 0 12px 32px rgba(22, 19, 17, .3); cursor: pointer; animation: toast-entra .22s ease-out; transition: opacity .2s, transform .2s; }
 .toast.saindo { opacity: 0; transform: translateX(16px); }
 .toast-icone { flex: none; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: #3fa36a; font-size: 14px; line-height: 1; }
@@ -231,7 +228,7 @@ label > span small { display: inline; margin-left: 4px; }
       <label>Café
         <select id="cafe"></select>
       </label>
-      <div class="field inline">
+      <div class="field">
         <span class="label-text" id="lbl-peso">Peso</span>
         <select id="peso" class="choice-select" aria-labelledby="lbl-peso">
           <option value="">Escolha…</option>
@@ -241,7 +238,7 @@ label > span small { display: inline; margin-left: 4px; }
           <option value="1kg">1 kg</option>
         </select>
       </div>
-      <div class="field inline">
+      <div class="field">
         <span class="label-text" id="lbl-moagem">Moagem</span>
         <select id="moagem" class="choice-select" aria-labelledby="lbl-moagem">
           <option value="">Escolha…</option>
@@ -249,8 +246,8 @@ label > span small { display: inline; margin-left: 4px; }
           <option value="Moído">Moído</option>
         </select>
       </div>
-      <div class="field inline">
-        <span class="label-text" id="lbl-entrega">Entrega</span>
+      <div class="field">
+        <span class="label-text" id="lbl-entrega">Entrega <small>(tag na etiqueta, opcional)</small></span>
         <select id="entrega" class="choice-select" aria-labelledby="lbl-entrega">
           <option value="">Sem tag</option>
           <option value="Uber">Uber</option>
@@ -284,7 +281,12 @@ label > span small { display: inline; margin-left: 4px; }
       <div id="aviso" role="status" aria-live="polite"></div>
     </form>
 
-    <section id="fila-card" class="card fila" aria-labelledby="fila-titulo" hidden>
+    <div id="fila-flutuante" hidden>
+    <button id="fila-fab" type="button" aria-expanded="false" aria-controls="fila-card" aria-label="Fila de impressão">
+      <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9V3h10v6"/><rect x="3" y="9" width="18" height="9" rx="2"/><path d="M7 14h10v7H7z"/></svg>
+      <span id="fila-badge"></span>
+    </button>
+    <section id="fila-card" class="fila" aria-labelledby="fila-titulo" hidden>
       <div class="fila-topo">
         <div>
           <h3 id="fila-titulo">Fila de impressão</h3>
@@ -300,6 +302,7 @@ label > span small { display: inline; margin-left: 4px; }
       </button>
       <div id="aviso-fila" role="status" aria-live="polite"></div>
     </section>
+    </div>
     </div>
 
     <div class="preview">
@@ -1181,27 +1184,25 @@ label > span small { display: inline; margin-left: 4px; }
   );
   function botoesDeEscolha(id, opcional = false) {
     const select = $(id);
-    const opcoes = [...select.options].filter((o) => o.value || opcional);
+    const opcoes = [...select.options].filter((o) => o.value);
     const grupo = document.createElement("div");
-    grupo.className = "radios";
-    grupo.setAttribute("role", "radiogroup");
+    grupo.className = "chips";
+    grupo.style.setProperty("--n", String(opcoes.length));
+    grupo.setAttribute("role", "group");
     grupo.setAttribute("aria-labelledby", `lbl-${id}`);
-    const marcar = () => grupo.querySelectorAll("input").forEach((r) => r.checked = r.value === select.value);
+    const marcar = () => grupo.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.valor === select.value)));
     for (const o of opcoes) {
-      const rotulo = document.createElement("label");
-      rotulo.className = "radio";
-      const r = document.createElement("input");
-      r.type = "radio";
-      r.name = `rd-${id}`;
-      r.value = o.value;
-      r.addEventListener("change", () => {
-        select.value = o.value;
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "chip";
+      b.dataset.valor = o.value;
+      b.textContent = o.textContent;
+      b.addEventListener("click", () => {
+        select.value = opcional && select.value === o.value ? "" : o.value;
+        marcar();
         select.dispatchEvent(new Event("input", { bubbles: true }));
       });
-      const texto = document.createElement("span");
-      texto.textContent = o.textContent;
-      rotulo.append(r, texto);
-      grupo.appendChild(rotulo);
+      grupo.appendChild(b);
     }
     select.after(grupo);
     select.addEventListener("change", marcar);
@@ -1338,48 +1339,58 @@ label > span small { display: inline; margin-left: 4px; }
   });
   function renderFila() {
     const itens = fila.list();
-    const card = $("fila-card");
-    card.hidden = itens.length === 0;
-    if (!itens.length) return;
+    $("fila-flutuante").hidden = itens.length === 0;
+    if (!itens.length) {
+      fecharFila();
+      return;
+    }
     const todos = book.list();
     const pendentes = itens.filter((i) => !i.enviado);
+    const aImprimir = pendentes.length ? totalEtiquetas(pendentes) : totalEtiquetas(itens);
+    $("fila-badge").textContent = String(totalEtiquetas(itens));
+    $("fila-fab").setAttribute("aria-label", `Fila de impress\xE3o: ${plural(totalEtiquetas(itens), "etiqueta", "etiquetas")}`);
     $("fila-resumo").textContent = `${plural(totalEtiquetas(itens), "etiqueta", "etiquetas")} \xB7 ${plural(itens.length, "item", "itens")}`;
     $("fila-lista").innerHTML = itens.map((i) => {
       const nome = textoNaLista({ id: i.cafeId, nome: i.cafe.nome, torra: i.cafe.torra }, todos);
-      const data = i.dataTorra.split("-").reverse().join("/");
       return `<li class="fila-item ${i.enviado ? "enviado" : ""}" data-id="${esc(i.id)}">
         <div class="fila-info">
-          <strong>${esc(nome)}</strong>
-          <div class="fila-tags"><span class="tag">${esc(i.peso)} \xB7 ${esc(i.moagem)}</span>${i.entrega ? `<span class="tag">${esc(i.entrega)}</span>` : ""}${i.enviado ? '<span class="tag enviado">\u2714 Enviado</span>' : ""}</div>
-          <small>${esc(i.cliente)} \xB7 torra ${esc(data)}</small>
+          <strong>${esc(i.cliente)}${i.enviado ? ' <span class="tag enviado">\u2714 Enviado</span>' : ""}</strong>
+          <small>${esc(nome)} / ${i.copias} / ${esc(moagemNoRotulo(i.moagem))}</small>
         </div>
-        <div class="fila-copias"><button type="button" data-act="menos" aria-label="Menos uma c\xF3pia de ${esc(i.cliente)}">\u2212</button><span aria-label="${i.copias} c\xF3pias">${i.copias}</span><button type="button" data-act="mais" aria-label="Mais uma c\xF3pia de ${esc(i.cliente)}">+</button></div>
-        <div class="fila-acoes">
-          <button type="button" class="fila-btn" data-act="editar">Editar</button>
-          <button type="button" class="fila-btn danger" data-act="remover" aria-label="Remover ${esc(i.cliente)} da fila">Remover</button>
-        </div>
+        <button type="button" class="fila-btn" data-act="editar" aria-label="Editar ${esc(i.cliente)}" title="Editar">\u270E</button>
+        <button type="button" class="fila-btn danger" data-act="remover" aria-label="Remover ${esc(i.cliente)} da fila" title="Remover">\u2715</button>
       </li>`;
     }).join("");
-    const aImprimir = pendentes.length ? totalEtiquetas(pendentes) : totalEtiquetas(itens);
     $("fila-imprimir-texto").textContent = pendentes.length ? "Imprimir fila" : "Imprimir de novo";
     $("fila-contagem").textContent = plural(aImprimir, "etiqueta", "etiquetas");
   }
+  function abrirFila(abrir) {
+    $("fila-card").hidden = !abrir;
+    $("fila-fab").setAttribute("aria-expanded", String(abrir));
+  }
+  var fecharFila = () => abrirFila(false);
+  $("fila-fab").addEventListener("click", () => abrirFila($("fila-card").hidden === true));
+  document.addEventListener("click", (ev) => {
+    if ($("fila-card").hidden !== true && !ev.target.closest("#fila-flutuante")) fecharFila();
+  });
+  document.addEventListener("keydown", (ev) => {
+    if (ev.key === "Escape" && $("fila-card").hidden !== true) {
+      fecharFila();
+      $("fila-fab").focus();
+    }
+  });
   $("fila-lista").addEventListener("click", (ev) => {
     const b = ev.target.closest("button");
     const li = ev.target.closest("li");
     if (!b || !li) return;
     const id = li.dataset.id ?? "";
-    const item = fila.list().find((i) => i.id === id);
-    if (!item) return;
+    if (!fila.list().some((i) => i.id === id)) return;
     aviso($("aviso-fila"), "", "");
-    if (b.dataset.act === "mais" || b.dataset.act === "menos") {
-      const novo = fila.alterarCopias(id, item.copias + (b.dataset.act === "mais" ? 1 : -1));
-      if (b.dataset.act === "mais" && novo === item.copias) aviso($("aviso-fila"), "fail", `A fila n\xE3o pode passar de ${LIMITE_ETIQUETAS} etiquetas.`);
-      renderFila();
-    } else if (b.dataset.act === "remover") {
+    if (b.dataset.act === "remover") {
       fila.remover(id);
       renderFila();
     } else if (b.dataset.act === "editar") {
+      fecharFila();
       editarItem(id);
     }
   });

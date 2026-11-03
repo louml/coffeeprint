@@ -38,7 +38,7 @@
       <label>Café
         <select id="cafe"></select>
       </label>
-      <div class="field inline">
+      <div class="field">
         <span class="label-text" id="lbl-peso">Peso</span>
         <select id="peso" class="choice-select" aria-labelledby="lbl-peso">
           <option value="">Escolha…</option>
@@ -48,7 +48,7 @@
           <option value="1kg">1 kg</option>
         </select>
       </div>
-      <div class="field inline">
+      <div class="field">
         <span class="label-text" id="lbl-moagem">Moagem</span>
         <select id="moagem" class="choice-select" aria-labelledby="lbl-moagem">
           <option value="">Escolha…</option>
@@ -56,8 +56,8 @@
           <option value="Moído">Moído</option>
         </select>
       </div>
-      <div class="field inline">
-        <span class="label-text" id="lbl-entrega">Entrega</span>
+      <div class="field">
+        <span class="label-text" id="lbl-entrega">Entrega <small>(tag na etiqueta, opcional)</small></span>
         <select id="entrega" class="choice-select" aria-labelledby="lbl-entrega">
           <option value="">Sem tag</option>
           <option value="Uber">Uber</option>
@@ -91,7 +91,12 @@
       <div id="aviso" role="status" aria-live="polite"></div>
     </form>
 
-    <section id="fila-card" class="card fila" aria-labelledby="fila-titulo" hidden>
+    <div id="fila-flutuante" hidden>
+    <button id="fila-fab" type="button" aria-expanded="false" aria-controls="fila-card" aria-label="Fila de impressão">
+      <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9V3h10v6"/><rect x="3" y="9" width="18" height="9" rx="2"/><path d="M7 14h10v7H7z"/></svg>
+      <span id="fila-badge"></span>
+    </button>
+    <section id="fila-card" class="fila" aria-labelledby="fila-titulo" hidden>
       <div class="fila-topo">
         <div>
           <h3 id="fila-titulo">Fila de impressão</h3>
@@ -107,6 +112,7 @@
       </button>
       <div id="aviso-fila" role="status" aria-live="polite"></div>
     </section>
+    </div>
     </div>
 
     <div class="preview">
