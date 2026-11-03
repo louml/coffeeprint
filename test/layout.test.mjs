@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { letraEntrega, moagemNoRotulo } from '../build/label/draw.js';
-import { rotateBitmap } from '../build/label/rotate.js';
+import { deslocarVertical, rotateBitmap } from '../build/label/rotate.js';
 import { arara, pontosNaLinha, renderLabel } from './helpers/render-node.mjs';
 
 test('rótulo: 640x800 pontos, 1 bit, e o selo muda a imagem', async () => {
@@ -177,4 +177,17 @@ test('selo (1,1x maior) não cobre o texto: o fundo cinza só aparece onde não 
   // o selo ocupa a área à direita (x 310-600) entre as linhas 1 e 2
   assert.ok(tinta2(com, 310, 150, 600, 450) - tinta2(sem, 310, 150, 600, 450) > 2500);
   assert.equal(tinta2(com, 310, 480, 600, 790), tinta2(sem, 310, 480, 600, 790), 'o selo não passa da linha 2');
+});
+
+test('ajuste vertical da impressão: sobe ou desce o conteúdo sem mexer no resto', async () => {
+  const bmp = await renderLabel(arara, { selo: false });
+  const [a, z] = [0, 799].map((_, i) => { let r = -1; for (let y = i ? 799 : 0; i ? y >= 0 : y < 800; y += i ? -1 : 1) if (pontosNaLinha(bmp, y) > 0) { r = y; break; } return r; });
+  const sobe = deslocarVertical(bmp, 8);
+  for (let y = 0; y < 792; y++) assert.equal(pontosNaLinha(sobe, y), pontosNaLinha(bmp, y + 8), `linha ${y}`);
+  assert.equal(pontosNaLinha(sobe, 799), 0, 'faixa nova em branco');
+  assert.equal(deslocarVertical(bmp, 0), bmp);
+  const desce = deslocarVertical(bmp, -8);
+  assert.equal(pontosNaLinha(desce, a + 8), pontosNaLinha(bmp, a));
+  assert.equal(pontosNaLinha(desce, 0), 0);
+  assert.ok(z + 8 < 800);
 });

@@ -39,28 +39,31 @@ document.querySelectorAll<HTMLButtonElement>('.tab').forEach((b) =>
 
 // ---------- emissão
 
-/** Peso e moagem viram botões de escolha (menos cliques); o <select> continua como fonte do valor. */
+/** Peso, moagem e entrega viram botões de rádio (ocupam menos espaço); o <select> continua como fonte do valor. */
 function botoesDeEscolha(id: string, opcional = false): void {
   const select = $(id) as HTMLSelectElement;
-  const opcoes = [...select.options].filter((o) => o.value);
+  // campo opcional: a opção vazia ("Sem tag") também vira um rádio; nos obrigatórios o vazio é só "Escolha…"
+  const opcoes = [...select.options].filter((o) => o.value || opcional);
   const grupo = document.createElement('div');
-  grupo.className = 'chips';
-  grupo.style.setProperty('--n', String(opcoes.length));
-  grupo.setAttribute('role', 'group');
+  grupo.className = 'radios';
+  grupo.setAttribute('role', 'radiogroup');
   grupo.setAttribute('aria-labelledby', `lbl-${id}`);
-  const marcar = () => grupo.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.valor === select.value)));
+  const marcar = () => grupo.querySelectorAll('input').forEach((r) => (r.checked = r.value === select.value));
   for (const o of opcoes) {
-    const b = document.createElement('button');
-    b.type = 'button';
-    b.className = 'chip';
-    b.dataset.valor = o.value;
-    b.textContent = o.textContent;
-    b.addEventListener('click', () => {
-      select.value = opcional && select.value === o.value ? '' : o.value; // campo opcional: clicar de novo desmarca
-      marcar();
+    const rotulo = document.createElement('label');
+    rotulo.className = 'radio';
+    const r = document.createElement('input');
+    r.type = 'radio';
+    r.name = `rd-${id}`;
+    r.value = o.value;
+    r.addEventListener('change', () => {
+      select.value = o.value;
       select.dispatchEvent(new Event('input', { bubbles: true }));
     });
-    grupo.appendChild(b);
+    const texto = document.createElement('span');
+    texto.textContent = o.textContent;
+    rotulo.append(r, texto);
+    grupo.appendChild(rotulo);
   }
   select.after(grupo);
   select.addEventListener('change', marcar);
@@ -141,7 +144,7 @@ async function emitir(dados: DadosRotulo, copias: number): Promise<string> {
     baixarPng(bmp, `rotulo-${new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)}.png`);
     return 'Modo sem impressora: o rótulo foi baixado como imagem.';
   }
-  const r = await imprimir(bmp, copias, cfg.rotacao);
+  const r = await imprimir(bmp, copias, cfg.rotacao, cfg.ajusteVertical);
   return `${copias === 1 ? '1 etiqueta enviada' : `${copias} etiquetas enviadas`} para impressão (${r.largura} × ${r.altura}). Confira na impressora.`;
 }
 
@@ -311,7 +314,7 @@ $('fila-imprimir').addEventListener('click', async () => {
       lotes.forEach((l, k) => baixarPng(l.bmp, `rotulo-fila-${carimbo}-${String(k + 1).padStart(2, '0')}.png`));
       msg = `Modo sem impressora: ${plural(lotes.length, 'rótulo foi baixado', 'rótulos foram baixados')} como imagem.`;
     } else {
-      const r = await imprimirLotes(lotes, cfg.rotacao);
+      const r = await imprimirLotes(lotes, cfg.rotacao, cfg.ajusteVertical);
       msg = `${plural(r.copias, 'etiqueta enviada', 'etiquetas enviadas')} para impressão (${r.largura} × ${r.altura}), de ${plural(itens.length, 'item', 'itens')}. Confira na impressora.`;
     }
     fila.marcarEnviadas();
@@ -389,11 +392,13 @@ $('form-cafe').addEventListener('submit', (ev) => {
 function loadConfig(): void {
   const c = repo.getConfig();
   ($('cfg-rotacao') as HTMLSelectElement).value = String(c.rotacao);
+  ($('cfg-ajuste') as HTMLInputElement).value = String(c.ajusteVertical);
   ($('cfg-selo') as HTMLInputElement).checked = c.selo;
   ($('cfg-offline') as HTMLInputElement).checked = c.modoSemImpressora;
 }
 const lerConfig = () => ({
   rotacao: Number(val('cfg-rotacao')) as Rotacao,
+  ajusteVertical: Math.max(-10, Math.min(10, Number.parseFloat(val('cfg-ajuste').replace(',', '.')) || 0)),
   selo: ($('cfg-selo') as HTMLInputElement).checked,
   modoSemImpressora: ($('cfg-offline') as HTMLInputElement).checked,
 });

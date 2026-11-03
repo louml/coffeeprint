@@ -1,4 +1,4 @@
-import { rotateBitmap, type Rotacao } from './label/rotate.js';
+import { deslocarVertical, rotateBitmap, type Rotacao } from './label/rotate.js';
 import type { Bitmap1bpp } from './label/types.js';
 import { drawBitmap } from './env.js';
 
@@ -20,9 +20,10 @@ export interface LoteImpressao {
  * e chama a impressão uma única vez, com todos os rótulos na ordem dada (a fila de impressão usa isto).
  * O navegador não informa se a impressora realmente imprimiu.
  */
-export async function imprimirLotes(lotes: LoteImpressao[], rotacao: Rotacao): Promise<ResultadoImpressao> {
+export async function imprimirLotes(lotes: LoteImpressao[], rotacao: Rotacao, ajusteVerticalMm = 0): Promise<ResultadoImpressao> {
   const imagens = lotes.map((lote) => {
-    const final = rotateBitmap(lote.bmp, rotacao);
+    // o ajuste vertical é na página impressa (depois do giro): positivo sobe o conteúdo, 8 pontos = 1 mm
+    const final = deslocarVertical(rotateBitmap(lote.bmp, rotacao), ajusteVerticalMm * 8);
     const canvas = document.createElement('canvas');
     drawBitmap(final, canvas);
     return { url: canvas.toDataURL('image/png'), copias: lote.copias, largura: final.width, altura: final.height };
@@ -75,8 +76,8 @@ export async function imprimirLotes(lotes: LoteImpressao[], rotacao: Rotacao): P
 }
 
 /** Imprime um único rótulo, `copias` vezes. */
-export function imprimir(bmp: Bitmap1bpp, copias: number, rotacao: Rotacao): Promise<ResultadoImpressao> {
-  return imprimirLotes([{ bmp, copias }], rotacao);
+export function imprimir(bmp: Bitmap1bpp, copias: number, rotacao: Rotacao, ajusteVerticalMm = 0): Promise<ResultadoImpressao> {
+  return imprimirLotes([{ bmp, copias }], rotacao, ajusteVerticalMm);
 }
 
 /** Modo sem impressora: baixa o rótulo como imagem. */

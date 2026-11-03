@@ -21,3 +21,19 @@ export function rotateBitmap(src: Bitmap1bpp, graus: Rotacao): Bitmap1bpp {
   }
   return { width, height, bytesPerRow, data };
 }
+
+/**
+ * Sobe (`dots` > 0) ou desce (`dots` < 0) todo o conteúdo da página. O que sai da imagem some e a faixa
+ * que sobra fica em branco. Compensa o ponto em que a impressora começa a imprimir no papel.
+ */
+export function deslocarVertical(src: Bitmap1bpp, dots: number): Bitmap1bpp {
+  const d = Math.round(dots);
+  if (!d) return src;
+  const data = new Uint8Array(src.data.length);
+  for (let y = 0; y < src.height; y++) {
+    const ny = y - d;
+    if (ny < 0 || ny >= src.height) continue;
+    data.set(src.data.subarray(y * src.bytesPerRow, (y + 1) * src.bytesPerRow), ny * src.bytesPerRow);
+  }
+  return { ...src, data };
+}

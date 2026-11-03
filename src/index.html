@@ -38,7 +38,7 @@
       <label>Café
         <select id="cafe"></select>
       </label>
-      <div class="field">
+      <div class="field inline">
         <span class="label-text" id="lbl-peso">Peso</span>
         <select id="peso" class="choice-select" aria-labelledby="lbl-peso">
           <option value="">Escolha…</option>
@@ -48,7 +48,7 @@
           <option value="1kg">1 kg</option>
         </select>
       </div>
-      <div class="field">
+      <div class="field inline">
         <span class="label-text" id="lbl-moagem">Moagem</span>
         <select id="moagem" class="choice-select" aria-labelledby="lbl-moagem">
           <option value="">Escolha…</option>
@@ -56,8 +56,8 @@
           <option value="Moído">Moído</option>
         </select>
       </div>
-      <div class="field">
-        <span class="label-text" id="lbl-entrega">Entrega <small>(tag na etiqueta, opcional)</small></span>
+      <div class="field inline">
+        <span class="label-text" id="lbl-entrega">Entrega</span>
         <select id="entrega" class="choice-select" aria-labelledby="lbl-entrega">
           <option value="">Sem tag</option>
           <option value="Uber">Uber</option>
@@ -171,6 +171,10 @@
           <option value="180">Girar 180° (de cabeça para baixo)</option>
         </select>
         <small>Se a etiqueta do rolo é mais larga que alta (100 × 80 mm), escolha uma das opções "deitada". Se o texto sair de cabeça para baixo, use a outra. Não muda a pré-visualização.</small>
+      </label>
+      <label>Ajuste vertical da impressão (mm)
+        <input id="cfg-ajuste" type="number" min="-10" max="10" step="0.5" inputmode="decimal">
+        <small>Sobe (positivo) ou desce (negativo) todo o conteúdo na etiqueta. Se a margem de cima sair maior que a de baixo, aumente o valor de 0,5 em 0,5 e imprima o teste. Não muda a pré-visualização.</small>
       </label>
       <button type="button" id="teste" class="big">Imprimir etiqueta de teste</button>
       <label class="check"><input id="cfg-selo" type="checkbox"> Imprimir o selo gráfico de fundo (Cafés Especiais / Torra Local)</label>

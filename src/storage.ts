@@ -12,9 +12,11 @@ export interface Config {
   modoSemImpressora: boolean;
   /** Giro aplicado só na impressão (etiqueta deitada no rolo). */
   rotacao: Rotacao;
+  /** Ajuste vertical da impressão em mm: positivo sobe o conteúdo na etiqueta (compensa onde a impressora começa a imprimir). */
+  ajusteVertical: number;
 }
 
-export const DEFAULT_CONFIG: Config = { selo: true, modoSemImpressora: false, rotacao: 0 };
+export const DEFAULT_CONFIG: Config = { selo: true, modoSemImpressora: false, rotacao: 0, ajusteVertical: 1 };
 
 const KEY_CAFES = 'torralocal.cafes.v1';
 const KEY_CONFIG = 'torralocal.config.v1';

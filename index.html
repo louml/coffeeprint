@@ -18,116 +18,118 @@
 }
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
-body { margin: 0; background: var(--paper); color: var(--ink); font: 400 17px/1.45 var(--f); }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 400 15px/1.4 var(--f); }
 h1, h2, h3, strong, b { font-weight: 400; font-family: var(--f-bold); }
-h2 { margin: 0 0 6px; font-size: 26px; letter-spacing: -.3px; }
-h3 { margin: 0; font-size: 18px; }
+h2 { margin: 0 0 4px; font-size: 21px; letter-spacing: -.3px; }
+h3 { margin: 0; font-size: 16px; }
 p { margin: 0; }
-.sub { color: var(--muted); font-size: 15px; }
+.sub { color: var(--muted); font-size: 13.5px; }
 
 /* ---------- topo */
-.topbar { display: flex; align-items: stretch; flex-wrap: wrap; gap: 0 36px; padding: 0 28px; background: var(--card); border-bottom: 1px solid var(--line); }
-.brand { display: flex; align-items: center; gap: 14px; padding: 14px 0; }
-.logo { width: 54px; height: 54px; display: block; }
+.topbar { display: flex; align-items: stretch; flex-wrap: wrap; gap: 0 28px; padding: 0 20px; background: var(--card); border-bottom: 1px solid var(--line); }
+.brand { display: flex; align-items: center; gap: 10px; padding: 8px 0; }
+.logo { width: 38px; height: 38px; display: block; }
 .brand-text { display: flex; flex-direction: column; line-height: 1.15; }
-.brand-text strong { font-size: 21px; letter-spacing: -.2px; }
-.brand-text span { color: var(--muted); font-size: 14px; }
+.brand-text strong { font-size: 16.5px; letter-spacing: -.2px; }
+.brand-text span { color: var(--muted); font-size: 12px; }
 /* abas: texto com traço embaixo (não parecem botões) */
-.tabs { display: flex; align-items: stretch; gap: 30px; margin-left: auto; }
-.tab { position: relative; display: flex; align-items: center; padding: 0 2px; margin-bottom: -1px; border: 0; border-bottom: 3px solid transparent; border-radius: 0; background: none; color: var(--muted); font: 400 16.5px var(--f-semi); cursor: pointer; white-space: nowrap; }
+.tabs { display: flex; align-items: stretch; gap: 22px; margin-left: auto; }
+.tab { position: relative; display: flex; align-items: center; padding: 0 2px; margin-bottom: -1px; border: 0; border-bottom: 2px solid transparent; border-radius: 0; background: none; color: var(--muted); font: 400 14px var(--f-semi); cursor: pointer; white-space: nowrap; }
 .tab:hover { color: var(--ink); border-bottom-color: var(--line); }
 .tab.active { color: var(--ink); border-bottom-color: var(--ink); }
 .tab:focus-visible { outline: none; box-shadow: none; }
 .tab:focus-visible { text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 2px; text-decoration-color: var(--accent); }
 
-main { max-width: 1120px; margin: 0 auto; padding: 28px; }
+main { max-width: 1040px; margin: 0 auto; padding: 18px 20px; }
 .panel { display: none; } .panel.active { display: block; }
 
 /* ---------- cartões e formulários */
-.card { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 26px; box-shadow: 0 1px 2px rgba(22, 19, 17, .04); display: flex; flex-direction: column; gap: 18px; }
-form { display: flex; flex-direction: column; gap: 18px; }
-label, .field { display: flex; flex-direction: column; gap: 7px; flex: 1; min-width: 0; font: 400 15px var(--f-semi); color: var(--ink-2); }
-label small, .field small, label span small { font: 400 13.5px/1.35 var(--f); color: var(--muted); }
-.label-text { font: 400 15px var(--f-semi); color: var(--ink-2); }
-.row { display: flex; gap: 14px; }
-input, select { font: 400 18px var(--f); color: var(--ink); width: 100%; min-height: 54px; padding: 0 14px; border: 1.5px solid var(--line); border-radius: 12px; background: var(--field); }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; box-shadow: 0 1px 2px rgba(22, 19, 17, .04); display: flex; flex-direction: column; gap: 11px; }
+form { display: flex; flex-direction: column; gap: 11px; }
+label, .field { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; font: 400 13px var(--f-semi); color: var(--ink-2); }
+label small, .field small, label span small { font: 400 12px/1.35 var(--f); color: var(--muted); }
+.label-text { font: 400 13px var(--f-semi); color: var(--ink-2); }
+.row { display: flex; gap: 10px; }
+input, select { font: 400 14.5px var(--f); color: var(--ink); width: 100%; min-height: 36px; padding: 0 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--field); }
 input::placeholder { color: #aaa095; }
 input:hover, select:hover { border-color: #cfc5b6; }
-input:focus, select:focus { outline: none; border-color: var(--ink); box-shadow: 0 0 0 4px var(--ring); }
+input:focus, select:focus { outline: none; border-color: var(--ink); box-shadow: 0 0 0 3px var(--ring); }
 input.invalido, select.invalido { border-color: var(--err); background: var(--err-bg); }
-label.check { flex-direction: row; align-items: center; gap: 12px; font: 400 16px var(--f); color: var(--ink); }
-label.check input { width: 24px; min-height: 0; height: 24px; accent-color: var(--ink); }
+label.check { flex-direction: row; align-items: center; gap: 10px; font: 400 14px var(--f); color: var(--ink); }
+label.check input { width: 18px; min-height: 0; height: 18px; accent-color: var(--ink); }
 
-/* escolha por botões (peso e moagem): o select fica só como apoio */
+/* escolha por botões de rádio (peso, moagem e entrega): o select fica só como apoio */
 .choice-select { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
-.chips { display: grid; gap: 10px; grid-template-columns: repeat(var(--n, 4), 1fr); }
-.chip { font: 400 18px var(--f-semi); min-height: 54px; border: 1.5px solid var(--line); border-radius: 12px; background: var(--field); color: var(--ink); cursor: pointer; }
-.chip:hover { border-color: var(--ink); }
-.chip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: #fff; }
-.chip:focus-visible, .choice-select:focus-visible + .chips .chip[aria-pressed="true"] { outline: none; box-shadow: 0 0 0 4px var(--ring); }
-.choice-select:focus-visible + .chips { outline: 3px solid var(--ring); outline-offset: 4px; border-radius: 14px; }
-.choice-select.invalido + .chips { outline: 2px solid var(--err); outline-offset: 4px; border-radius: 14px; }
+.field.inline { flex-direction: row; align-items: center; gap: 8px; flex: none; }
+.field.inline .label-text { width: 54px; flex: none; }
+.radios { display: flex; flex-wrap: wrap; gap: 4px 11px; flex: 1; min-width: 0; padding: 3px 0; }
+.radio { display: inline-flex; flex-direction: row; align-items: center; gap: 5px; flex: none; font: 400 13.5px var(--f); color: var(--ink); cursor: pointer; }
+.radio input { width: 16px; height: 16px; min-height: 0; margin: 0; padding: 0; accent-color: var(--ink); cursor: pointer; }
+.radio:hover span { text-decoration: underline; text-underline-offset: 3px; }
+.radio input:checked + span { font-family: var(--f-semi); }
+.choice-select:focus-visible + .radios { outline: 2px solid var(--ring); outline-offset: 3px; border-radius: 8px; }
+.choice-select.invalido + .radios { outline: 2px solid var(--err); outline-offset: 3px; border-radius: 8px; }
 
-.stepper { display: grid; grid-template-columns: 54px 1fr 54px; gap: 6px; }
+.stepper { display: grid; grid-template-columns: 36px 1fr 36px; gap: 4px; }
 .stepper input { text-align: center; font-family: var(--f-semi); padding: 0 4px; -moz-appearance: textfield; }
 .stepper input::-webkit-outer-spin-button, .stepper input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-.stepper button { font: 400 26px/1 var(--f); min-height: 54px; border: 1.5px solid var(--line); border-radius: 12px; background: var(--field); color: var(--ink); cursor: pointer; }
+.stepper button { font: 400 20px/1 var(--f); min-height: 36px; border: 1px solid var(--line); border-radius: 8px; background: var(--field); color: var(--ink); cursor: pointer; }
 .stepper button:hover { border-color: var(--ink); }
 
 /* ---------- botões */
 button { font-family: inherit; }
-button.big { font: 400 17px var(--f-semi); min-height: 54px; padding: 0 24px; border-radius: 12px; border: 2px solid var(--ink); background: var(--card); color: var(--ink); cursor: pointer; }
+button.big { font: 400 14px var(--f-semi); min-height: 36px; padding: 0 16px; border-radius: 8px; border: 1.5px solid var(--ink); background: var(--card); color: var(--ink); cursor: pointer; }
 button.big:hover { background: #f5f1ea; }
 button.primary { background: var(--ink); color: #fff; }
 button.primary:hover { background: #2b2521; }
-button:focus-visible { outline: none; box-shadow: 0 0 0 4px var(--ring); }
+button:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--ring); }
 button:disabled { opacity: .55; cursor: wait; }
 
 /* ---------- avisos */
 #aviso:empty, #aviso-config:empty, #aviso-backup:empty, .erro:empty { display: none; }
-.ok, .fail, .erro { padding: 14px 16px; border-radius: 12px; font: 400 16px/1.4 var(--f-semi); }
+.ok, .fail, .erro { padding: 9px 12px; border-radius: 8px; font: 400 14px/1.4 var(--f-semi); }
 .ok { background: var(--ok-bg); color: var(--ok); border: 1.5px solid var(--ok); }
 .fail, .erro { background: var(--err-bg); color: var(--err); border: 1.5px solid var(--err); }
 #aviso:not(.ok):not(.fail), #aviso-config:not(.ok):not(.fail), #aviso-backup:not(.ok):not(.fail) { color: var(--muted); font: 400 15px var(--f); }
-.aviso-topo { background: #fff6dc; color: #6a4f06; border: 1.5px solid #e6c766; border-radius: 12px; padding: 14px 16px; margin-bottom: 18px; font: 400 15.5px/1.4 var(--f-semi); }
+.aviso-topo { background: #fff6dc; color: #6a4f06; border: 1.5px solid #e6c766; border-radius: 12px; padding: 14px 16px; margin-bottom: 18px; font: 400 14px/1.4 var(--f-semi); }
 .aviso-topo[hidden] { display: none; }
 
 /* ---------- emissão */
-.split { display: grid; grid-template-columns: minmax(330px, 470px) 1fr; gap: 32px; align-items: start; }
+.split { display: grid; grid-template-columns: minmax(320px, 440px) 1fr; gap: 24px; align-items: start; }
 .preview { display: flex; flex-direction: column; align-items: center; gap: 14px; position: sticky; top: 20px; }
-.sheet { width: 100%; max-width: 440px; aspect-ratio: 4 / 5; background: #fff; border-radius: 4px; box-shadow: 0 1px 2px rgba(22,19,17,.18), 0 14px 38px rgba(22,19,17,.16); display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.sheet { width: 100%; max-width: 400px; aspect-ratio: 4 / 5; background: #fff; border-radius: 4px; box-shadow: 0 1px 2px rgba(22,19,17,.18), 0 14px 38px rgba(22,19,17,.16); display: flex; align-items: center; justify-content: center; overflow: hidden; }
 #previa { width: 100%; height: 100%; display: block; }
 #previa[hidden], #previa-vazia[hidden] { display: none; }
 #previa-vazia { color: var(--muted); text-align: center; padding: 24px; font-size: 16px; }
-.preview small { color: var(--muted); font-size: 14px; text-align: center; max-width: 440px; }
+.preview small { color: var(--muted); font-size: 12.5px; text-align: center; max-width: 440px; }
 
 /* ---------- cafés */
-.bar { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
+.bar { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
 .bar h2 { margin: 0; }
-.cafe-item { display: flex; align-items: center; gap: 10px; background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px 14px 20px; margin-bottom: 10px; flex-wrap: wrap; }
+.cafe-item { display: flex; align-items: center; gap: 10px; background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px 8px 16px; margin-bottom: 6px; flex-wrap: wrap; }
 .cafe-item .info { flex: 1; min-width: 220px; }
-.cafe-item .info strong { font-size: 18px; }
-.cafe-item .info small { color: var(--muted); display: block; margin-top: 2px; font-size: 14.5px; }
+.cafe-item .info strong { font-size: 15px; }
+.cafe-item .info small { color: var(--muted); display: block; margin-top: 1px; font-size: 12.5px; }
 .cafe-item.inativo { background: #faf7f2; }
 .cafe-item.inativo .info strong { color: var(--muted); }
 .tag { font: 400 12.5px var(--f-semi); background: #ece6dc; color: var(--ink-2); border-radius: 999px; padding: 3px 10px; margin-left: 10px; vertical-align: 2px; }
-.cafe-item button { font: 400 15.5px var(--f-semi); min-height: 46px; padding: 0 16px; border-radius: 10px; border: 1.5px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer; }
+.cafe-item button { font: 400 13.5px var(--f-semi); min-height: 32px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer; }
 .cafe-item button:hover { border-color: var(--ink); }
 .cafe-item button.danger { color: var(--err); }
 .cafe-item button.danger:hover { border-color: var(--err); background: var(--err-bg); }
 
-dialog { border: 0; border-radius: 22px; padding: 28px; width: min(620px, 94vw); max-height: 94vh; overflow: auto; box-shadow: 0 24px 70px rgba(22,19,17,.4); background: var(--card); color: var(--ink); }
+dialog { border: 0; border-radius: 16px; padding: 20px; width: min(620px, 94vw); max-height: 94vh; overflow: auto; box-shadow: 0 24px 70px rgba(22,19,17,.4); background: var(--card); color: var(--ink); }
 dialog::backdrop { background: rgba(22, 19, 17, .55); }
-dialog form { gap: 16px; }
-.actions { display: flex; gap: 12px; justify-content: flex-end; }
+dialog form { gap: 10px; }
+.actions { display: flex; gap: 8px; justify-content: flex-end; }
 
 /* ---------- configurações */
-.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 22px; align-items: start; margin-top: 16px; }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; align-items: start; margin-top: 10px; }
 .card .sub { line-height: 1.5; }
-.arquivo { display: inline-flex; align-items: center; justify-content: center; cursor: pointer; flex: none; min-height: 54px; border: 1.5px solid var(--ink); border-radius: 12px; font: 400 17px var(--f-semi); color: var(--ink); }
+.arquivo { display: inline-flex; align-items: center; justify-content: center; cursor: pointer; flex: none; min-height: 36px; border: 1.5px solid var(--ink); border-radius: 8px; font: 400 14px var(--f-semi); color: var(--ink); }
 .arquivo:hover { background: #f5f1ea; }
 .arquivo input { position: absolute; width: 1px; height: 1px; opacity: 0; }
-.arquivo:focus-within { box-shadow: 0 0 0 4px var(--ring); }
+.arquivo:focus-within { box-shadow: 0 0 0 3px var(--ring); }
 
 /* ---------- telas estreitas */
 @media (max-width: 880px) {
@@ -136,58 +138,57 @@ dialog form { gap: 16px; }
   .topbar { padding: 0 16px; }
   .brand { padding: 12px 0 8px; }
   .tabs { margin-left: 0; width: 100%; gap: 0; }
-  .tab { flex: 1 1 0; justify-content: center; min-height: 50px; padding: 0 4px; font-size: 15px; }
-  main { padding: 18px 16px; }
-  .card { padding: 20px; }
+  .tab { flex: 1 1 0; justify-content: center; min-height: 42px; padding: 0 4px; font-size: 14px; }
+  main { padding: 14px 12px; }
 }
 @media (max-width: 420px) { .row { flex-direction: column; } }
 @media print { body > #app { display: none !important; } }
 label > span small { display: inline; margin-left: 4px; }
 
 /* ---------- botões Adicionar à fila / Imprimir */
-.coluna { display: flex; flex-direction: column; gap: 22px; min-width: 0; }
-.acoes { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.coluna { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.acoes { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 2px; }
 @media (max-width: 420px) { .acoes { grid-template-columns: 1fr; } }
 
 /* ---------- fila de impressão */
 .fila[hidden] { display: none; }
 .fila-topo { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
-.fila-topo h3 { font-size: 19px; }
-.link { background: none; border: 0; padding: 6px 2px; color: var(--ink-2); font: 400 15px var(--f-semi); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.fila-topo h3 { font-size: 15px; }
+.link { background: none; border: 0; padding: 4px 2px; color: var(--ink-2); font: 400 13px var(--f-semi); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 .link:hover { color: var(--err); }
-#fila-lista { list-style: none; margin: 0; padding: 0 4px 0 0; display: flex; flex-direction: column; gap: 8px; max-height: min(64vh, 600px); overflow-y: auto; }
-.fila-item { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 4px 12px; padding: 12px 14px 10px; border: 1px solid var(--line); border-radius: 14px; background: var(--field); }
+#fila-lista { list-style: none; margin: 0; padding: 0 4px 0 0; display: flex; flex-direction: column; gap: 6px; max-height: min(56vh, 520px); overflow-y: auto; }
+.fila-item { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 2px 10px; padding: 8px 10px 6px; border: 1px solid var(--line); border-radius: 10px; background: var(--field); }
 .fila-item.enviado { background: #f3f1ec; }
 .fila-item.enviado .fila-info strong { color: var(--muted); }
 .fila-info { min-width: 0; line-height: 1.3; }
-.fila-info strong { font-size: 17px; }
-.fila-tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 5px 0 3px; }
+.fila-info strong { font-size: 14.5px; }
+.fila-tags { display: flex; flex-wrap: wrap; gap: 4px; margin: 3px 0 2px; }
 .fila-item .tag { margin-left: 0; white-space: nowrap; }
 .tag.enviado { background: var(--ok-bg); color: var(--ok); }
-.fila-info small { display: block; color: var(--muted); font-size: 14px; overflow-wrap: anywhere; }
+.fila-info small { display: block; color: var(--muted); font-size: 12.5px; overflow-wrap: anywhere; }
 .fila-copias { display: flex; align-items: center; gap: 4px; }
-.fila-copias span { min-width: 30px; text-align: center; font: 400 17px var(--f-semi); }
-.fila-copias button { font: 400 20px/1 var(--f); min-height: 40px; min-width: 40px; padding: 0; border: 1.5px solid var(--line); border-radius: 10px; background: var(--card); color: var(--ink); cursor: pointer; }
+.fila-copias span { min-width: 24px; text-align: center; font: 400 14.5px var(--f-semi); }
+.fila-copias button { font: 400 17px/1 var(--f); min-height: 30px; min-width: 30px; padding: 0; border: 1px solid var(--line); border-radius: 8px; background: var(--card); color: var(--ink); cursor: pointer; }
 .fila-copias button:hover { border-color: var(--ink); }
-.fila-acoes { grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: 6px; padding-top: 6px; border-top: 1px solid var(--line); }
-.fila-btn { font: 400 14.5px var(--f-semi); min-height: 36px; padding: 0 12px; border: 0; border-radius: 8px; background: none; color: var(--ink-2); cursor: pointer; }
+.fila-acoes { grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: 4px; padding-top: 4px; border-top: 1px solid var(--line); }
+.fila-btn { font: 400 13px var(--f-semi); min-height: 28px; padding: 0 12px; border: 0; border-radius: 8px; background: none; color: var(--ink-2); cursor: pointer; }
 .fila-btn:hover { background: #ece6dc; color: var(--ink); }
 .fila-btn.danger { color: var(--err); }
 .fila-btn.danger:hover { background: var(--err-bg); color: var(--err); }
-.print .contagem { padding: 3px 12px; border-radius: 999px; background: rgba(255, 255, 255, .2); font: 400 15px var(--f-semi); white-space: nowrap; }
+.print .contagem { padding: 1px 9px; border-radius: 999px; background: rgba(255, 255, 255, .2); font: 400 13px var(--f-semi); white-space: nowrap; }
 .print .contagem:empty { display: none; }
 #fila-imprimir-texto { white-space: nowrap; }
 #aviso-fila:empty { display: none; }
 
 /* ---------- botões de ação principais (Adicionar à fila, Imprimir, Imprimir fila)
    Mesmo tamanho, fonte, borda e raio; só as cores mudam: primário (cheio) e secundário (contorno). */
-.print, .add { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 68px; padding: 0 12px; border: 2px solid var(--ink); border-radius: 16px; font: 400 19px var(--f-bold); letter-spacing: -.1px; white-space: nowrap; cursor: pointer; }
+.print, .add { display: flex; align-items: center; justify-content: center; gap: 7px; min-height: 40px; padding: 0 10px; border: 1.5px solid var(--ink); border-radius: 10px; font: 400 14.5px var(--f-bold); letter-spacing: -.1px; white-space: nowrap; cursor: pointer; }
 .print { background: var(--ink); color: #fff; }
 .print:hover { background: #2b2521; border-color: #2b2521; }
 .add { background: var(--card); color: var(--ink); }
 .add:hover { background: #f5f1ea; }
 .print:disabled, .add:disabled { opacity: .55; cursor: wait; }
-.print svg, .add svg { flex: none; width: 24px; height: 24px; }
+.print svg, .add svg { flex: none; width: 18px; height: 18px; }
 
 /* ---------- aviso temporário (toast) no canto superior direito */
 #toasts { position: fixed; top: 16px; right: 16px; z-index: 1000; display: flex; flex-direction: column; gap: 10px; width: min(380px, calc(100vw - 32px)); pointer-events: none; }
@@ -230,7 +231,7 @@ label > span small { display: inline; margin-left: 4px; }
       <label>Café
         <select id="cafe"></select>
       </label>
-      <div class="field">
+      <div class="field inline">
         <span class="label-text" id="lbl-peso">Peso</span>
         <select id="peso" class="choice-select" aria-labelledby="lbl-peso">
           <option value="">Escolha…</option>
@@ -240,7 +241,7 @@ label > span small { display: inline; margin-left: 4px; }
           <option value="1kg">1 kg</option>
         </select>
       </div>
-      <div class="field">
+      <div class="field inline">
         <span class="label-text" id="lbl-moagem">Moagem</span>
         <select id="moagem" class="choice-select" aria-labelledby="lbl-moagem">
           <option value="">Escolha…</option>
@@ -248,8 +249,8 @@ label > span small { display: inline; margin-left: 4px; }
           <option value="Moído">Moído</option>
         </select>
       </div>
-      <div class="field">
-        <span class="label-text" id="lbl-entrega">Entrega <small>(tag na etiqueta, opcional)</small></span>
+      <div class="field inline">
+        <span class="label-text" id="lbl-entrega">Entrega</span>
         <select id="entrega" class="choice-select" aria-labelledby="lbl-entrega">
           <option value="">Sem tag</option>
           <option value="Uber">Uber</option>
@@ -363,6 +364,10 @@ label > span small { display: inline; margin-left: 4px; }
           <option value="180">Girar 180° (de cabeça para baixo)</option>
         </select>
         <small>Se a etiqueta do rolo é mais larga que alta (100 × 80 mm), escolha uma das opções "deitada". Se o texto sair de cabeça para baixo, use a outra. Não muda a pré-visualização.</small>
+      </label>
+      <label>Ajuste vertical da impressão (mm)
+        <input id="cfg-ajuste" type="number" min="-10" max="10" step="0.5" inputmode="decimal">
+        <small>Sobe (positivo) ou desce (negativo) todo o conteúdo na etiqueta. Se a margem de cima sair maior que a de baixo, aumente o valor de 0,5 em 0,5 e imprima o teste. Não muda a pré-visualização.</small>
       </label>
       <button type="button" id="teste" class="big">Imprimir etiqueta de teste</button>
       <label class="check"><input id="cfg-selo" type="checkbox"> Imprimir o selo gráfico de fundo (Cafés Especiais / Torra Local)</label>
@@ -818,7 +823,7 @@ label > span small { display: inline; margin-left: 4px; }
   };
 
   // src/storage.ts
-  var DEFAULT_CONFIG = { selo: true, modoSemImpressora: false, rotacao: 0 };
+  var DEFAULT_CONFIG = { selo: true, modoSemImpressora: false, rotacao: 0, ajusteVertical: 1 };
   var KEY_CAFES = "torralocal.cafes.v1";
   var KEY_CONFIG = "torralocal.config.v1";
   var KEY_SEED = "torralocal.seed.v1";
@@ -1036,12 +1041,23 @@ label > span small { display: inline; margin-left: 4px; }
     }
     return { width, height, bytesPerRow, data };
   }
+  function deslocarVertical(src, dots) {
+    const d = Math.round(dots);
+    if (!d) return src;
+    const data = new Uint8Array(src.data.length);
+    for (let y = 0; y < src.height; y++) {
+      const ny = y - d;
+      if (ny < 0 || ny >= src.height) continue;
+      data.set(src.data.subarray(y * src.bytesPerRow, (y + 1) * src.bytesPerRow), ny * src.bytesPerRow);
+    }
+    return { ...src, data };
+  }
 
   // src/print.ts
   var mm = (dots) => `${(dots / 8).toFixed(2).replace(/\.00$/, "")}mm`;
-  async function imprimirLotes(lotes, rotacao) {
+  async function imprimirLotes(lotes, rotacao, ajusteVerticalMm = 0) {
     const imagens = lotes.map((lote) => {
-      const final = rotateBitmap(lote.bmp, rotacao);
+      const final = deslocarVertical(rotateBitmap(lote.bmp, rotacao), ajusteVerticalMm * 8);
       const canvas = document.createElement("canvas");
       drawBitmap(final, canvas);
       return { url: canvas.toDataURL("image/png"), copias: lote.copias, largura: final.width, altura: final.height };
@@ -1089,8 +1105,8 @@ label > span small { display: inline; margin-left: 4px; }
     style.remove();
     return { copias: total, largura: w, altura: h };
   }
-  function imprimir(bmp, copias, rotacao) {
-    return imprimirLotes([{ bmp, copias }], rotacao);
+  function imprimir(bmp, copias, rotacao, ajusteVerticalMm = 0) {
+    return imprimirLotes([{ bmp, copias }], rotacao, ajusteVerticalMm);
   }
   function baixarPng(bmp, nome) {
     const canvas = document.createElement("canvas");
@@ -1165,25 +1181,27 @@ label > span small { display: inline; margin-left: 4px; }
   );
   function botoesDeEscolha(id, opcional = false) {
     const select = $(id);
-    const opcoes = [...select.options].filter((o) => o.value);
+    const opcoes = [...select.options].filter((o) => o.value || opcional);
     const grupo = document.createElement("div");
-    grupo.className = "chips";
-    grupo.style.setProperty("--n", String(opcoes.length));
-    grupo.setAttribute("role", "group");
+    grupo.className = "radios";
+    grupo.setAttribute("role", "radiogroup");
     grupo.setAttribute("aria-labelledby", `lbl-${id}`);
-    const marcar = () => grupo.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.valor === select.value)));
+    const marcar = () => grupo.querySelectorAll("input").forEach((r) => r.checked = r.value === select.value);
     for (const o of opcoes) {
-      const b = document.createElement("button");
-      b.type = "button";
-      b.className = "chip";
-      b.dataset.valor = o.value;
-      b.textContent = o.textContent;
-      b.addEventListener("click", () => {
-        select.value = opcional && select.value === o.value ? "" : o.value;
-        marcar();
+      const rotulo = document.createElement("label");
+      rotulo.className = "radio";
+      const r = document.createElement("input");
+      r.type = "radio";
+      r.name = `rd-${id}`;
+      r.value = o.value;
+      r.addEventListener("change", () => {
+        select.value = o.value;
         select.dispatchEvent(new Event("input", { bubbles: true }));
       });
-      grupo.appendChild(b);
+      const texto = document.createElement("span");
+      texto.textContent = o.textContent;
+      rotulo.append(r, texto);
+      grupo.appendChild(rotulo);
     }
     select.after(grupo);
     select.addEventListener("change", marcar);
@@ -1257,7 +1275,7 @@ label > span small { display: inline; margin-left: 4px; }
       baixarPng(bmp, `rotulo-${(/* @__PURE__ */ new Date()).toISOString().replace(/[:.]/g, "-").slice(0, 19)}.png`);
       return "Modo sem impressora: o r\xF3tulo foi baixado como imagem.";
     }
-    const r = await imprimir(bmp, copias, cfg.rotacao);
+    const r = await imprimir(bmp, copias, cfg.rotacao, cfg.ajusteVertical);
     return `${copias === 1 ? "1 etiqueta enviada" : `${copias} etiquetas enviadas`} para impress\xE3o (${r.largura} \xD7 ${r.altura}). Confira na impressora.`;
   }
   function lerFormulario(acao) {
@@ -1411,7 +1429,7 @@ label > span small { display: inline; margin-left: 4px; }
         lotes.forEach((l, k) => baixarPng(l.bmp, `rotulo-fila-${carimbo}-${String(k + 1).padStart(2, "0")}.png`));
         msg = `Modo sem impressora: ${plural(lotes.length, "r\xF3tulo foi baixado", "r\xF3tulos foram baixados")} como imagem.`;
       } else {
-        const r = await imprimirLotes(lotes, cfg.rotacao);
+        const r = await imprimirLotes(lotes, cfg.rotacao, cfg.ajusteVertical);
         msg = `${plural(r.copias, "etiqueta enviada", "etiquetas enviadas")} para impress\xE3o (${r.largura} \xD7 ${r.altura}), de ${plural(itens.length, "item", "itens")}. Confira na impressora.`;
       }
       fila.marcarEnviadas();
@@ -1482,11 +1500,13 @@ label > span small { display: inline; margin-left: 4px; }
   function loadConfig() {
     const c = repo.getConfig();
     $("cfg-rotacao").value = String(c.rotacao);
+    $("cfg-ajuste").value = String(c.ajusteVertical);
     $("cfg-selo").checked = c.selo;
     $("cfg-offline").checked = c.modoSemImpressora;
   }
   var lerConfig = () => ({
     rotacao: Number(val("cfg-rotacao")),
+    ajusteVertical: Math.max(-10, Math.min(10, Number.parseFloat(val("cfg-ajuste").replace(",", ".")) || 0)),
     selo: $("cfg-selo").checked,
     modoSemImpressora: $("cfg-offline").checked
   });
