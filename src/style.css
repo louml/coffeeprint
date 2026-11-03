@@ -1,7 +1,7 @@
 :root {
   --ink: #161311; --ink-2: #4a423b; --muted: #7a7068;
   --paper: #f5f1ea; --card: #fff; --field: #fcfaf7; --line: #e4ddd2;
-  --accent: #a4571d; --fab: #e8731a; --ring: rgba(164, 87, 29, .28);
+  --accent: #a4571d; --fab: #fc8b19; --ring: rgba(164, 87, 29, .28);
   --ok: #1f7a3d; --ok-bg: #e8f5ec; --err: #b3261e; --err-bg: #fdecea;
   --f: "TLInter", system-ui, "Segoe UI", sans-serif;
   --f-med: "TLInterMed", var(--f); --f-semi: "TLInterSemi", var(--f); --f-bold: "TLInterBold", var(--f);
@@ -16,7 +16,7 @@ p { margin: 0; }
 .sub { color: var(--muted); font-size: 14px; }
 
 /* ---------- topo */
-.topbar { display: flex; align-items: stretch; flex-wrap: wrap; gap: 0 32px; padding: 0 84px 0 24px; background: var(--card); border-bottom: 1px solid var(--line); }
+.topbar { display: flex; align-items: stretch; flex-wrap: wrap; gap: 0 32px; padding: 0 24px; background: var(--card); border-bottom: 1px solid var(--line); }
 .brand { display: flex; align-items: center; gap: 12px; padding: 10px 0; }
 .logo { width: 44px; height: 44px; display: block; }
 .brand-text { display: flex; flex-direction: column; line-height: 1.15; }
@@ -140,13 +140,13 @@ label > span small { display: inline; margin-left: 4px; }
 @media (max-width: 420px) { .acoes { grid-template-columns: 1fr; } }
 
 /* ---------- fila de impressão: botão laranja flutuante que abre a lista */
-#fila-flutuante { position: fixed; top: 12px; right: 16px; z-index: 900; }
+#fila-flutuante { position: fixed; bottom: 20px; right: 20px; z-index: 900; }
 #fila-flutuante[hidden] { display: none; }
-#fila-fab { position: relative; display: grid; place-items: center; margin-left: auto; width: 52px; height: 52px; border: 0; border-radius: 50%; background: var(--fab); color: #fff; box-shadow: 0 6px 18px rgba(200, 90, 10, .45); cursor: pointer; transition: transform .12s, background .12s; }
-#fila-fab:hover { background: #cf620f; transform: translateY(-1px); }
-#fila-fab[aria-expanded="true"] { background: #b5540c; }
+#fila-fab { position: relative; display: grid; place-items: center; margin-left: auto; width: 60px; height: 60px; border: 0; border-radius: 50%; background: var(--fab); color: #fff; box-shadow: 0 6px 18px rgba(252, 139, 25, .5); cursor: pointer; transition: transform .12s, background .12s; }
+#fila-fab:hover { background: #ec7c0c; transform: translateY(-1px); }
+#fila-fab[aria-expanded="true"] { background: #e4720a; }
 #fila-badge { position: absolute; top: -4px; right: -4px; min-width: 22px; height: 22px; padding: 0 5px; border-radius: 11px; background: var(--ink); color: #fff; border: 2px solid var(--paper); font: 400 12px/18px var(--f-bold); text-align: center; }
-.fila { position: absolute; top: 62px; right: 0; width: min(360px, calc(100vw - 32px)); max-height: calc(100vh - 90px); overflow: hidden; display: flex; flex-direction: column; gap: 10px; padding: 14px; background: var(--card); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 16px 44px rgba(22, 19, 17, .28); }
+.fila { position: absolute; bottom: 72px; right: 0; width: min(360px, calc(100vw - 40px)); max-height: calc(100vh - 110px); overflow: hidden; display: flex; flex-direction: column; gap: 10px; padding: 14px; background: var(--card); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 16px 44px rgba(22, 19, 17, .28); }
 .fila[hidden] { display: none; }
 .fila-topo { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
 .fila-topo h3 { font-size: 16px; }
@@ -178,7 +178,7 @@ label > span small { display: inline; margin-left: 4px; }
 .print svg, .add svg { flex: none; width: 21px; height: 21px; }
 
 /* ---------- aviso temporário (toast) no canto superior direito */
-#toasts { position: fixed; top: 76px; right: 16px; z-index: 1000; display: flex; flex-direction: column; gap: 10px; width: min(380px, calc(100vw - 32px)); pointer-events: none; }
+#toasts { position: fixed; top: 16px; right: 16px; z-index: 1000; display: flex; flex-direction: column; gap: 10px; width: min(380px, calc(100vw - 32px)); pointer-events: none; }
 .toast { pointer-events: auto; display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; border-radius: 14px; background: var(--ink); color: #fff; box-shadow: 0 12px 32px rgba(22, 19, 17, .3); cursor: pointer; animation: toast-entra .22s ease-out; transition: opacity .2s, transform .2s; }
 .toast.saindo { opacity: 0; transform: translateX(16px); }
 .toast-icone { flex: none; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: #3fa36a; font-size: 14px; line-height: 1; }
