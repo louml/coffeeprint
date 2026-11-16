@@ -22,6 +22,7 @@ const KEY_CAFES = 'torralocal.cafes.v1';
 const KEY_CONFIG = 'torralocal.config.v1';
 const KEY_SEED = 'torralocal.seed.v1';
 const KEY_FILA = 'torralocal.fila.v1';
+const KEY_CACHE_CAFES = 'torralocal.cache.cafes.v1';
 
 /**
  * Dados que ficam só neste computador/navegador: configurações da impressora e fila de impressão.
@@ -44,8 +45,8 @@ export interface CafeRepository {
   create(input: CafeInput): Promise<Cafe>;
   update(id: string, input: CafeInput): Promise<Cafe | undefined>;
   remove(id: string): Promise<boolean>;
-  /** Substitui todos os cafés (restauração de cópia de segurança). */
-  replaceAll(cafes: Cafe[]): Promise<void>;
+  /** Aplica uma lista de cafés vinda de cópia de segurança ou de outro lugar. No navegador substitui tudo; no banco só acrescenta o que falta. */
+  importar(cafes: Cafe[]): Promise<void>;
 }
 
 export class BrowserRepository implements LocalStore {
@@ -102,6 +103,17 @@ export class BrowserRepository implements LocalStore {
   }
   saveConfig(config: Config): void {
     this.write(KEY_CONFIG, config);
+  }
+  /** Última lista de cafés vinda do banco: deixa o app consultável quando não há internet. */
+  lerCacheCafes(): { em: string; cafes: Cafe[] } | null {
+    const c = this.read<{ em?: string; cafes?: Cafe[] } | null>(KEY_CACHE_CAFES, null);
+    return c && typeof c.em === 'string' && Array.isArray(c.cafes) ? { em: c.em, cafes: c.cafes } : null;
+  }
+  salvarCacheCafes(cafes: Cafe[]): void {
+    this.write(KEY_CACHE_CAFES, { em: new Date().toISOString(), cafes });
+  }
+  limparCacheCafes(): void {
+    this.write(KEY_CACHE_CAFES, null);
   }
   getFila(): ItemFila[] {
     const fila = this.read<ItemFila[]>(KEY_FILA, []);
@@ -174,7 +186,7 @@ export class BrowserCafeRepository implements CafeRepository {
     this.store.saveCafes(rest);
     return true;
   }
-  async replaceAll(cafes: Cafe[]): Promise<void> {
+  async importar(cafes: Cafe[]): Promise<void> {
     this.store.saveCafes(cafes);
   }
 }
@@ -204,7 +216,7 @@ export class MemoryCafeRepository implements CafeRepository {
     this.cafes = this.cafes.filter((c) => c.id !== id);
     return this.cafes.length !== n;
   }
-  async replaceAll(cafes: Cafe[]): Promise<void> {
+  async importar(cafes: Cafe[]): Promise<void> {
     this.cafes = cafes.map((c) => ({ ...c }));
   }
 }
@@ -252,6 +264,6 @@ export async function importBackup(cafes: CafeRepository, store: LocalStore, raw
     id: typeof c?.id === 'string' && c.id ? c.id : newId() + i,
     ...sanitizeCafe(c ?? {}),
   }));
-  await cafes.replaceAll(lista);
+  await cafes.importar(lista);
   if (b.config) store.saveConfig({ ...DEFAULT_CONFIG, ...b.config });
 }

@@ -90,3 +90,12 @@ test/                   testes (node:test)
 - A pré-visualização e a impressão usam a **mesma imagem** gerada por `draw.ts`.
 - Para **acrescentar cafés iniciais**: adicione ao fim de `CAFES_INICIAIS` com `desde` = `SEED_VERSION + 1`, aumente `SEED_VERSION`, rode `npm run build` e troque o arquivo nos computadores.
 - A interface `Repository` permite trocar o armazenamento do navegador por outro (arquivo, nuvem) sem mexer no resto.
+
+
+## V2: banco de dados (Supabase), estoque e data de torra automática
+
+- **Login:** ao abrir o app, entre com o e-mail e a senha da equipe (criados no painel do Supabase, em Authentication → Users). A sessão fica lembrada no navegador; **Configurações → Sair da conta** encerra.
+- **Cafés no banco:** os cafés agora ficam no Supabase (projeto TorraLocal360) e aparecem iguais em qualquer computador. Se um navegador já tinha cafés cadastrados antes, use **Configurações → Enviar cafés deste navegador para o banco** (só acrescenta os que faltam; não altera nem apaga o que já está no banco). Sem internet, o app mostra a última lista salva.
+- **Estoque (aba Estoque):** **Registrar torra** cria um lote (café, data, kg). **Registrar saída** (venda, perda ou ajuste) baixa o estoque do lote mais antigo primeiro (FIFO) e passa ao seguinte quando ele zera.
+- **Data de torra automática:** a etiqueta usa a data do **lote mais antigo que ainda tem saldo**. Se o café não tem estoque, use **usar outra data** para escolher a data à mão. Imprimir etiqueta não baixa o estoque: a baixa é feita em **Registrar saída**.
+- **Banco:** `supabase/migrations/` tem o SQL (tabelas `cafes`, `lotes_torra`, `estoque_movimentos`, visões de saldo, regras de acesso). A URL e a chave pública do projeto ficam em `src/config.ts` (a senha nunca vai para o repositório).

@@ -27,6 +27,7 @@ export async function buildApp() {
     target: 'es2022',
     write: false,
     legalComments: 'none',
+    minify: true, // o cliente do Supabase é grande; minificado o arquivo fica bem menor
     logLevel: 'warning',
   });
   const js = bundle.outputFiles[0].text.replace(/<\/script/gi, '<\\/script');
@@ -47,9 +48,11 @@ export async function buildApp() {
     '{{ASSETS}}': JSON.stringify(assets),
     '/*{{SCRIPT}}*/': js,
   };
-  let html = read('src/index.html').toString('utf8');
-  for (const [marker, value] of Object.entries(values)) html = html.replace(marker, () => value);
-  if (html.includes('{{')) throw new Error('Algum marcador do src/index.html não foi substituído.');
+  const modelo = read('src/index.html').toString('utf8');
+  // confere o modelo (o código embutido pode conter "{{" por conta própria, então a conferência é antes de embutir)
+  if (Object.keys(values).reduce((t, marker) => t.replaceAll(marker, ''), modelo).includes('{{')) throw new Error('Há um marcador desconhecido no src/index.html.');
+  let html = modelo;
+  for (const [marker, value] of Object.entries(values)) html = html.replaceAll(marker, () => value);
   return `<!-- GERADO por "npm run build". Não edite à mão: edite os arquivos de src/ e gere de novo. -->\n${html}`;
 }
 

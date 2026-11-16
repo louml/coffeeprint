@@ -26,9 +26,12 @@ export interface Movimento {
   /** AAAA-MM-DD */
   data: string;
   observacao: string;
+  /** Preenchidos ao listar o histórico (café e data de torra do lote). */
+  cafeId?: string;
+  dataTorra?: string;
 }
 
-export type NovoMovimento = Omit<Movimento, 'id'>;
+export type NovoMovimento = Omit<Movimento, 'id' | 'cafeId' | 'dataTorra'>;
 
 /** Arredonda para 3 casas (gramas), como o banco (numeric(10,3)). */
 export const arredondarKg = (kg: number): number => Math.round(kg * 1000) / 1000;
@@ -123,8 +126,11 @@ export class MemoryEstoqueRepository implements EstoqueRepository {
   }
 
   async movimentos(filtro: { cafeId?: string; limite?: number } = {}): Promise<Movimento[]> {
-    const doCafe = (m: Movimento) => !filtro.cafeId || this.lotesBase.find((l) => l.id === m.loteId)?.cafeId === filtro.cafeId;
-    const lista = this.movs.filter(doCafe).reverse();
+    const lote = (m: Movimento) => this.lotesBase.find((l) => l.id === m.loteId);
+    const lista = this.movs
+      .filter((m) => !filtro.cafeId || lote(m)?.cafeId === filtro.cafeId)
+      .map((m) => ({ ...m, cafeId: lote(m)?.cafeId, dataTorra: lote(m)?.dataTorra }))
+      .reverse();
     return filtro.limite ? lista.slice(0, filtro.limite) : lista;
   }
 }

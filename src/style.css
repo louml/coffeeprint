@@ -187,3 +187,35 @@ label > span small { display: inline; margin-left: 4px; }
 @keyframes toast-entra { from { opacity: 0; transform: translate(16px, -6px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .toast { animation: none; transition: none; } }
 @media print { #toasts { display: none !important; } }
+
+/* ---------- tela de entrada (login) */
+#login { display: none; position: fixed; inset: 0; z-index: 2000; align-items: center; justify-content: center; padding: 20px; background: var(--paper); }
+.sem-login #login { display: flex; }
+.sem-login #app, .sem-login #fila-flutuante { display: none; }
+#form-login { width: min(380px, 100%); align-items: stretch; }
+#form-login .logo { width: 56px; height: 56px; align-self: center; }
+#form-login h2, #form-login .sub { text-align: center; margin: 0; }
+#aviso-login:empty, #aviso-conta:empty { display: none; }
+
+/* ---------- data de torra automática e estoque */
+.lote-info { font: 400 14.5px var(--f-semi); color: var(--ink); min-height: 44px; display: flex; align-items: center; padding: 0 12px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--field); }
+.lote-info.vazio { color: var(--err); background: var(--err-bg); border-color: var(--err); font-size: 13.5px; line-height: 1.25; padding: 6px 10px; }
+.lote-info small { font: 400 12.5px var(--f); color: var(--muted); margin-left: 6px; }
+.lote-link { align-self: flex-start; padding: 0 2px; font-size: 13px; }
+#aviso-dados:empty { display: none; }
+#aviso-dados { margin-bottom: 14px; }
+.bar-acoes { display: flex; gap: 8px; flex-wrap: wrap; }
+.secao { margin: 22px 0 10px; }
+.estoque-item { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 11px 16px; margin-bottom: 8px; }
+.estoque-topo { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.estoque-topo strong { font-size: 16px; }
+.estoque-saldo { font: 400 16px var(--f-bold); }
+.estoque-saldo.zero { color: var(--muted); font-family: var(--f-semi); font-size: 14px; }
+.lotes { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.lotes li { font: 400 13px var(--f-semi); background: #ece6dc; color: var(--ink-2); border-radius: 999px; padding: 3px 11px; }
+.lotes li.em-uso { background: var(--ink); color: #fff; }
+.mov { display: grid; grid-template-columns: 92px 1fr auto; gap: 4px 12px; align-items: baseline; padding: 7px 4px; border-bottom: 1px solid var(--line); font-size: 14px; }
+.mov small { color: var(--muted); font-size: 12.5px; display: block; }
+.mov .kg { font-family: var(--f-bold); white-space: nowrap; }
+.mov .kg.sai { color: var(--err); }
+.mov .kg.entra { color: var(--ok); }

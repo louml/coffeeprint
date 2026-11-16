@@ -10,7 +10,22 @@
 /*{{CSS}}*/
 </style>
 </head>
-<body>
+<body class="sem-login">
+<div id="login" role="dialog" aria-labelledby="login-titulo" aria-modal="true">
+  <form id="form-login" class="card" novalidate>
+    <img class="logo" src="{{LOGO}}" alt="Torra Local">
+    <h2 id="login-titulo">Entrar</h2>
+    <p class="sub">Use o e-mail e a senha da equipe da Torra Local.</p>
+    <label>E-mail
+      <input id="login-email" type="email" autocomplete="username" required>
+    </label>
+    <label>Senha
+      <input id="login-senha" type="password" autocomplete="current-password" required>
+    </label>
+    <button id="login-entrar" type="submit" class="big primary">Entrar</button>
+    <div id="aviso-login" role="status" aria-live="polite"></div>
+  </form>
+</div>
 <div id="app">
 <header class="topbar">
   <div class="brand">
@@ -20,11 +35,13 @@
   <nav class="tabs" role="tablist" aria-label="Seções">
     <button class="tab active" role="tab" aria-selected="true" data-tab="emitir">Emitir rótulo</button>
     <button class="tab" role="tab" aria-selected="false" data-tab="cafes">Cafés</button>
+    <button class="tab" role="tab" aria-selected="false" data-tab="estoque">Estoque</button>
     <button class="tab" role="tab" aria-selected="false" data-tab="config">Configurações</button>
   </nav>
 </header>
 
 <main>
+<div id="aviso-dados" role="status" aria-live="polite"></div>
 <div id="aviso-armazenamento" class="aviso-topo" hidden>O navegador está bloqueando o armazenamento: os cafés cadastrados e as configurações não serão lembrados ao fechar. Use uma janela normal (não anônima) do Chrome ou Edge.</div>
 
 <!-- ============ EMITIR ============ -->
@@ -68,9 +85,12 @@
         </select>
       </div>
       <div class="row">
-        <label>Data de torra
-          <input id="data" type="date">
-        </label>
+        <div class="field">
+          <span class="label-text" id="lbl-data">Data de torra</span>
+          <div id="lote-info" class="lote-info" aria-live="polite"></div>
+          <input id="data" type="date" aria-labelledby="lbl-data" hidden>
+          <button type="button" id="data-trocar" class="link lote-link">usar outra data</button>
+        </div>
         <div class="field">
           <span class="label-text" id="lbl-copias">Cópias</span>
           <div class="stepper">
@@ -165,6 +185,65 @@
   </dialog>
 </section>
 
+<!-- ============ ESTOQUE ============ -->
+<section id="estoque" class="panel">
+  <div class="bar">
+    <div>
+      <h2>Estoque de café torrado</h2>
+      <p class="sub">Saldo em kg por café, em lotes de torra. A etiqueta usa a data do lote mais antigo que ainda tem saldo.</p>
+    </div>
+    <div class="bar-acoes">
+      <button id="nova-torra" type="button" class="big primary">+ Registrar torra</button>
+      <button id="nova-saida" type="button" class="big">Registrar saída</button>
+    </div>
+  </div>
+  <div id="lista-estoque"></div>
+  <h3 class="secao">Últimos movimentos</h3>
+  <div id="lista-movimentos"></div>
+
+  <dialog id="dlg-torra">
+    <form id="form-torra" method="dialog" novalidate>
+      <h2>Registrar torra</h2>
+      <label>Café<select id="torra-cafe"></select></label>
+      <div class="row">
+        <label>Data da torra<input id="torra-data" type="date"></label>
+        <label>Quantidade (kg)<input id="torra-kg" type="text" inputmode="decimal" placeholder="Ex.: 12,5" autocomplete="off"></label>
+      </div>
+      <label>Observação <small>(opcional)</small><input id="torra-obs" type="text" maxlength="120" autocomplete="off"></label>
+      <div id="erro-torra" class="erro"></div>
+      <div class="actions">
+        <button type="button" id="cancelar-torra" class="big">Cancelar</button>
+        <button type="submit" class="big primary">Registrar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="dlg-saida">
+    <form id="form-saida" method="dialog" novalidate>
+      <h2>Registrar saída</h2>
+      <label>Café<select id="saida-cafe"></select></label>
+      <div id="saida-saldo" class="sub"></div>
+      <div class="row">
+        <label>Tipo
+          <select id="saida-tipo">
+            <option value="venda">Venda</option>
+            <option value="perda">Perda</option>
+            <option value="ajuste_menos">Ajuste para menos</option>
+            <option value="ajuste_mais">Ajuste para mais</option>
+          </select>
+        </label>
+        <label>Quantidade (kg)<input id="saida-kg" type="text" inputmode="decimal" placeholder="Ex.: 2,5" autocomplete="off"></label>
+      </div>
+      <label>Observação <small>(opcional)</small><input id="saida-obs" type="text" maxlength="120" autocomplete="off"></label>
+      <div id="erro-saida" class="erro"></div>
+      <div class="actions">
+        <button type="button" id="cancelar-saida" class="big">Cancelar</button>
+        <button type="submit" class="big primary">Registrar</button>
+      </div>
+    </form>
+  </dialog>
+</section>
+
 <!-- ============ CONFIG ============ -->
 <section id="config" class="panel">
   <h2>Configurações</h2>
@@ -190,6 +269,14 @@
       <button type="submit" class="big primary">Salvar configurações</button>
       <div id="aviso-config" role="status" aria-live="polite"></div>
     </form>
+
+    <div class="card">
+      <h3>Conta e dados</h3>
+      <p class="sub">Os cafés ficam no banco de dados da Torra Local e aparecem em qualquer computador. Se este navegador já tinha cafés cadastrados antes, envie-os uma vez para o banco (os que já existem lá não são alterados).</p>
+      <button type="button" id="enviar-locais" class="big">Enviar cafés deste navegador para o banco</button>
+      <button type="button" id="sair" class="big">Sair da conta</button>
+      <div id="aviso-conta" role="status" aria-live="polite"></div>
+    </div>
 
     <div class="card">
       <h3>Cópia de segurança</h3>
