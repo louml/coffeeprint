@@ -287,7 +287,7 @@ function editarItem(id: string): void {
   const cafeSelect = $('cafe') as HTMLSelectElement;
   const existe = [...cafeSelect.options].some((o) => o.value === item.cafeId);
   cafeSelect.value = existe ? item.cafeId : '';
-  for (const [campo, valor] of [['peso', item.peso], ['moagem', item.moagem], ['entrega', item.entrega ?? '']] as const) {
+  for (const [campo, valor] of [['peso', item.peso], ['moagem', item.moagem === 'Moído' ? 'Moído p/ coado' : item.moagem], ['entrega', item.entrega ?? '']] as const) {
     ($(campo) as HTMLSelectElement).value = valor;
     $(campo).dispatchEvent(new Event('change')); // atualiza os botões de escolha
   }

@@ -15,7 +15,7 @@ export interface Pedido {
 }
 
 export const PESOS = ['100g', '250g', '500g', '1kg'];
-export const MOAGENS = ['Grão', 'Moído'];
+export const MOAGENS = ['Grão', 'Moído p/ coado', 'Prensa francesa'];
 export const ENTREGAS = ['Uber', 'Coleta', 'Motoboy'];
 
 /** Nomes dos campos obrigatórios que ainda faltam. */

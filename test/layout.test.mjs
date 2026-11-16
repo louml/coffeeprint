@@ -105,17 +105,21 @@ test('nome do café e nome do cliente têm o mesmo tamanho e o mesmo peso', asyn
 
 test('moagem: logo abaixo do título, só "Em grãos" ou "Moído" (sem a legenda "Moagem:")', async () => {
   assert.equal(moagemNoRotulo('Grão'), 'Em grãos');
-  assert.equal(moagemNoRotulo('Moído'), 'Moído');
+  assert.equal(moagemNoRotulo('Moído p/ coado'), 'Moído (c)');
+  assert.equal(moagemNoRotulo('Prensa francesa'), 'Moído (p.f)');
+  assert.equal(moagemNoRotulo('Moído'), 'Moído', 'itens antigos da fila');
   assert.equal(moagemNoRotulo(''), '');
   const grao = await renderLabel({ ...arara, moagem: 'Grão' }, { selo: false });
-  const moido = await renderLabel({ ...arara, moagem: 'Moído' }, { selo: false });
+  const moido = await renderLabel({ ...arara, moagem: 'Moído p/ coado' }, { selo: false });
+  const pf = await renderLabel({ ...arara, moagem: 'Prensa francesa' }, { selo: false });
+  assert.notDeepEqual(moido.data, pf.data);
   const sem = await renderLabel({ ...arara, moagem: '' }, { selo: false });
   assert.notDeepEqual(grao.data, moido.data);
   assert.notDeepEqual(moido.data, sem.data);
   // a linha logo abaixo do título (y 76-124): espécie colada na esquerda e moagem colada na direita
   const pontaEsquerda = (b) => { for (let x = 0; x < 320; x++) for (let y = 76; y < 124; y++) if (b.data[y * 80 + (x >> 3)] & (0x80 >> (x & 7))) return x; return -1; };
   const pontaDireita = (b) => { let max = -1; for (let y = 76; y < 124; y++) for (let x = 330; x < 640; x++) if (b.data[y * 80 + (x >> 3)] & (0x80 >> (x & 7))) max = Math.max(max, x); return max; };
-  for (const b of [grao, moido]) {
+  for (const b of [grao, moido, pf]) {
     assert.ok(pontaEsquerda(b) >= 44 && pontaEsquerda(b) <= 50, `espécie começa na margem esquerda (${pontaEsquerda(b)})`);
     assert.ok(pontaDireita(b) >= 594 && pontaDireita(b) <= 600, `moagem termina na margem direita (${pontaDireita(b)})`);
   }

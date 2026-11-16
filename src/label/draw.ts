@@ -132,9 +132,14 @@ type Op =
 
 const text = (text: string, family: string, size: number, x: number, y: number, align: 'left' | 'right' | 'center' = 'left'): Op => ({ t: 'text', text, family, size, x, y, align });
 
-/** Como a moagem aparece na etiqueta (a lista de escolha do usuário continua com "Grão" e "Moído"). */
+/** Como a moagem aparece na etiqueta (no app a escolha é "Grão", "Moído p/ coado" ou "Prensa francesa"). */
+const MOAGEM_NO_ROTULO: Record<string, string> = {
+  Grão: 'Em grãos',
+  'Moído p/ coado': 'Moído (c)',
+  'Prensa francesa': 'Moído (p.f)',
+};
 export function moagemNoRotulo(moagem: string): string {
-  return moagem === 'Grão' ? 'Em grãos' : moagem;
+  return MOAGEM_NO_ROTULO[moagem] ?? moagem; // "Moído" (itens antigos da fila) e vazio saem como estão
 }
 
 /** Letra da tag de entrega: Uber (U), coleta pelo cliente na loja (C) ou motoboy (E). */
