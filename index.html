@@ -885,8 +885,8 @@ label > span small { display: inline; margin-left: 4px; }
       }
       return saved;
     }
-    saveCafes(cafes) {
-      this.write(KEY_CAFES, cafes);
+    saveCafes(cafes2) {
+      this.write(KEY_CAFES, cafes2);
       this.write(KEY_SEED, SEED_VERSION);
     }
     getConfig() {
@@ -932,52 +932,73 @@ label > span small { display: inline; margin-left: 4px; }
       ativo: raw.ativo !== false
     };
   }
+  var BrowserCafeRepository = class {
+    constructor(store) {
+      this.store = store;
+    }
+    store;
+    async list() {
+      return this.store.listCafes();
+    }
+    async create(input) {
+      const cafe = { id: newId(), ...input };
+      this.store.saveCafes([...this.store.listCafes(), cafe]);
+      return cafe;
+    }
+    async update(id, input) {
+      const all = this.store.listCafes();
+      const i = all.findIndex((c) => c.id === id);
+      if (i < 0) return void 0;
+      all[i] = { id, ...input };
+      this.store.saveCafes(all);
+      return all[i];
+    }
+    async remove(id) {
+      const all = this.store.listCafes();
+      const rest = all.filter((c) => c.id !== id);
+      if (rest.length === all.length) return false;
+      this.store.saveCafes(rest);
+      return true;
+    }
+    async replaceAll(cafes2) {
+      this.store.saveCafes(cafes2);
+    }
+  };
   var CafeBook = class {
     constructor(repo2) {
       this.repo = repo2;
     }
     repo;
     list() {
-      return this.repo.listCafes();
+      return this.repo.list();
     }
-    get(id) {
-      return this.list().find((c) => c.id === id);
+    async get(id) {
+      return (await this.list()).find((c) => c.id === id);
     }
     create(input) {
-      const cafe = { id: newId(), ...sanitizeCafe(input) };
-      this.repo.saveCafes([...this.list(), cafe]);
-      return cafe;
+      return this.repo.create(sanitizeCafe(input));
     }
     update(id, input) {
-      const all = this.list();
-      const i = all.findIndex((c) => c.id === id);
-      if (i < 0) return void 0;
-      all[i] = { id, ...sanitizeCafe(input) };
-      this.repo.saveCafes(all);
-      return all[i];
+      return this.repo.update(id, sanitizeCafe(input));
     }
     remove(id) {
-      const all = this.list();
-      const rest = all.filter((c) => c.id !== id);
-      if (rest.length === all.length) return false;
-      this.repo.saveCafes(rest);
-      return true;
+      return this.repo.remove(id);
     }
   };
-  function exportBackup(repo2) {
-    return { app: "torralocal-rotulos", versao: 1, cafes: repo2.listCafes(), config: repo2.getConfig() };
+  function exportBackup(cafes2, config) {
+    return { app: "torralocal-rotulos", versao: 1, cafes: cafes2, config };
   }
-  function importBackup(repo2, raw) {
+  async function importBackup(cafes2, store, raw) {
     const b = raw;
     if (!b || b.app !== "torralocal-rotulos" || !Array.isArray(b.cafes)) {
       throw new Error("Este arquivo n\xE3o \xE9 uma c\xF3pia de seguran\xE7a do app.");
     }
-    const cafes = b.cafes.map((c, i) => ({
+    const lista = b.cafes.map((c, i) => ({
       id: typeof c?.id === "string" && c.id ? c.id : newId() + i,
       ...sanitizeCafe(c ?? {})
     }));
-    repo2.saveCafes(cafes);
-    if (b.config) repo2.saveConfig({ ...DEFAULT_CONFIG, ...b.config });
+    await cafes2.replaceAll(lista);
+    if (b.config) store.saveConfig({ ...DEFAULT_CONFIG, ...b.config });
   }
 
   // src/fila.ts
@@ -1170,8 +1191,14 @@ label > span small { display: inline; margin-left: 4px; }
   // src/app.ts
   var $ = (id) => document.getElementById(id);
   var repo = new BrowserRepository();
-  var book = new CafeBook(repo);
+  var cafeRepo = new BrowserCafeRepository(repo);
+  var book = new CafeBook(cafeRepo);
   var fila = new FilaDeImpressao(repo);
+  var cafes = [];
+  var cafePorId = (id) => cafes.find((c) => c.id === id);
+  async function recarregarCafes() {
+    cafes = await book.list();
+  }
   var today = () => {
     const d = /* @__PURE__ */ new Date();
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -1181,6 +1208,9 @@ label > span small { display: inline; margin-left: 4px; }
     el.className = tipo;
     el.textContent = texto;
   };
+  function erroDeDados(e) {
+    aviso($("aviso"), "fail", "\u2716 N\xE3o foi poss\xEDvel carregar os dados: " + (e instanceof Error ? e.message : "erro inesperado."));
+  }
   document.querySelectorAll(".tab").forEach(
     (b) => b.addEventListener("click", () => {
       document.querySelectorAll(".tab").forEach((t) => {
@@ -1188,8 +1218,8 @@ label > span small { display: inline; margin-left: 4px; }
         t.setAttribute("aria-selected", String(t === b));
       });
       document.querySelectorAll(".panel").forEach((p) => p.classList.toggle("active", p.id === b.dataset.tab));
-      if (b.dataset.tab === "emitir") loadCafes();
-      if (b.dataset.tab === "cafes") renderCafes();
+      if (b.dataset.tab === "emitir") loadCafes().catch(erroDeDados);
+      if (b.dataset.tab === "cafes") renderCafes().catch(erroDeDados);
       if (b.dataset.tab === "config") loadConfig();
     })
   );
@@ -1236,11 +1266,12 @@ label > span small { display: inline; margin-left: 4px; }
   var FIELDS = { cliente: "Cliente", cafe: "Caf\xE9", peso: "Peso", moagem: "Moagem", entrega: "Entrega", data: "Data de torra", copias: "N\xFAmero de c\xF3pias" };
   var val = (id) => $(id).value;
   function pedido() {
-    return { cafe: book.get(val("cafe")), cliente: val("cliente"), peso: val("peso"), moagem: val("moagem"), entrega: val("entrega"), dataTorra: val("data"), copias: Number(val("copias")) };
+    return { cafe: cafePorId(val("cafe")), cliente: val("cliente"), peso: val("peso"), moagem: val("moagem"), entrega: val("entrega"), dataTorra: val("data"), copias: Number(val("copias")) };
   }
-  function loadCafes() {
+  async function loadCafes() {
+    await recarregarCafes();
     const atual = val("cafe");
-    const ativos = ordenarCafes(book.list().filter((c) => c.ativo));
+    const ativos = ordenarCafes(cafes.filter((c) => c.ativo));
     $("cafe").innerHTML = '<option value="">Escolha\u2026</option>' + ativos.map((c) => `<option value="${esc(c.id)}">${esc(textoNaLista(c, ativos))}</option>`).join("");
     if (ativos.some((c) => c.id === atual)) $("cafe").value = atual;
     else if (ativos.length === 1) $("cafe").value = ativos[0].id;
@@ -1357,7 +1388,7 @@ label > span small { display: inline; margin-left: 4px; }
       fecharFila();
       return;
     }
-    const todos = book.list();
+    const todos = cafes;
     const pendentes = itens.filter((i) => !i.enviado);
     const aImprimir = pendentes.length ? totalEtiquetas(pendentes) : totalEtiquetas(itens);
     $("fila-badge").textContent = String(totalEtiquetas(itens));
@@ -1467,8 +1498,9 @@ label > span small { display: inline; margin-left: 4px; }
     }
   });
   var editId = null;
-  function renderCafes() {
-    const lista = ordenarCafes(book.list());
+  async function renderCafes() {
+    await recarregarCafes();
+    const lista = ordenarCafes(cafes);
     $("lista-cafes").innerHTML = lista.map(
       (c) => `
       <div class="cafe-item ${c.ativo ? "" : "inativo"}">
@@ -1480,19 +1512,23 @@ label > span small { display: inline; margin-left: 4px; }
       </div>`
     ).join("") || "<p>Nenhum caf\xE9 cadastrado.</p>";
   }
-  $("lista-cafes").addEventListener("click", (ev) => {
+  $("lista-cafes").addEventListener("click", async (ev) => {
     const b = ev.target.closest("button");
     if (!b) return;
-    const c = book.get(b.dataset.id ?? "");
+    const c = cafePorId(b.dataset.id ?? "");
     if (!c) return;
-    if (b.dataset.act === "edit") openCafe(c);
-    if (b.dataset.act === "toggle") {
-      book.update(c.id, { ...c, ativo: !c.ativo });
-      renderCafes();
-    }
-    if (b.dataset.act === "del" && confirm(`Remover "${c.nome}" de vez? Para s\xF3 esconder da lista, use "Desativar".`)) {
-      book.remove(c.id);
-      renderCafes();
+    try {
+      if (b.dataset.act === "edit") openCafe(c);
+      if (b.dataset.act === "toggle") {
+        await book.update(c.id, { ...c, ativo: !c.ativo });
+        await renderCafes();
+      }
+      if (b.dataset.act === "del" && confirm(`Remover "${c.nome}" de vez? Para s\xF3 esconder da lista, use "Desativar".`)) {
+        await book.remove(c.id);
+        await renderCafes();
+      }
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "Erro inesperado.");
     }
   });
   var CAMPOS = ["nome", "notas", "produtor", "rotuloProdutor", "variedade", "regiao", "especie", "torra"];
@@ -1508,16 +1544,16 @@ label > span small { display: inline; margin-left: 4px; }
   }
   $("novo-cafe").addEventListener("click", () => openCafe(null));
   $("cancelar-cafe").addEventListener("click", () => $("dlg-cafe").close());
-  $("form-cafe").addEventListener("submit", (ev) => {
+  $("form-cafe").addEventListener("submit", async (ev) => {
     ev.preventDefault();
     const f = $("form-cafe");
     const body = Object.fromEntries(CAMPOS.map((k) => [k, f.elements.namedItem(k).value]));
     body.ativo = f.elements.namedItem("ativo").checked;
     try {
-      if (editId) book.update(editId, body);
-      else book.create(body);
+      if (editId) await book.update(editId, body);
+      else await book.create(body);
       $("dlg-cafe").close();
-      renderCafes();
+      await renderCafes();
     } catch (e) {
       $("erro-cafe").textContent = e instanceof Error ? e.message : "Erro inesperado.";
     }
@@ -1547,7 +1583,7 @@ label > span small { display: inline; margin-left: 4px; }
     repo.saveConfig(lerConfig());
     aviso($("aviso-config"), "", "Preparando a etiqueta de teste\u2026");
     try {
-      const cafe = book.list()[0];
+      const cafe = cafes[0];
       const { id: _i, ativo: _a, ...base2 } = cafe ?? { id: "", ativo: true, nome: "Caf\xE9 de teste", notas: "Chocolate e laranja", produtor: "Produtor", variedade: "Variedade", regiao: "Regi\xE3o", especie: "100% Ar\xE1bica", torra: "Torra m\xE9dia" };
       const msg = await emitir({ cafe: base2, cliente: "ETIQUETA DE TESTE", peso: "250g", moagem: "Gr\xE3o", entrega: "", dataTorra: formatDate(today()) }, 1);
       aviso($("aviso-config"), "ok", "\u2714 " + msg);
@@ -1557,8 +1593,8 @@ label > span small { display: inline; margin-left: 4px; }
       btn.disabled = false;
     }
   });
-  $("backup-baixar").addEventListener("click", () => {
-    const blob = new Blob([JSON.stringify(exportBackup(repo), null, 2)], { type: "application/json" });
+  $("backup-baixar").addEventListener("click", async () => {
+    const blob = new Blob([JSON.stringify(exportBackup(await book.list(), repo.getConfig()), null, 2)], { type: "application/json" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
     a.download = `torralocal-copia-${today()}.json`;
@@ -1574,9 +1610,9 @@ label > span small { display: inline; margin-left: 4px; }
     if (!file) return;
     try {
       if (!confirm("Restaurar vai substituir os caf\xE9s e configura\xE7\xF5es atuais por os do arquivo. Continuar?")) return;
-      importBackup(repo, JSON.parse(await file.text()));
+      await importBackup(cafeRepo, repo, JSON.parse(await file.text()));
       loadConfig();
-      loadCafes();
+      await loadCafes();
       aviso($("aviso-backup"), "ok", "\u2714 C\xF3pia de seguran\xE7a restaurada.");
     } catch (e) {
       aviso($("aviso-backup"), "fail", "\u2716 " + (e instanceof Error ? e.message : "Arquivo inv\xE1lido."));
@@ -1591,7 +1627,7 @@ label > span small { display: inline; margin-left: 4px; }
     navigator.storage.persist().catch(() => void 0);
   }
   renderFila();
-  loadFonts().then(loadCafes);
+  loadFonts().then(loadCafes).catch(erroDeDados);
 })();
 
 </script>

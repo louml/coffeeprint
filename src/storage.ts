@@ -24,12 +24,10 @@ const KEY_SEED = 'torralocal.seed.v1';
 const KEY_FILA = 'torralocal.fila.v1';
 
 /**
- * Onde os dados ficam guardados. Hoje: no próprio navegador deste computador.
- * Para sincronizar na nuvem no futuro, basta outra implementação desta interface.
+ * Dados que ficam só neste computador/navegador: configurações da impressora e fila de impressão.
+ * (Os cafés e o estoque vão para o banco: veja CafeRepository e EstoqueRepository.)
  */
-export interface Repository {
-  listCafes(): Cafe[];
-  saveCafes(cafes: Cafe[]): void;
+export interface LocalStore {
   getConfig(): Config;
   saveConfig(config: Config): void;
   /** Fila de impressão (itens ainda por imprimir). Não entra na cópia de segurança. */
@@ -37,7 +35,20 @@ export interface Repository {
   saveFila(fila: ItemFila[]): void;
 }
 
-export class BrowserRepository implements Repository {
+/**
+ * Cadastro de cafés, assíncrono e por registro (serve tanto para o navegador quanto para o banco de dados).
+ * Quem usa nunca grava "a lista inteira": cada operação mexe só no café indicado.
+ */
+export interface CafeRepository {
+  list(): Promise<Cafe[]>;
+  create(input: CafeInput): Promise<Cafe>;
+  update(id: string, input: CafeInput): Promise<Cafe | undefined>;
+  remove(id: string): Promise<boolean>;
+  /** Substitui todos os cafés (restauração de cópia de segurança). */
+  replaceAll(cafes: Cafe[]): Promise<void>;
+}
+
+export class BrowserRepository implements LocalStore {
   /** false se o navegador bloqueou o armazenamento: o app funciona, mas não lembra nada. */
   persistent = true;
   private memory = new Map<string, string>();
@@ -137,34 +148,84 @@ export function sanitizeCafe(raw: Partial<CafeInput>): CafeInput {
   };
 }
 
-/** Cadastro de cafés sobre qualquer Repository. */
-export class CafeBook {
-  constructor(private readonly repo: Repository) {}
-  list(): Cafe[] {
-    return this.repo.listCafes();
+/** Cafés guardados no navegador (localStorage), com a lista de cafés iniciais. Provisório: o Supabase substitui isto. */
+export class BrowserCafeRepository implements CafeRepository {
+  constructor(private readonly store: BrowserRepository) {}
+  async list(): Promise<Cafe[]> {
+    return this.store.listCafes();
   }
-  get(id: string): Cafe | undefined {
-    return this.list().find((c) => c.id === id);
-  }
-  create(input: Partial<CafeInput>): Cafe {
-    const cafe: Cafe = { id: newId(), ...sanitizeCafe(input) };
-    this.repo.saveCafes([...this.list(), cafe]);
+  async create(input: CafeInput): Promise<Cafe> {
+    const cafe: Cafe = { id: newId(), ...input };
+    this.store.saveCafes([...this.store.listCafes(), cafe]);
     return cafe;
   }
-  update(id: string, input: Partial<CafeInput>): Cafe | undefined {
-    const all = this.list();
+  async update(id: string, input: CafeInput): Promise<Cafe | undefined> {
+    const all = this.store.listCafes();
     const i = all.findIndex((c) => c.id === id);
     if (i < 0) return undefined;
-    all[i] = { id, ...sanitizeCafe(input) };
-    this.repo.saveCafes(all);
+    all[i] = { id, ...input };
+    this.store.saveCafes(all);
     return all[i];
   }
-  remove(id: string): boolean {
-    const all = this.list();
+  async remove(id: string): Promise<boolean> {
+    const all = this.store.listCafes();
     const rest = all.filter((c) => c.id !== id);
     if (rest.length === all.length) return false;
-    this.repo.saveCafes(rest);
+    this.store.saveCafes(rest);
     return true;
+  }
+  async replaceAll(cafes: Cafe[]): Promise<void> {
+    this.store.saveCafes(cafes);
+  }
+}
+
+/** Cafés só em memória (testes). Começa com os cafés iniciais, a menos que se passe outra lista. */
+export class MemoryCafeRepository implements CafeRepository {
+  private cafes: Cafe[];
+  constructor(inicial: Cafe[] = CAFES_INICIAIS.map(semDesde)) {
+    this.cafes = inicial.map((c) => ({ ...c }));
+  }
+  async list(): Promise<Cafe[]> {
+    return this.cafes.map((c) => ({ ...c }));
+  }
+  async create(input: CafeInput): Promise<Cafe> {
+    const cafe: Cafe = { id: newId(), ...input };
+    this.cafes.push(cafe);
+    return { ...cafe };
+  }
+  async update(id: string, input: CafeInput): Promise<Cafe | undefined> {
+    const i = this.cafes.findIndex((c) => c.id === id);
+    if (i < 0) return undefined;
+    this.cafes[i] = { id, ...input };
+    return { ...this.cafes[i] };
+  }
+  async remove(id: string): Promise<boolean> {
+    const n = this.cafes.length;
+    this.cafes = this.cafes.filter((c) => c.id !== id);
+    return this.cafes.length !== n;
+  }
+  async replaceAll(cafes: Cafe[]): Promise<void> {
+    this.cafes = cafes.map((c) => ({ ...c }));
+  }
+}
+
+/** Cadastro de cafés: valida os dados (sanitizeCafe) e delega ao repositório. */
+export class CafeBook {
+  constructor(private readonly repo: CafeRepository) {}
+  list(): Promise<Cafe[]> {
+    return this.repo.list();
+  }
+  async get(id: string): Promise<Cafe | undefined> {
+    return (await this.list()).find((c) => c.id === id);
+  }
+  create(input: Partial<CafeInput>): Promise<Cafe> {
+    return this.repo.create(sanitizeCafe(input));
+  }
+  update(id: string, input: Partial<CafeInput>): Promise<Cafe | undefined> {
+    return this.repo.update(id, sanitizeCafe(input));
+  }
+  remove(id: string): Promise<boolean> {
+    return this.repo.remove(id);
   }
 }
 
@@ -177,20 +238,20 @@ export interface Backup {
   config: Config;
 }
 
-export function exportBackup(repo: Repository): Backup {
-  return { app: 'torralocal-rotulos', versao: 1, cafes: repo.listCafes(), config: repo.getConfig() };
+export function exportBackup(cafes: Cafe[], config: Config): Backup {
+  return { app: 'torralocal-rotulos', versao: 1, cafes, config };
 }
 
 /** Valida e aplica um backup. Lança erro com mensagem em português se o arquivo não servir. */
-export function importBackup(repo: Repository, raw: unknown): void {
+export async function importBackup(cafes: CafeRepository, store: LocalStore, raw: unknown): Promise<void> {
   const b = raw as Partial<Backup>;
   if (!b || b.app !== 'torralocal-rotulos' || !Array.isArray(b.cafes)) {
     throw new Error('Este arquivo não é uma cópia de segurança do app.');
   }
-  const cafes: Cafe[] = b.cafes.map((c, i) => ({
+  const lista: Cafe[] = b.cafes.map((c, i) => ({
     id: typeof c?.id === 'string' && c.id ? c.id : newId() + i,
     ...sanitizeCafe(c ?? {}),
   }));
-  repo.saveCafes(cafes);
-  if (b.config) repo.saveConfig({ ...DEFAULT_CONFIG, ...b.config });
+  await cafes.replaceAll(lista);
+  if (b.config) store.saveConfig({ ...DEFAULT_CONFIG, ...b.config });
 }

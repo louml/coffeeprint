@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { FilaDeImpressao, LIMITE_ETIQUETAS, dadosDoItem, totalEtiquetas } from '../build/fila.js';
 import { dadosDoPedido } from '../build/request.js';
-import { BrowserRepository, CafeBook, exportBackup } from '../build/storage.js';
+import { BrowserCafeRepository, BrowserRepository, CafeBook, exportBackup } from '../build/storage.js';
 
 class FakeStorage {
   m = new Map();
@@ -30,10 +30,10 @@ test('fila: sobrevive a fechar e reabrir o navegador (mesmo armazenamento)', () 
   assert.deepEqual(depois.list().map((i) => i.cliente), ['Ana']);
 });
 
-test('fila: o item guarda o rótulo como foi visto (editar o café depois não muda o item)', () => {
+test('fila: o item guarda o rótulo como foi visto (editar o café depois não muda o item)', async () => {
   const { repo, fila, cafes } = novo();
   const item = fila.adicionar(pedido(cafes[0]));
-  new CafeBook(repo).update(cafes[0].id, { ...cafes[0], nome: 'Nome novo', notas: 'Outras notas' });
+  await new CafeBook(new BrowserCafeRepository(repo)).update(cafes[0].id, { ...cafes[0], nome: 'Nome novo', notas: 'Outras notas' });
   const d = dadosDoItem(fila.list()[0]);
   assert.equal(d.cafe.nome, cafes[0].nome);
   assert.equal(d.dataTorra, '05/10/2026');
@@ -85,7 +85,7 @@ test('fila: armazenamento corrompido vira fila vazia, e a fila fica fora da cóp
   assert.deepEqual(fila.list(), []);
   store.setItem('torralocal.fila.v1', JSON.stringify({ nao: 'é lista' }));
   assert.deepEqual(fila.list(), []);
-  assert.deepEqual(Object.keys(exportBackup(repo)).sort(), ['app', 'cafes', 'config', 'versao']);
+  assert.deepEqual(Object.keys(exportBackup(repo.listCafes(), repo.getConfig())).sort(), ['app', 'cafes', 'config', 'versao']);
 });
 
 test('fila: sem armazenamento o app funciona (a fila só dura até fechar a página)', () => {

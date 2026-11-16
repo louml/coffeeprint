@@ -1,7 +1,7 @@
 import { formatDate } from './label/format.js';
 import type { DadosRotulo } from './label/types.js';
 import { dadosDoPedido, type Pedido } from './request.js';
-import { newId, type Repository } from './storage.js';
+import { newId, type LocalStore } from './storage.js';
 
 /** Máximo de etiquetas na fila (soma das cópias), para a impressão não ficar pesada demais. */
 export const LIMITE_ETIQUETAS = 500;
@@ -31,9 +31,9 @@ export function dadosDoItem(item: ItemFila): DadosRotulo {
 
 export const totalEtiquetas = (fila: ItemFila[]): number => fila.reduce((soma, i) => soma + i.copias, 0);
 
-/** Fila de rótulos para imprimir de uma vez. Guardada no Repository, então sobrevive a recarregar a página. */
+/** Fila de rótulos para imprimir de uma vez. Guardada no LocalStore, então sobrevive a recarregar a página. */
 export class FilaDeImpressao {
-  constructor(private readonly repo: Repository) {}
+  constructor(private readonly repo: LocalStore) {}
 
   list(): ItemFila[] {
     return this.repo.getFila();

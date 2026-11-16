@@ -7,12 +7,20 @@ import { FilaDeImpressao, dadosDoItem, totalEtiquetas } from './fila.js';
 import { baixarPng, imprimir, imprimirLotes } from './print.js';
 import { mostrarToast } from './toast.js';
 import { camposFaltando, dadosDoPedido, ordenarCafes, textoNaLista, type Pedido } from './request.js';
-import { BrowserRepository, CafeBook, exportBackup, importBackup, type Cafe } from './storage.js';
+import { BrowserCafeRepository, BrowserRepository, CafeBook, exportBackup, importBackup, type Cafe } from './storage.js';
 
 const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
-const repo = new BrowserRepository();
-const book = new CafeBook(repo);
+const repo = new BrowserRepository(); // configurações da impressora e fila: ficam neste computador
+const cafeRepo = new BrowserCafeRepository(repo); // cafés (o Supabase vai substituir este repositório)
+const book = new CafeBook(cafeRepo);
 const fila = new FilaDeImpressao(repo);
+
+/** Cafés carregados: a tela lê daqui (síncrono) e só as gravações vão ao repositório (assíncrono). */
+let cafes: Cafe[] = [];
+const cafePorId = (id: string) => cafes.find((c) => c.id === id);
+async function recarregarCafes(): Promise<void> {
+  cafes = await book.list();
+}
 
 const today = () => {
   const d = new Date();
@@ -24,6 +32,11 @@ const aviso = (el: HTMLElement, tipo: '' | 'ok' | 'fail', texto: string) => {
   el.textContent = texto;
 };
 
+/** Falha ao ler ou gravar os dados (com o banco na nuvem, por exemplo, falta de internet). */
+function erroDeDados(e: unknown): void {
+  aviso($('aviso'), 'fail', '✖ Não foi possível carregar os dados: ' + (e instanceof Error ? e.message : 'erro inesperado.'));
+}
+
 // ---------- abas
 document.querySelectorAll<HTMLButtonElement>('.tab').forEach((b) =>
   b.addEventListener('click', () => {
@@ -32,8 +45,8 @@ document.querySelectorAll<HTMLButtonElement>('.tab').forEach((b) =>
       t.setAttribute('aria-selected', String(t === b));
     });
     document.querySelectorAll('.panel').forEach((p) => p.classList.toggle('active', p.id === b.dataset.tab));
-    if (b.dataset.tab === 'emitir') loadCafes();
-    if (b.dataset.tab === 'cafes') renderCafes();
+    if (b.dataset.tab === 'emitir') loadCafes().catch(erroDeDados);
+    if (b.dataset.tab === 'cafes') renderCafes().catch(erroDeDados);
     if (b.dataset.tab === 'config') loadConfig();
   }),
 );
@@ -87,12 +100,13 @@ const FIELDS: Record<string, string> = { cliente: 'Cliente', cafe: 'Café', peso
 const val = (id: string) => ($(id) as HTMLInputElement | HTMLSelectElement).value;
 
 function pedido(): Pedido {
-  return { cafe: book.get(val('cafe')), cliente: val('cliente'), peso: val('peso'), moagem: val('moagem'), entrega: val('entrega'), dataTorra: val('data'), copias: Number(val('copias')) };
+  return { cafe: cafePorId(val('cafe')), cliente: val('cliente'), peso: val('peso'), moagem: val('moagem'), entrega: val('entrega'), dataTorra: val('data'), copias: Number(val('copias')) };
 }
 
-function loadCafes(): void {
+async function loadCafes(): Promise<void> {
+  await recarregarCafes();
   const atual = val('cafe');
-  const ativos = ordenarCafes(book.list().filter((c) => c.ativo));
+  const ativos = ordenarCafes(cafes.filter((c) => c.ativo));
   $('cafe').innerHTML = '<option value="">Escolha…</option>' + ativos.map((c) => `<option value="${esc(c.id)}">${esc(textoNaLista(c, ativos))}</option>`).join('');
   if (ativos.some((c) => c.id === atual)) ($('cafe') as HTMLSelectElement).value = atual;
   else if (ativos.length === 1) ($('cafe') as HTMLSelectElement).value = ativos[0].id;
@@ -225,7 +239,7 @@ function renderFila(): void {
     fecharFila();
     return;
   }
-  const todos = book.list();
+  const todos = cafes;
   const pendentes = itens.filter((i) => !i.enviado);
   const aImprimir = pendentes.length ? totalEtiquetas(pendentes) : totalEtiquetas(itens);
   $('fila-badge').textContent = String(totalEtiquetas(itens));
@@ -347,8 +361,9 @@ $('fila-imprimir').addEventListener('click', async () => {
 
 // ---------- cadastro de cafés
 let editId: string | null = null;
-function renderCafes(): void {
-  const lista = ordenarCafes(book.list());
+async function renderCafes(): Promise<void> {
+  await recarregarCafes();
+  const lista = ordenarCafes(cafes);
   $('lista-cafes').innerHTML =
     lista
       .map(
@@ -363,19 +378,23 @@ function renderCafes(): void {
       )
       .join('') || '<p>Nenhum café cadastrado.</p>';
 }
-$('lista-cafes').addEventListener('click', (ev) => {
+$('lista-cafes').addEventListener('click', async (ev) => {
   const b = (ev.target as HTMLElement).closest('button');
   if (!b) return;
-  const c = book.get(b.dataset.id ?? '');
+  const c = cafePorId(b.dataset.id ?? '');
   if (!c) return;
-  if (b.dataset.act === 'edit') openCafe(c);
-  if (b.dataset.act === 'toggle') {
-    book.update(c.id, { ...c, ativo: !c.ativo });
-    renderCafes();
-  }
-  if (b.dataset.act === 'del' && confirm(`Remover "${c.nome}" de vez? Para só esconder da lista, use "Desativar".`)) {
-    book.remove(c.id);
-    renderCafes();
+  try {
+    if (b.dataset.act === 'edit') openCafe(c);
+    if (b.dataset.act === 'toggle') {
+      await book.update(c.id, { ...c, ativo: !c.ativo });
+      await renderCafes();
+    }
+    if (b.dataset.act === 'del' && confirm(`Remover "${c.nome}" de vez? Para só esconder da lista, use "Desativar".`)) {
+      await book.remove(c.id);
+      await renderCafes();
+    }
+  } catch (e) {
+    alert(e instanceof Error ? e.message : 'Erro inesperado.');
   }
 });
 const CAMPOS = ['nome', 'notas', 'produtor', 'rotuloProdutor', 'variedade', 'regiao', 'especie', 'torra'] as const;
@@ -391,16 +410,16 @@ function openCafe(c: Cafe | null): void {
 }
 $('novo-cafe').addEventListener('click', () => openCafe(null));
 $('cancelar-cafe').addEventListener('click', () => ($('dlg-cafe') as HTMLDialogElement).close());
-$('form-cafe').addEventListener('submit', (ev) => {
+$('form-cafe').addEventListener('submit', async (ev) => {
   ev.preventDefault();
   const f = $('form-cafe') as HTMLFormElement;
   const body: Record<string, string | boolean> = Object.fromEntries(CAMPOS.map((k) => [k, (f.elements.namedItem(k) as HTMLInputElement).value]));
   body.ativo = (f.elements.namedItem('ativo') as HTMLInputElement).checked;
   try {
-    if (editId) book.update(editId, body);
-    else book.create(body);
+    if (editId) await book.update(editId, body);
+    else await book.create(body);
     ($('dlg-cafe') as HTMLDialogElement).close();
-    renderCafes();
+    await renderCafes();
   } catch (e) {
     $('erro-cafe').textContent = e instanceof Error ? e.message : 'Erro inesperado.';
   }
@@ -432,7 +451,7 @@ $('teste').addEventListener('click', async () => {
   repo.saveConfig(lerConfig()); // o teste usa o que está na tela, mesmo sem salvar antes
   aviso($('aviso-config'), '', 'Preparando a etiqueta de teste…');
   try {
-    const cafe = book.list()[0];
+    const cafe = cafes[0];
     const { id: _i, ativo: _a, ...base } = cafe ?? { id: '', ativo: true, nome: 'Café de teste', notas: 'Chocolate e laranja', produtor: 'Produtor', variedade: 'Variedade', regiao: 'Região', especie: '100% Arábica', torra: 'Torra média' };
     const msg = await emitir({ cafe: base, cliente: 'ETIQUETA DE TESTE', peso: '250g', moagem: 'Grão', entrega: '', dataTorra: formatDate(today()) }, 1);
     aviso($('aviso-config'), 'ok', '✔ ' + msg);
@@ -444,8 +463,8 @@ $('teste').addEventListener('click', async () => {
 });
 
 // ---------- cópia de segurança
-$('backup-baixar').addEventListener('click', () => {
-  const blob = new Blob([JSON.stringify(exportBackup(repo), null, 2)], { type: 'application/json' });
+$('backup-baixar').addEventListener('click', async () => {
+  const blob = new Blob([JSON.stringify(exportBackup(await book.list(), repo.getConfig()), null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = `torralocal-copia-${today()}.json`;
@@ -461,9 +480,9 @@ $('backup-restaurar').addEventListener('change', async (ev) => {
   if (!file) return;
   try {
     if (!confirm('Restaurar vai substituir os cafés e configurações atuais por os do arquivo. Continuar?')) return;
-    importBackup(repo, JSON.parse(await file.text()));
+    await importBackup(cafeRepo, repo, JSON.parse(await file.text()));
     loadConfig();
-    loadCafes();
+    await loadCafes();
     aviso($('aviso-backup'), 'ok', '✔ Cópia de segurança restaurada.');
   } catch (e) {
     aviso($('aviso-backup'), 'fail', '✖ ' + (e instanceof Error ? e.message : 'Arquivo inválido.'));
@@ -480,4 +499,4 @@ if (!repo.persistent) {
   navigator.storage.persist().catch(() => undefined); // pede ao navegador para não apagar os dados sozinho
 }
 renderFila();
-loadFonts().then(loadCafes);
+loadFonts().then(loadCafes).catch(erroDeDados);
