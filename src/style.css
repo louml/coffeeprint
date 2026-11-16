@@ -51,7 +51,7 @@ label.check input { width: 20px; min-height: 0; height: 20px; accent-color: var(
 /* escolha por botões (peso e moagem): o select fica só como apoio */
 .choice-select { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
 .chips { display: grid; gap: 8px; grid-template-columns: repeat(var(--n, 4), 1fr); }
-.chip { font: 400 15.5px var(--f-semi); min-height: 44px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--field); color: var(--ink); cursor: pointer; }
+.chip { font: 400 14.5px var(--f-semi); padding: 0 4px; white-space: nowrap; min-height: 44px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--field); color: var(--ink); cursor: pointer; }
 .chip:hover { border-color: var(--ink); }
 .chip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: #fff; }
 .chip:focus-visible, .choice-select:focus-visible + .chips .chip[aria-pressed="true"] { outline: none; box-shadow: 0 0 0 4px var(--ring); }

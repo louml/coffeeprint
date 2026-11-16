@@ -61,7 +61,7 @@ label.check input { width: 20px; min-height: 0; height: 20px; accent-color: var(
 /* escolha por botões (peso e moagem): o select fica só como apoio */
 .choice-select { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
 .chips { display: grid; gap: 8px; grid-template-columns: repeat(var(--n, 4), 1fr); }
-.chip { font: 400 15.5px var(--f-semi); min-height: 44px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--field); color: var(--ink); cursor: pointer; }
+.chip { font: 400 14.5px var(--f-semi); padding: 0 4px; white-space: nowrap; min-height: 44px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--field); color: var(--ink); cursor: pointer; }
 .chip:hover { border-color: var(--ink); }
 .chip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: #fff; }
 .chip:focus-visible, .choice-select:focus-visible + .chips .chip[aria-pressed="true"] { outline: none; box-shadow: 0 0 0 4px var(--ring); }
@@ -243,8 +243,9 @@ label > span small { display: inline; margin-left: 4px; }
         <select id="moagem" class="choice-select" aria-labelledby="lbl-moagem">
           <option value="">Escolha…</option>
           <option value="Grão">Grão</option>
-          <option value="Moído p/ coado">Moído p/ coado</option>
-          <option value="Prensa francesa">Prensa francesa</option>
+          <option value="Coado">Coado</option>
+          <option value="P. Francesa">P. Francesa</option>
+          <option value="Espresso">Espresso</option>
         </select>
       </div>
       <div class="field">
@@ -477,8 +478,12 @@ label > span small { display: inline; margin-left: 4px; }
   var text = (text2, family, size, x, y, align = "left") => ({ t: "text", text: text2, family, size, x, y, align });
   var MOAGEM_NO_ROTULO = {
     Gr\u00E3o: "Em gr\xE3os",
-    "Mo\xEDdo p/ coado": "Mo\xEDdo (c)",
-    "Prensa francesa": "Mo\xEDdo (p.f)"
+    Coado: "Mo\xEDdo (coado)",
+    "P. Francesa": "Mo\xEDdo (p. Francesa)",
+    Espresso: "Mo\xEDdo (espresso)",
+    // nomes de versões anteriores (itens que já estavam na fila)
+    "Mo\xEDdo p/ coado": "Mo\xEDdo (coado)",
+    "Prensa francesa": "Mo\xEDdo (p. Francesa)"
   };
   function moagemNoRotulo(moagem) {
     return MOAGEM_NO_ROTULO[moagem] ?? moagem;
@@ -768,7 +773,7 @@ label > span small { display: inline; margin-left: 4px; }
 
   // src/request.ts
   var PESOS = ["100g", "250g", "500g", "1kg"];
-  var MOAGENS = ["Gr\xE3o", "Mo\xEDdo p/ coado", "Prensa francesa"];
+  var MOAGENS = ["Gr\xE3o", "Coado", "P. Francesa", "Espresso"];
   var ENTREGAS = ["Uber", "Coleta", "Motoboy"];
   function camposFaltando(p) {
     const f = [];
@@ -1402,13 +1407,14 @@ label > span small { display: inline; margin-left: 4px; }
       editarItem(id);
     }
   });
+  var MOAGEM_ANTIGA = { Mo\u00EDdo: "Coado", "Mo\xEDdo p/ coado": "Coado", "Prensa francesa": "P. Francesa" };
   function editarItem(id) {
     const item = fila.remover(id);
     if (!item) return;
     const cafeSelect = $("cafe");
     const existe = [...cafeSelect.options].some((o) => o.value === item.cafeId);
     cafeSelect.value = existe ? item.cafeId : "";
-    for (const [campo, valor] of [["peso", item.peso], ["moagem", item.moagem === "Mo\xEDdo" ? "Mo\xEDdo p/ coado" : item.moagem], ["entrega", item.entrega ?? ""]]) {
+    for (const [campo, valor] of [["peso", item.peso], ["moagem", MOAGEM_ANTIGA[item.moagem] ?? item.moagem], ["entrega", item.entrega ?? ""]]) {
       $(campo).value = valor;
       $(campo).dispatchEvent(new Event("change"));
     }

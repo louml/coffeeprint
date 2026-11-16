@@ -51,7 +51,7 @@ test('web: validação lista o que falta e monta os dados do rótulo', () => {
   const vazio = { cliente: '', peso: '', moagem: '', entrega: '', dataTorra: '', copias: 1 };
   assert.deepEqual(camposFaltando(vazio), ['Cliente', 'Café', 'Peso', 'Moagem', 'Data de torra']);
   assert.ok(camposFaltando({ ...vazio, cafe, cliente: 'X', peso: '1kg', moagem: 'Grão', dataTorra: '2026-10-05', copias: 0 })[0].startsWith('Número'));
-  const ok = { cafe, cliente: ' Padaria ', peso: '250g', moagem: 'Moído p/ coado', entrega: '', dataTorra: '2026-10-05', copias: 3 };
+  const ok = { cafe, cliente: ' Padaria ', peso: '250g', moagem: 'Coado', entrega: '', dataTorra: '2026-10-05', copias: 3 };
   assert.deepEqual(camposFaltando(ok), []);
   for (const e of ['Uber', 'Coleta', 'Motoboy']) assert.deepEqual(camposFaltando({ ...ok, entrega: e }), [], 'entrega é opcional e aceita os três tipos');
   assert.deepEqual(camposFaltando({ ...ok, entrega: 'Drone' }), ['Entrega']);
