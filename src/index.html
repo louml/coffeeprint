@@ -35,6 +35,7 @@
   <nav class="tabs" role="tablist" aria-label="Seções">
     <button class="tab active" role="tab" aria-selected="true" data-tab="emitir">Emitir rótulo</button>
     <button class="tab" role="tab" aria-selected="false" data-tab="cafes">Cafés</button>
+    <button class="tab" role="tab" aria-selected="false" data-tab="torra">Torra</button>
     <button class="tab" role="tab" aria-selected="false" data-tab="estoque">Estoque</button>
     <button class="tab" role="tab" aria-selected="false" data-tab="config">Configurações</button>
   </nav>
@@ -85,12 +86,9 @@
         </select>
       </div>
       <div class="row">
-        <div class="field">
-          <span class="label-text" id="lbl-data">Data de torra</span>
-          <div id="lote-info" class="lote-info" aria-live="polite"></div>
-          <input id="data" type="date" aria-labelledby="lbl-data" hidden>
-          <button type="button" id="data-trocar" class="link lote-link">usar outra data</button>
-        </div>
+        <label>Data de torra
+          <input id="data" type="date">
+        </label>
         <div class="field">
           <span class="label-text" id="lbl-copias">Cópias</span>
           <div class="stepper">
@@ -185,63 +183,49 @@
   </dialog>
 </section>
 
-<!-- ============ ESTOQUE ============ -->
+<!-- ============ TORRA ============ -->
+<section id="torra" class="panel">
+  <div class="bar">
+    <div>
+      <h2>Controle de torra</h2>
+      <p class="sub">Histórico das torras: data, quem torrou e os cafés torrados, com as quantidades.</p>
+    </div>
+    <button id="nova-torra" type="button" class="big primary">+ Cadastrar torra</button>
+  </div>
+  <div id="lista-torras"></div>
+
+  <dialog id="dlg-torra">
+    <form id="form-torra" method="dialog" novalidate>
+      <h2>Cadastrar torra</h2>
+      <div class="row">
+        <label>Data da torra<input id="torra-data" type="date" required></label>
+        <label>Quem torrou<input id="torra-quem" type="text" maxlength="60" autocomplete="off" placeholder="Nome" required></label>
+      </div>
+      <div class="field">
+        <span class="label-text">Cafés torrados <small>(café e quantidade em kg; todos obrigatórios)</small></span>
+        <div id="torra-linhas"></div>
+        <button type="button" id="torra-mais" class="link lote-link">+ Adicionar outro café</button>
+      </div>
+      <div id="erro-torra" class="erro"></div>
+      <div class="actions">
+        <button type="button" id="cancelar-torra" class="big">Cancelar</button>
+        <button type="submit" id="torra-salvar" class="big primary">Cadastrar</button>
+      </div>
+    </form>
+  </dialog>
+</section>
+
+<!-- ============ ESTOQUE (mocado) ============ -->
 <section id="estoque" class="panel">
   <div class="bar">
     <div>
       <h2>Estoque de café torrado</h2>
-      <p class="sub">Saldo em kg por café, em lotes de torra. A etiqueta usa a data do lote mais antigo que ainda tem saldo.</p>
+      <p class="sub">Quanto de cada café torrado ainda está disponível.</p>
     </div>
-    <div class="bar-acoes">
-      <button id="nova-torra" type="button" class="big primary">+ Registrar torra</button>
-      <button id="nova-saida" type="button" class="big">Registrar saída</button>
-    </div>
+    <label class="busca">Buscar café<input id="estoque-busca" type="search" placeholder="Nome do café" autocomplete="off"></label>
   </div>
+  <div class="aviso-topo" role="note"><strong>Dados de exemplo.</strong> Esta tela ainda não está ligada à torra nem aos pedidos: as quantidades são fictícias e só mostram como ficará.</div>
   <div id="lista-estoque"></div>
-  <h3 class="secao">Últimos movimentos</h3>
-  <div id="lista-movimentos"></div>
-
-  <dialog id="dlg-torra">
-    <form id="form-torra" method="dialog" novalidate>
-      <h2>Registrar torra</h2>
-      <label>Café<select id="torra-cafe"></select></label>
-      <div class="row">
-        <label>Data da torra<input id="torra-data" type="date"></label>
-        <label>Quantidade (kg)<input id="torra-kg" type="text" inputmode="decimal" placeholder="Ex.: 12,5" autocomplete="off"></label>
-      </div>
-      <label>Observação <small>(opcional)</small><input id="torra-obs" type="text" maxlength="120" autocomplete="off"></label>
-      <div id="erro-torra" class="erro"></div>
-      <div class="actions">
-        <button type="button" id="cancelar-torra" class="big">Cancelar</button>
-        <button type="submit" class="big primary">Registrar</button>
-      </div>
-    </form>
-  </dialog>
-
-  <dialog id="dlg-saida">
-    <form id="form-saida" method="dialog" novalidate>
-      <h2>Registrar saída</h2>
-      <label>Café<select id="saida-cafe"></select></label>
-      <div id="saida-saldo" class="sub"></div>
-      <div class="row">
-        <label>Tipo
-          <select id="saida-tipo">
-            <option value="venda">Venda</option>
-            <option value="perda">Perda</option>
-            <option value="ajuste_menos">Ajuste para menos</option>
-            <option value="ajuste_mais">Ajuste para mais</option>
-          </select>
-        </label>
-        <label>Quantidade (kg)<input id="saida-kg" type="text" inputmode="decimal" placeholder="Ex.: 2,5" autocomplete="off"></label>
-      </div>
-      <label>Observação <small>(opcional)</small><input id="saida-obs" type="text" maxlength="120" autocomplete="off"></label>
-      <div id="erro-saida" class="erro"></div>
-      <div class="actions">
-        <button type="button" id="cancelar-saida" class="big">Cancelar</button>
-        <button type="submit" class="big primary">Registrar</button>
-      </div>
-    </form>
-  </dialog>
 </section>
 
 <!-- ============ CONFIG ============ -->

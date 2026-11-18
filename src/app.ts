@@ -9,8 +9,8 @@ import { mostrarToast } from './toast.js';
 import { camposFaltando, dadosDoPedido, ordenarCafes, textoNaLista, type Pedido } from './request.js';
 import { BrowserCafeRepository, BrowserRepository, CafeBook, exportBackup, importBackup, type Cafe } from './storage.js';
 import { SupabaseCafeRepository } from './supabase-cafes.js';
-import { SupabaseEstoqueRepository } from './supabase-estoque.js';
-import { distribuirSaida, loteAtual, parseKg, type Lote, type NovoMovimento } from './estoque.js';
+import { SupabaseTorraRepository } from './supabase-torras.js';
+import { erroDaTorra, parseKg } from './torras.js';
 import { aoTerminarSessao, comTempo, entrar, sair, sessaoAtiva, supabase } from './supabase.js';
 
 const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
@@ -18,30 +18,13 @@ const repo = new BrowserRepository(); // configurações da impressora e fila: f
 const cafesLocais = new BrowserCafeRepository(repo); // cafés que este navegador tinha antes do banco (só para enviar ao banco)
 const cafeRepo = new SupabaseCafeRepository(supabase()); // cafés no banco de dados (Supabase)
 const book = new CafeBook(cafeRepo);
-const estoque = new SupabaseEstoqueRepository(supabase());
+const torras = new SupabaseTorraRepository(supabase());
 const fila = new FilaDeImpressao(repo);
 
 /** Cafés carregados: a tela lê daqui (síncrono) e só as gravações vão ao repositório (assíncrono). */
 let cafes: Cafe[] = [];
 const cafePorId = (id: string) => cafes.find((c) => c.id === id);
 
-/** Lotes de torra com saldo (todos os cafés). A etiqueta usa a data do lote em uso (FIFO) de cada café. */
-let lotes: Lote[] = [];
-const lotesDoCafe = (cafeId: string) => lotes.filter((l) => l.cafeId === cafeId);
-const loteEmUso = (cafeId: string) => loteAtual(lotesDoCafe(cafeId));
-const saldoDoCafe = (cafeId: string) => Math.round(lotesDoCafe(cafeId).reduce((s, l) => s + l.saldoKg, 0) * 1000) / 1000;
-async function carregarEstoque(): Promise<void> {
-  try {
-    const lista = await comTempo(estoque.lotes(), 6000, null);
-    if (!lista) throw new Error('O banco demorou para responder.');
-    lotes = lista;
-  } catch (e) {
-    lotes = []; // sem estoque conhecido: a etiqueta oferece "usar outra data"
-    erroDeDados(e);
-  }
-  atualizarLoteInfo();
-  refreshPreview();
-}
 const kgTexto = (kg: number) => `${kg.toLocaleString('pt-BR', { maximumFractionDigits: 3 })} kg`;
 const dataBR = (iso: string) => iso.split('-').reverse().join('/');
 async function recarregarCafes(): Promise<void> {
@@ -85,7 +68,8 @@ document.querySelectorAll<HTMLButtonElement>('.tab').forEach((b) =>
     document.querySelectorAll('.panel').forEach((p) => p.classList.toggle('active', p.id === b.dataset.tab));
     if (b.dataset.tab === 'emitir') loadCafes().catch(erroDeDados);
     if (b.dataset.tab === 'cafes') renderCafes().catch(erroDeDados);
-    if (b.dataset.tab === 'estoque') renderEstoque().catch(erroDeDados);
+    if (b.dataset.tab === 'torra') renderTorras().catch(erroDeDados);
+    if (b.dataset.tab === 'estoque') renderEstoque();
     if (b.dataset.tab === 'config') loadConfig();
   }),
 );
@@ -138,34 +122,8 @@ contadorDeCopias();
 const FIELDS: Record<string, string> = { cliente: 'Cliente', cafe: 'Café', peso: 'Peso', moagem: 'Moagem', entrega: 'Entrega', data: 'Data de torra', copias: 'Número de cópias' };
 const val = (id: string) => ($(id) as HTMLInputElement | HTMLSelectElement).value;
 
-/** Data de torra da etiqueta: a do lote em uso do café escolhido, ou a escolhida à mão ("usar outra data"). */
-let dataManual = false;
-function dataDaEtiqueta(): string {
-  if (dataManual) return val('data');
-  return loteEmUso(val('cafe'))?.dataTorra ?? '';
-}
-function usarDataManual(ligado: boolean, data?: string): void {
-  dataManual = ligado;
-  if (data) ($('data') as HTMLInputElement).value = data;
-  atualizarLoteInfo();
-  refreshPreview();
-}
-function atualizarLoteInfo(): void {
-  const info = $('lote-info');
-  const cafeId = val('cafe');
-  $('data').hidden = !dataManual;
-  info.hidden = dataManual;
-  $('data-trocar').textContent = dataManual ? 'usar a data do lote' : 'usar outra data';
-  if (dataManual) return;
-  const lote = cafeId ? loteEmUso(cafeId) : undefined;
-  info.classList.toggle('vazio', !lote);
-  if (lote) info.innerHTML = `${esc(dataBR(lote.dataTorra))}<small>lote · ${esc(kgTexto(lote.saldoKg))} restantes</small>`;
-  else info.textContent = cafeId ? 'Sem estoque deste café. Registre uma torra ou use outra data.' : 'Escolha um café.';
-}
-$('data-trocar').addEventListener('click', () => usarDataManual(!dataManual, dataManual ? undefined : dataDaEtiqueta() || today()));
-
 function pedido(): Pedido {
-  return { cafe: cafePorId(val('cafe')), cliente: val('cliente'), peso: val('peso'), moagem: val('moagem'), entrega: val('entrega'), dataTorra: dataDaEtiqueta(), copias: Number(val('copias')) };
+  return { cafe: cafePorId(val('cafe')), cliente: val('cliente'), peso: val('peso'), moagem: val('moagem'), entrega: val('entrega'), dataTorra: val('data'), copias: Number(val('copias')) };
 }
 
 async function loadCafes(): Promise<void> {
@@ -181,7 +139,6 @@ async function loadCafes(): Promise<void> {
 let previewTimer: number | undefined;
 let previewSeq = 0;
 function refreshPreview(): void {
-  atualizarLoteInfo();
   clearTimeout(previewTimer);
   previewTimer = window.setTimeout(async () => {
     const seq = ++previewSeq;
@@ -239,8 +196,7 @@ function lerFormulario(acao: 'imprimi' | 'adicionei'): Pedido | null {
   if (camposFaltando(p).some((f) => f.startsWith('Número'))) faltam.push('copias');
   if (faltam.length) {
     faltam.forEach((id) => $(id).classList.add('invalido'));
-    const semEstoque = faltam.includes('data') && !dataManual && !!p.cafe;
-    aviso($('aviso'), 'fail', `Não ${acao}. Falta preencher: ${faltam.map((id) => FIELDS[id]).join(', ')}.` + (semEstoque ? ' Este café não tem estoque: registre uma torra na aba Estoque ou use outra data.' : ''));
+    aviso($('aviso'), 'fail', `Não ${acao}. Falta preencher: ${faltam.map((id) => FIELDS[id]).join(', ')}.`);
     $(faltam[0]).focus();
     return null;
   }
@@ -376,7 +332,7 @@ function editarItem(id: string): void {
     $(campo).dispatchEvent(new Event('change')); // atualiza os botões de escolha
   }
   ($('cliente') as HTMLInputElement).value = item.cliente;
-  usarDataManual(true, item.dataTorra); // o item guarda a data que foi vista; o lote pode ter mudado desde então
+  ($('data') as HTMLInputElement).value = item.dataTorra;
   ($('copias') as HTMLInputElement).value = String(item.copias);
   document.querySelectorAll('.invalido').forEach((e) => e.classList.remove('invalido'));
   refreshPreview();
@@ -529,116 +485,114 @@ $('teste').addEventListener('click', async () => {
   }
 });
 
-// ---------- estoque de café torrado
-const TIPO_TEXTO: Record<string, string> = { torra: 'Torra', venda: 'Venda', perda: 'Perda', ajuste: 'Ajuste' };
-
-async function renderEstoque(): Promise<void> {
+// ---------- controle de torra
+async function renderTorras(): Promise<void> {
   await recarregarCafes();
-  await carregarEstoque();
-  const todos = ordenarCafes(cafes);
-  const visiveis = todos.filter((c) => c.ativo || lotesDoCafe(c.id).length > 0);
-  $('lista-estoque').innerHTML =
-    visiveis
-      .map((c) => {
-        const emUso = loteEmUso(c.id);
-        const comSaldo = lotesDoCafe(c.id).filter((l) => l.saldoKg > 0);
-        const saldo = saldoDoCafe(c.id);
-        return `<div class="estoque-item">
-          <div class="estoque-topo"><strong>${esc(textoNaLista(c, todos))}</strong><span class="estoque-saldo ${saldo > 0 ? '' : 'zero'}">${saldo > 0 ? esc(kgTexto(saldo)) : 'Sem estoque'}</span></div>
-          ${comSaldo.length ? `<ul class="lotes">${comSaldo.map((l) => `<li class="${l.id === emUso?.id ? 'em-uso' : ''}" title="${l.id === emUso?.id ? 'Lote em uso: é a data que sai na etiqueta' : 'Próximo lote'}">${esc(dataBR(l.dataTorra))} · ${esc(kgTexto(l.saldoKg))}${l.id === emUso?.id ? ' · em uso' : ''}</li>`).join('')}</ul>` : ''}
-        </div>`;
+  const lista = await torras.listar();
+  const nomeDoCafe = (id: string) => {
+    const c = cafePorId(id);
+    return c ? textoNaLista(c, cafes) : 'Café removido';
+  };
+  $('lista-torras').innerHTML =
+    lista
+      .map((t, i) => {
+        const total = Math.round(t.itens.reduce((s, it) => s + it.quantidadeKg, 0) * 1000) / 1000;
+        return `<details class="acordeao"${i === 0 ? ' open' : ''}>
+          <summary>
+            <span class="acordeao-data">${esc(dataBR(t.dataTorra))}</span>
+            <span class="acordeao-quem">${esc(t.torrador)}</span>
+            <span class="acordeao-total">${esc(plural(t.itens.length, 'café', 'cafés'))} · ${esc(kgTexto(total))}</span>
+          </summary>
+          <ul class="acordeao-itens">${t.itens.map((it) => `<li><span>${esc(nomeDoCafe(it.cafeId))}</span><strong>${esc(kgTexto(it.quantidadeKg))}</strong></li>`).join('')}</ul>
+        </details>`;
       })
-      .join('') || '<p>Nenhum café cadastrado.</p>';
-  const movs = await estoque.movimentos({ limite: 30 });
-  $('lista-movimentos').innerHTML =
-    movs
-      .map((m) => {
-        const c = m.cafeId ? cafePorId(m.cafeId) : undefined;
-        const sinal = m.quantidadeKg > 0 ? 'entra' : 'sai';
-        return `<div class="mov"><span>${esc(dataBR(m.data))}</span><span>${esc(c?.nome ?? 'Café')}<small>${esc(TIPO_TEXTO[m.tipo] ?? m.tipo)}${m.dataTorra ? ' · lote de ' + esc(dataBR(m.dataTorra)) : ''}${m.observacao ? ' · ' + esc(m.observacao) : ''}</small></span><span class="kg ${sinal}">${m.quantidadeKg > 0 ? '+' : '−'}${esc(kgTexto(Math.abs(m.quantidadeKg)))}</span></div>`;
-      })
-      .join('') || '<p class="sub">Nenhum movimento ainda.</p>';
+      .join('') || '<p class="sub">Nenhuma torra registrada ainda. Use "Cadastrar torra".</p>';
 }
 
-function opcoesDeCafes(select: HTMLSelectElement, so_ativos: boolean): void {
-  const lista = ordenarCafes(cafes.filter((c) => !so_ativos || c.ativo));
-  select.innerHTML = '<option value="">Escolha…</option>' + lista.map((c) => `<option value="${esc(c.id)}">${esc(textoNaLista(c, lista))}</option>`).join('');
+/** Linha do formulário: café + quantidade (kg) + remover. */
+function linhaDeCafe(): HTMLElement {
+  const linha = document.createElement('div');
+  linha.className = 'torra-linha';
+  const ativos = ordenarCafes(cafes.filter((c) => c.ativo));
+  linha.innerHTML = `<select class="torra-cafe" aria-label="Café"><option value="">Café…</option>${ativos.map((c) => `<option value="${esc(c.id)}">${esc(textoNaLista(c, ativos))}</option>`).join('')}</select>
+    <input class="torra-kg" type="text" inputmode="decimal" placeholder="kg" aria-label="Quantidade em kg" autocomplete="off">
+    <button type="button" class="fila-btn danger torra-remover" aria-label="Remover esta linha" title="Remover">✕</button>`;
+  return linha;
 }
-
+function atualizarRemover(): void {
+  const linhas = $('torra-linhas').querySelectorAll('.torra-linha');
+  linhas.forEach((l) => ((l.querySelector('.torra-remover') as HTMLButtonElement).hidden = linhas.length === 1));
+}
 $('nova-torra').addEventListener('click', () => {
-  opcoesDeCafes($('torra-cafe') as HTMLSelectElement, true);
   ($('torra-data') as HTMLInputElement).value = today();
-  ($('torra-kg') as HTMLInputElement).value = '';
-  ($('torra-obs') as HTMLInputElement).value = '';
+  ($('torra-quem') as HTMLInputElement).value = '';
+  $('torra-linhas').replaceChildren(linhaDeCafe());
+  atualizarRemover();
   $('erro-torra').textContent = '';
   ($('dlg-torra') as HTMLDialogElement).showModal();
-  $('torra-cafe').focus();
+  $('torra-quem').focus();
+});
+$('torra-mais').addEventListener('click', () => {
+  const l = linhaDeCafe();
+  $('torra-linhas').appendChild(l);
+  atualizarRemover();
+  (l.querySelector('select') as HTMLElement).focus();
+});
+$('torra-linhas').addEventListener('click', (ev) => {
+  const b = (ev.target as HTMLElement).closest('.torra-remover');
+  if (!b) return;
+  b.closest('.torra-linha')?.remove();
+  atualizarRemover();
 });
 $('cancelar-torra').addEventListener('click', () => ($('dlg-torra') as HTMLDialogElement).close());
 $('form-torra').addEventListener('submit', async (ev) => {
   ev.preventDefault();
-  const cafeId = val('torra-cafe');
-  const kg = parseKg(val('torra-kg'));
-  const data = val('torra-data');
-  if (!cafeId) return void ($('erro-torra').textContent = 'Escolha o café.');
-  if (!data) return void ($('erro-torra').textContent = 'Informe a data da torra.');
-  if (kg === null) return void ($('erro-torra').textContent = 'Informe a quantidade em kg (por exemplo, 12,5).');
+  const itens = [...$('torra-linhas').querySelectorAll('.torra-linha')].map((l) => ({
+    cafeId: (l.querySelector('.torra-cafe') as HTMLSelectElement).value,
+    quantidadeKg: parseKg((l.querySelector('.torra-kg') as HTMLInputElement).value) ?? 0,
+  }));
+  const nova = { dataTorra: val('torra-data'), torrador: val('torra-quem'), itens };
+  const erro = erroDaTorra(nova);
+  if (erro) return void ($('erro-torra').textContent = erro);
+  const btn = $('torra-salvar') as HTMLButtonElement;
+  btn.disabled = true;
   try {
-    await estoque.registrarTorra(cafeId, data, kg, val('torra-obs').trim());
+    await torras.registrar(nova);
     ($('dlg-torra') as HTMLDialogElement).close();
-    await renderEstoque();
-    refreshPreview();
+    mostrarToast('Torra cadastrada', `${plural(itens.length, 'café', 'cafés')} em ${dataBR(nova.dataTorra)}`);
+    await renderTorras();
   } catch (e) {
     $('erro-torra').textContent = e instanceof Error ? e.message : 'Erro inesperado.';
+  } finally {
+    btn.disabled = false;
   }
 });
 
-function atualizarSaldoSaida(): void {
-  const id = val('saida-cafe');
-  $('saida-saldo').textContent = id ? (saldoDoCafe(id) > 0 ? `Em estoque: ${kgTexto(saldoDoCafe(id))}` : 'Este café não tem estoque.') : '';
+// ---------- estoque (MOCADO: só interface; ainda sem ligação com torras, pedidos nem banco)
+/** Quantidade de exemplo (0 a ~25 kg), sempre a mesma para o mesmo café. */
+function quantidadeDeExemplo(id: string): number {
+  let h = 0;
+  for (const ch of id) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  return h % 9 === 0 ? 0 : Math.round(((h % 2500) / 100) * 2) / 2;
 }
-$('nova-saida').addEventListener('click', () => {
-  opcoesDeCafes($('saida-cafe') as HTMLSelectElement, false);
-  ($('saida-kg') as HTMLInputElement).value = '';
-  ($('saida-obs') as HTMLInputElement).value = '';
-  ($('saida-tipo') as HTMLSelectElement).value = 'venda';
-  atualizarSaldoSaida();
-  $('erro-saida').textContent = '';
-  ($('dlg-saida') as HTMLDialogElement).showModal();
-  $('saida-cafe').focus();
-});
-$('saida-cafe').addEventListener('change', atualizarSaldoSaida);
-$('cancelar-saida').addEventListener('click', () => ($('dlg-saida') as HTMLDialogElement).close());
-$('form-saida').addEventListener('submit', async (ev) => {
-  ev.preventDefault();
-  const erro = (msg: string) => void ($('erro-saida').textContent = msg);
-  const cafeId = val('saida-cafe');
-  const kg = parseKg(val('saida-kg'));
-  const tipo = val('saida-tipo');
-  if (!cafeId) return erro('Escolha o café.');
-  if (kg === null) return erro('Informe a quantidade em kg (por exemplo, 2,5).');
-  const obs = val('saida-obs').trim();
-  const hoje = today();
-  let movimentos: NovoMovimento[];
-  if (tipo === 'ajuste_mais') {
-    // sobra a mais: entra no lote em uso (ou, sem estoque, no lote mais recente)
-    const alvo = loteEmUso(cafeId) ?? [...lotesDoCafe(cafeId)].sort((a, b) => b.dataTorra.localeCompare(a.dataTorra) || b.criadoEm.localeCompare(a.criadoEm))[0];
-    if (!alvo) return erro('Este café ainda não tem nenhum lote. Registre uma torra primeiro.');
-    movimentos = [{ loteId: alvo.id, tipo: 'ajuste', quantidadeKg: kg, data: hoje, observacao: obs }];
-  } else {
-    if (kg > saldoDoCafe(cafeId)) return erro(`Só há ${kgTexto(saldoDoCafe(cafeId))} em estoque deste café.`);
-    const { movimentos: saidas } = distribuirSaida(lotesDoCafe(cafeId), kg);
-    movimentos = saidas.map((m) => ({ ...m, tipo: tipo === 'ajuste_menos' ? 'ajuste' : (tipo as 'venda' | 'perda'), data: hoje, observacao: obs }));
-  }
-  try {
-    await estoque.registrarMovimentos(movimentos);
-    ($('dlg-saida') as HTMLDialogElement).close();
-    await renderEstoque();
-    refreshPreview();
-  } catch (e) {
-    erro(e instanceof Error ? e.message : 'Erro inesperado.');
-  }
-});
+const LIMITE_BAIXO_KG = 3;
+function renderEstoque(): void {
+  const filtro = val('estoque-busca').trim().toLowerCase();
+  const lista = ordenarCafes(cafes.filter((c) => c.ativo)).filter((c) => !filtro || c.nome.toLowerCase().includes(filtro));
+  $('lista-estoque').innerHTML =
+    lista
+      .map((c) => {
+        const kg = quantidadeDeExemplo(c.id);
+        const nivel = kg === 0 ? 'zero' : kg < LIMITE_BAIXO_KG ? 'baixo' : 'ok';
+        const texto = { zero: 'Sem estoque', baixo: 'Estoque baixo', ok: 'Disponível' }[nivel];
+        return `<div class="estoque-item">
+          <div class="estoque-topo"><strong>${esc(textoNaLista(c, cafes))}</strong><span class="estoque-saldo ${kg > 0 ? '' : 'zero'}">${esc(kgTexto(kg))}</span></div>
+          <div class="estoque-meta"><span class="selo-nivel ${nivel}">${texto}</span><div class="barra" aria-hidden="true"><i style="width:${Math.min(100, (kg / 25) * 100)}%"></i></div></div>
+        </div>`;
+      })
+      .join('') || '<p class="sub">Nenhum café encontrado.</p>';
+}
+$('estoque-busca').addEventListener('input', renderEstoque);
 
 // ---------- conta e dados
 $('sair').addEventListener('click', async () => {
@@ -711,7 +665,6 @@ function mostrarLogin(): void {
 async function iniciarSessao(): Promise<void> {
   document.body.classList.remove('sem-login');
   await loadCafes();
-  await carregarEstoque();
 }
 $('form-login').addEventListener('submit', async (ev) => {
   ev.preventDefault();

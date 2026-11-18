@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { SupabaseCafeRepository, cafeDeLinha, erroDoBanco, linhaDeCafe } from '../build/supabase-cafes.js';
-import { SupabaseEstoqueRepository, loteDeLinha, movimentoDeLinha } from '../build/supabase-estoque.js';
+import { SupabaseTorraRepository, torraDeLinha } from '../build/supabase-torras.js';
 
 const cafe = { nome: 'Geisha', notas: 'Mel', produtor: 'Daniela', rotuloProdutor: 'Produtora', variedade: 'Geisha', regiao: 'Mogiana', especie: '100% Arábica', torra: 'Torra média', ativo: true };
 
@@ -19,12 +19,10 @@ test('banco: erros do Supabase viram mensagens para a equipe', () => {
   assert.equal(erroDoBanco({ message: 'outro erro' }).message, 'outro erro');
 });
 
-test('banco: lotes e movimentos (numeric chega como texto ou número)', () => {
-  assert.deepEqual(loteDeLinha({ lote_id: 'l1', cafe_id: 'c1', data_torra: '2026-11-01', created_at: 't', saldo_kg: '8.500' }), { id: 'l1', cafeId: 'c1', dataTorra: '2026-11-01', criadoEm: 't', saldoKg: 8.5 });
-  const m = movimentoDeLinha({ id: 'm1', lote_id: 'l1', tipo: 'venda', quantidade_kg: -2.5, data: '2026-11-02', observacao: '', lotes_torra: { cafe_id: 'c1', data_torra: '2026-11-01' } });
-  assert.equal(m.quantidadeKg, -2.5);
-  assert.equal(m.cafeId, 'c1');
-  assert.equal(m.dataTorra, '2026-11-01');
+test('banco: torra e seus cafés (numeric chega como texto ou número)', () => {
+  const t = torraDeLinha({ id: 't1', data_torra: '2026-11-18', torrador: 'Ana', created_at: 'x', torra_itens: [{ cafe_id: 'c1', quantidade_kg: '7.500' }, { cafe_id: 'c2', quantidade_kg: 4 }] });
+  assert.deepEqual(t, { id: 't1', dataTorra: '2026-11-18', torrador: 'Ana', criadoEm: 'x', itens: [{ cafeId: 'c1', quantidadeKg: 7.5 }, { cafeId: 'c2', quantidadeKg: 4 }] });
+  assert.deepEqual(torraDeLinha({ id: 't2', data_torra: '2026-11-18', torrador: 'Ana', created_at: 'x', torra_itens: null }).itens, []);
 });
 
 // cliente de mentira que grava as chamadas e devolve respostas prontas
@@ -44,14 +42,13 @@ test('banco: importar só acrescenta cafés (upsert por legacy_id, ignorando os 
   assert.deepEqual(up[3], { onConflict: 'legacy_id', ignoreDuplicates: true });
 });
 
-test('banco: registrar torra chama a função atômica e recusa quantidade inválida antes de ir à rede', async () => {
-  const { db, chamadas } = falso(() => ({ data: 'lote-novo', error: null }));
-  const est = new SupabaseEstoqueRepository(db);
-  const lote = await est.registrarTorra('c1', '2026-11-01', 10, 'obs');
-  assert.equal(lote.id, 'lote-novo');
-  assert.deepEqual(chamadas.find((c) => c[0] === 'rpc'), ['rpc', 'registrar_torra', { p_cafe_id: 'c1', p_data_torra: '2026-11-01', p_quantidade_kg: 10, p_observacao: 'obs' }]);
+test('banco: registrar torra chama a função atômica e recusa dados incompletos antes de ir à rede', async () => {
+  const { db, chamadas } = falso(() => ({ data: 'torra-nova', error: null }));
+  const repo = new SupabaseTorraRepository(db);
+  const t = await repo.registrar({ dataTorra: '2026-11-18', torrador: ' Ana ', itens: [{ cafeId: 'c1', quantidadeKg: 7.5 }, { cafeId: 'c2', quantidadeKg: 4 }] });
+  assert.equal(t.id, 'torra-nova');
+  assert.deepEqual(chamadas.find((c) => c[0] === 'rpc'), ['rpc', 'registrar_torra', { p_data_torra: '2026-11-18', p_torrador: 'Ana', p_itens: [{ cafe_id: 'c1', quantidade_kg: 7.5 }, { cafe_id: 'c2', quantidade_kg: 4 }] }]);
   const antes = chamadas.length;
-  await assert.rejects(() => est.registrarTorra('c1', '2026-11-01', -1), /positiva/);
-  await assert.rejects(() => est.registrarMovimentos([{ loteId: 'l', tipo: 'venda', quantidadeKg: 1, data: '2026-11-01', observacao: '' }]), /reduzem/);
+  await assert.rejects(() => repo.registrar({ dataTorra: '2026-11-18', torrador: '', itens: [{ cafeId: 'c1', quantidadeKg: 1 }] }), /quem torrou/);
   assert.equal(chamadas.length, antes, 'nada foi enviado ao banco');
 });
