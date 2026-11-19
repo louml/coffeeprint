@@ -167,7 +167,7 @@ function lerFormulario(acao: 'imprimi' | 'adicionei'): Pedido | null {
 }
 
 /**
- * Depois de imprimir: mantém café, peso, moagem e data; limpa o cliente e a entrega (variam a cada pedido).
+ * Depois de imprimir: mantém café, peso, moagem e data; limpa o cliente e a entrega (variam a cada pedido) e volta as cópias para 1.
  * Depois de adicionar à fila (`manterCliente`): mantém também o cliente e a entrega, para montar vários itens do mesmo pedido.
  */
 function prepararProximo(manterCliente = false): void {
@@ -175,6 +175,7 @@ function prepararProximo(manterCliente = false): void {
     ($('cliente') as HTMLInputElement).value = '';
     ($('entrega') as HTMLSelectElement).value = '';
     $('entrega').dispatchEvent(new Event('change')); // atualiza os botões de escolha
+    ($('copias') as HTMLInputElement).value = '1';
   }
   refreshPreview();
   $('cliente').focus();
